@@ -1,0 +1,320 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程抄送阅办表			【wdk_wf_cc】
+	版本经历：	
+				1、v1.0			于猛			2014-12-23 15:33:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS	s_string
+	
+	输入.newactorid				TYPEAS	s_string
+	输入.oldactorid				TYPEAS	s_string
+	输入.completedt				TYPEAS	s_string
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--抄送流水ID
+	输入.id						TYPEAS	s_sstring
+	
+	--关联办理记录ID
+	输入.taskrecordid			TYPEAS	s_sstring
+	
+	--流程模板ID
+	输入.pdid					TYPEAS	s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS	s_sstring
+	
+	--抄送环节
+	输入.nodename				TYPEAS	s_sstring
+	
+	--抄送人ID
+	输入.actorid					TYPEAS	s_sstring
+	
+	--抄送人姓名
+	输入.actortype				TYPEAS	s_sstring
+	
+	--阅办人ID
+	输入.ccactorid				TYPEAS	s_sstring
+	
+	--阅办人姓名
+	输入.ccactortype				TYPEAS	s_sstring
+	
+	--原始阅办人ID
+	输入.actualccactorid			TYPEAS	s_sstring
+	
+	--原始阅办人类型
+	输入.actualccactortype		TYPEAS	s_sstring
+	
+	--阅办代理方式
+	输入.agenttype				TYPEAS	s_sstring
+	
+	--抄送时间
+	输入.createdt				TYPEAS	s_sstring
+	
+	--抄送意见
+	输入.cccomment				TYPEAS	s_string
+	
+	--阅办时间
+	输入.readdt					TYPEAS	s_sstring
+	
+	--阅办意见
+	输入.readcomment				TYPEAS	s_string
+	
+	--当前抄送状态
+	输入.status					TYPEAS	s_stype
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.count						TYPEAS		n_integer
+	
+	临时明细.id						TYPEAS	s_string
+	临时明细.taskrecordid			TYPEAS	s_string
+	临时明细.pdid					TYPEAS	s_string
+	临时明细.piid					TYPEAS	s_string
+	临时明细.nodename				TYPEAS	s_string
+	临时明细.actorid					TYPEAS	s_string
+	临时明细.actortype				TYPEAS	s_string
+	临时明细.ccactorid				TYPEAS	s_string
+	临时明细.ccactortype				TYPEAS	s_string
+	临时明细.actualccactorid			TYPEAS	s_string
+	临时明细.actualccactortype		TYPEAS	s_string
+	临时明细.agenttype				TYPEAS	s_string
+	临时明细.createdt				TYPEAS	s_string
+	临时明细.cccomment				TYPEAS	s_string
+	临时明细.readdt					TYPEAS	s_string
+	临时明细.readcomment				TYPEAS	s_string
+	临时明细.status					TYPEAS	s_string
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_cc(
+				id
+				,taskrecordid
+				,pdid
+				,piid
+				,nodename
+				,actorid
+				,actortype
+				,ccactorid
+				,ccactortype
+				,actualccactorid
+				,actualccactortype
+				,agenttype
+				,createdt
+				,cccomment
+				,readdt
+				,readcomment
+				,status
+		) values (
+				输入.id
+				,输入.taskrecordid
+				,输入.pdid
+				,输入.piid
+				,输入.nodename
+				,输入.actorid
+				,输入.actortype
+				,输入.ccactorid
+				,输入.ccactortype
+				,输入.actualccactorid
+				,输入.actualccactortype
+				,输入.agenttype
+				,输入.createdt
+				,输入.cccomment
+				,输入.readdt
+				,输入.readcomment
+				,输入.status
+		)
+		ENDINSERT
+	ENDIF
+
+	
+	#修改意见和状态
+	IF 输入.flag = 2
+		UPDATE wdk_wf_cc a SET
+			a.actualccactorid		=	输入.actualccactorid
+			,a.actualccactortype	=	输入.actualccactortype
+			,a.agenttype			=	输入.agenttype
+			,a.readdt				=	输入.readdt
+			,a.readcomment 			=	输入.readcomment
+			,a.status 				=	输入.status
+		WHERE 1=1
+			AND a.id		=	输入.id
+		ENDUPDATE
+	ENDIF
+	
+	
+	#作为抄送人的人员替换
+	IF 输入.flag = 3
+		UPDATE wdk_wf_cc a SET
+			a.actorid = 输入.newactorid
+		WHERE
+			a.actorid = 输入.oldactorid
+		ENDUPDATE
+	ENDIF
+	
+	#作为阅办人的人员替换
+	IF 输入.flag = 4
+		UPDATE wdk_wf_cc a SET
+			a.ccactorid = 输入.newactorid
+		WHERE
+			a.ccactorid = 输入.oldactorid
+		ENDUPDATE
+	ENDIF
+	
+	
+	#阅办删除并移动到历史库
+	IF 输入.flag = 5
+
+		#1、查询现有记录
+		SELECT
+			id					as	ID
+			,taskrecordid		as	TASKRECORDID
+			,pdid				as	PDID
+			,piid				as	PIID
+			,nodename			as	NODENAME
+			,actorid			as	ACTORID
+			,actortype			as	ACTORTYPE
+			,ccactorid			as	CCACTORID
+			,ccactortype		as	CCACTORTYPE
+			,actualccactorid	as	ACTUALCCACTORID
+			,actualccactortype	as	ACTUALCCACTORTYPE
+			,agenttype			as	AGENTTYPE
+			,createdt			as	CREATEDT
+			,cccomment			as	CCCOMMENT
+			,readdt				as	READDT
+			,readcomment		as	READCOMMENT
+			,status				as	STATUS
+		FROM wdk_wf_cc a
+		WHERE 1=1
+			AND	a.piid		=	输入.piid
+		ENDSELECT
+		
+		SELECT
+			count(*)			AS		COUNT
+		FROM wdk_wf_cc a
+		WHERE 1=1
+			AND a.piid		=	输入.piid
+		ENDSELECT
+		
+		#2、中间变量赋值
+		临时.count					=	COUNT
+		
+		临时明细.id					=	ID
+		临时明细.taskrecordid		=	TASKRECORDID
+		临时明细.pdid				=	PDID
+		临时明细.piid				=	PIID
+		临时明细.nodename			=	NODENAME
+		临时明细.actorid				=	ACTORID
+		临时明细.actortype			=	ACTORTYPE
+		临时明细.ccactorid			=	CCACTORID
+		临时明细.ccactortype			=	CCACTORTYPE
+		临时明细.actualccactorid		=	ACTUALCCACTORID
+		临时明细.actualccactortype	=	ACTUALCCACTORTYPE
+		临时明细.agenttype			=	AGENTTYPE
+		临时明细.createdt			=	CREATEDT
+		临时明细.cccomment			=	CCCOMMENT
+		临时明细.readdt				=	READDT
+		临时明细.readcomment			=	READCOMMENT
+		临时明细.status				=	STATUS
+		
+		
+		#3、历史库新增
+		LOOP 临时.count
+			INSERT INTO wdk_wf_cc_his(
+				id
+				,taskrecordid
+				,pdid
+				,piid
+				,nodename
+				,actorid
+				,actortype
+				,ccactorid
+				,ccactortype
+				,actualccactorid
+				,actualccactortype
+				,agenttype
+				,createdt
+				,cccomment
+				,readdt
+				,readcomment
+				,status
+				,completedt
+			) values (
+				临时明细.id
+				,临时明细.taskrecordid
+				,临时明细.pdid
+				,临时明细.piid
+				,临时明细.nodename
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.ccactorid
+				,临时明细.ccactortype
+				,临时明细.actualccactorid
+				,临时明细.actualccactortype
+				,临时明细.agenttype
+				,临时明细.createdt
+				,临时明细.cccomment
+				,临时明细.readdt
+				,临时明细.readcomment
+				,临时明细.status
+				,输入.completedt
+			)
+			ENDINSERT
+		ENDLOOP
+		
+		#4、活动库删除
+		DELETE FROM wdk_wf_cc a
+		WHERE 1=1
+			AND a.piid		=	输入.piid
+		ENDDELETE
+	ENDIF
+	
+	
+	#根据流程实例删除所有关联抄送阅办任务
+	IF 输入.flag = 6
+		DELETE FROM wdk_wf_cc a
+		WHERE 1=1
+			AND a.piid		=	输入.piid
+		ENDDELETE
+	ENDIF

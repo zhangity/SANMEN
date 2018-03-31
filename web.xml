@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+	<display-name>wdkapp1.0</display-name>
+	<filter>
+		<filter-name>hisloginfilter</filter-name>
+		<filter-class>com.longj.products.ea.standard.bu.action.BUExamFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>hisloginfilter</filter-name>
+		<url-pattern>/products/ea/standard/bu/exam.jsp</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>hisloginfilter</filter-name>
+		<url-pattern>/products/ea/standard/bu/exam_nurse_list.jsp</url-pattern>
+	</filter-mapping>
+	<listener>
+		<description>自定义Session监听器</description>
+		<display-name>SessionListener</display-name>
+		<listener-class>org.wdk.channel.SessionListener</listener-class>
+	</listener>
+	
+	<servlet>
+		<servlet-name>BarcodeServlet</servlet-name>
+		<servlet-class>org.krysalis.barcode4j.servlet.BarcodeServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>BarcodeServlet</servlet-name>
+		<url-pattern>/genbc</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>WeixinServlet</servlet-name>
+		<servlet-class>com.longj.products.ea.standard.axis.WeixinServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>WeixinServlet</servlet-name>
+		<url-pattern>/weixin</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>wdkinit</servlet-name>
+		<servlet-class>org.wdk.channel.ServletInit</servlet-class>
+		<init-param>
+			<param-name>path-init</param-name>
+			<param-value>E:/privatespace/smapp/01检查预约系统/06source/03object/smeacfg</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>runtimechannel</servlet-name>
+		<servlet-class>org.wdk.channel.ServletChannel</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>runtimechannel</servlet-name>
+		<url-pattern>/wdk</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<display-name>Apache-Axis Servlet</display-name>
+		<servlet-name>AxisServlet</servlet-name>
+		<servlet-class>org.apache.axis.transport.http.AxisServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>/servlet/AxisServlet</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>*.jws</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<display-name>Axis Admin Servlet</display-name>
+		<servlet-name>AdminServlet</servlet-name>
+		<servlet-class>org.apache.axis.transport.http.AdminServlet</servlet-class>
+		<load-on-startup>100</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminServlet</servlet-name>
+		<url-pattern>/servlet/AdminServlet</url-pattern>
+	</servlet-mapping>
+	
+
+	
+	
+	
+</web-app>

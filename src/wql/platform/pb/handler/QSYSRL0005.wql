@@ -1,0 +1,142 @@
+[交易说明]
+	交易名：		角色对应功能表
+	所属模块：	系统公用
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、角色对应功能表		【wdk_role_fun】
+	版本经历：	
+				1、v1.0		于猛			2015-01-26 13:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	##角色集合
+	输入.roleids				TYPEAS		f_string
+	
+	
+	
+	--系统ID
+	输入.id						TYPEAS		s_id
+	
+	--角色ID
+	输入.roleid					TYPEAS		s_id
+	
+	--功能编码
+	输入.funcode					TYPEAS		s_sstring
+	
+	--功能类型
+	输入.funtype					TYPEAS		s_stype
+	
+	--创建时间
+	输入.createdt				TYPEAS		s_sstring
+
+	
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询菜单角色表
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				a.id
+				,a.roleid
+				,a.funcode
+				,a.funtype
+				,a.createdt
+				,b.rolename
+				,b.rolecode
+				,b.ordercode
+				FROM wdk_role_fun  a
+				left join wdk_role b on b.roleid = a.roleid
+				WHERE 1=1
+				OPTION 输入.id <> ""
+					a.id = 输入.id
+				ENDOPTION
+				OPTION 输入.roleid <> ""
+					a.roleid = 输入.roleid
+				ENDOPTION
+				OPTION 输入.funcode <> ""
+					a.funcode = 输入.funcode
+				ENDOPTION
+				OPTION 输入.funtype <> ""
+					a.funtype = 输入.funtype
+				ENDOPTION
+				OPTION 输入.createdt <> ""
+					a.createdt = 输入.createdt
+				ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	#根据角色或角色列表查询所有对应的菜单
+	IF	输入.flag = 2
+		QUERY
+			SELECT
+				distinct funcode
+				FROM wdk_role_fun  a
+				WHERE 1=1
+				OPTION 输入.id <> ""
+					a.id = 输入.id
+				ENDOPTION
+				OPTION 输入.roleid <> ""
+					a.roleid = 输入.roleid
+				ENDOPTION
+				OPTION 输入.roleids <> ""
+					a.roleid in ( 输入.roleids )
+				ENDOPTION
+				OPTION 输入.funcode <> ""
+					a.funcode = 输入.funcode
+				ENDOPTION
+				OPTION 输入.funtype <> ""
+					a.funtype = 输入.funtype
+				ENDOPTION
+				OPTION 输入.createdt <> ""
+					a.createdt = 输入.createdt
+				ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

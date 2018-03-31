@@ -1,0 +1,248 @@
+[交易说明]
+	交易名： 查询号码实例表信息
+	所属模块：	预约和锁号模块用
+	功能简述：	
+	版权所有：	xxxx
+	表引用：		
+			号码实例表				【EA_BU_NUMBER】		
+			检查单表					【EA_BU_Exam】								
+			
+	版本经历：	
+				1、v1.0		俞斌		2016/12/11 15:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+[IO定义]
+	#操作符  1- 2-
+	输入.flag					TYPEAS		s_string
+	
+	#排班实例的日期
+	输入.schedu_dt				TYPEAS		s_datetime
+	
+	#设备的UUID
+	输入.device_id				TYPEAS		s_id
+	
+	#检查类型
+	输入.examtype_id				TYPEAS		s_id
+	
+	#病人ID
+	输入.patient_id				TYPEAS		s_id
+	
+	#病人CODE
+	输入.patient_code			TYPEAS		s_id
+	
+	#住院病人所属的病区
+	输入.dept_id					TYPEAS		s_id
+	
+	#开单时间起始
+	输入.createdt_start			TYPEAS		s_datetime
+	
+	#开单时间结束
+	输入.createdt_end			TYPEAS		s_datetime
+	
+	#是否已经预约
+	输入.is_appted				TYPEAS		s_string
+	
+	#现在时间
+	输入.now						TYPEAS		s_datetime
+
+	#其他过滤sql语句
+	输入.sql						TYPEAS		f_string
+	
+	#排序语句
+	输入.orderby					TYPEAS		f_string
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#根据预约设备ID和日期查询当前所有的号码实例
+	IF 输入.flag = 1
+		QUERY
+			SELECT T0.NUMBER_ID
+				,T0.APPT_ID
+	        	,T0.DEVICE_ID
+		        ,T0.SCHEDU_ID
+		        ,T0.SCHEDU_DT
+		        ,T0.SCHEDU_AMPM
+		        ,T0.SCHEDU_SECTION
+		        ,T0.SCHEDU_POINT
+		        ,T0.NUMBER_TYPE
+		        ,T0.LOCKTYPE
+		        ,T0.LOCKSOURCE
+		        ,T0.UNLOCKDEPTID
+		        ,T0.LOCK_ID
+		        ,T0.ADD_ID
+		        ,T0.CREATEDT
+		        ,T0.ORDERCODE
+		        ,T1.DOCTOR_ID
+		        ,T9.PERSON_NAME as DOCTOR_IDNAME
+	        FROM EA_BU_NUMBER T0
+	        LEFT JOIN EA_BI_DEVICESCHEDU T1
+	        ON T0.SCHEDU_ID = T1.SCHEDU_ID
+	        LEFT JOIN ea_bi_person T9
+	        ON T1.DOCTOR_ID = T9.PERSON_ID
+		 	WHERE T0.SCHEDU_DT = 输入.schedu_dt
+		    AND T0.DEVICE_ID = 输入.device_id
+		    OPTION 输入.now <> ""
+		    	T0.SCHEDU_POINT >= 输入.now
+		    ENDOPTION
+		    OPTION 输入.sql <> ""
+		    	输入.sql
+		    ENDOPTION 
+		 	ORDER BY T0.SCHEDU_SECTION, T0.SCHEDU_POINT
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#按病人和开单科室，分组查询所有的检查单信息
+	IF 输入.flag = 2
+		PAGEQUERY
+			SELECT t.patient_id
+				, t.patient_code
+			    , t.patient_name
+			    , t.dept_id
+			    , (select t9.dept_name from EA_BI_DepartMent t9 where t9.dept_id = t.dept_id) as dept_idname
+			FROM V_EA_BU_Appointment t
+			WHERE t.form_status <> 's002' and t.patient_id <> '' and t.patient_id is not null
+			OPTION 输入.examtype_id <> ""
+				t.examtype_id = 输入.examtype_id
+			ENDOPTION
+			OPTION 输入.createdt_start <> ""
+				 t.exam_create_dt >= 输入.createdt_start
+			ENDOPTION
+			OPTION 输入.createdt_end <> ""
+				 t.exam_create_dt <= 输入.createdt_end
+			ENDOPTION
+			OPTION  输入.is_appted = "1"
+				(appt_id is not null and appt_id <> '')
+			ENDOPTION
+			OPTION  输入.is_appted = "0"
+				(appt_id is  null or appt_id = '')
+			ENDOPTION
+			OPTION 输入.sql <> ""
+		    	输入.sql
+		    ENDOPTION 
+			GROUP BY t.patient_id,t.patient_code, t.patient_name, t.dept_id
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+	
+	#根据住院病人，查询此人的所有的检查单
+	IF 输入.flag = 3
+		IF 输入.patient_id = ""
+			ERROR "：未输入patient_id"
+		ENDIF
+		IF 输入.dept_id = ""
+			ERROR "：未输入dept_id"
+		ENDIF
+		QUERY
+			SELECT a.DOCTOR_ID,
+			   p.PERSON_NAME,
+			   o.dept_name as patient_dept_name,
+		       a.bed_no,
+		       a.PATIENT_ID,
+		       a.PATIENT_CODE,
+		       b.item_name,
+		       a.appt_date,
+		       a.DEVICE_ID,
+		       b.package_money,
+		       b.patient_explain,
+		       d.room_name,
+		       f.dept_name
+		  from V_EA_BU_Appointment a
+		 inner join ea_bi_examitem b on a.EXAMITEM_ID = b.item_id
+		  left join ea_bi_department o on o.dept_id = a.dept_id
+		  left join ea_bi_person p on p.person_id = a.DOCTOR_ID
+		  left join ea_bi_device c on c.device_id = a.DEVICE_ID
+		  left join ea_bi_room d on d.room_id = c.room_id
+		  left join ea_bi_departmentexamtype e on e.examtype_id = a.examtype_id
+		  left join ea_bi_department f on f.dept_id = e.dept_id
+		 where a.PATIENT_ID = 输入.patient_id
+		   AND EXAM_TYPE = 't2'
+		   and a.dept_id = 输入.dept_id
+		 ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	#通用的查询方案
+	IF 输入.flag = 999
+		QUERY
+			SELECT 
+			   T0.appt_id,
+			   T0.exam_id,
+			   T0.exam_serial,
+			   T0.DOCTOR_ID,
+			   T0.dept_id,
+			   T0.charge_status,
+			   T0.form_status,
+			   T0.exam_create_dt,
+			   T0.owncharge,
+			   T0.illness_level,
+			   T0.convoy_type,
+			   T0.isemergency,
+			   T0.appt_dt,
+			   T0.examitem_id,
+			   p.PERSON_NAME as DOCTOR_IDNAME,
+			   o.dept_name as dept_id_name,
+		       T0.bed_no,
+		       T0.PATIENT_ID,
+		       T0.PATIENT_CODE,
+		       T0.patient_name,
+		       b.item_name as examitem_idname,
+		       T0.appt_date,
+		       T0.DEVICE_ID,
+		       b.package_money,
+		       b.patient_explain,
+		       d.room_name,
+		       f.dept_name,
+		       T0.examtype_id,
+		       t.examtype_name as examtype_idname
+		  from V_EA_BU_Appointment T0
+		 inner join ea_bi_examitem b on T0.EXAMITEM_ID = b.item_id
+		  left join EA_BI_ExamType t on t.examtype_id = T0.examtype_id
+		  left join ea_bi_department o on o.dept_id = T0.dept_id
+		  left join ea_bi_person p on p.person_id = T0.DOCTOR_ID
+		  left join ea_bi_device c on c.device_id = T0.DEVICE_ID
+		  left join ea_bi_room d on d.room_id = c.room_id
+		  left join ea_bi_departmentexamtype e on e.examtype_id = T0.examtype_id
+		  left join ea_bi_department f on f.dept_id = e.dept_id
+		  WHERE 1=1 
+		  OPTION 输入.sql <> ""
+		    	输入.sql
+		  ENDOPTION 
+		  ORDERBY 输入.orderby <> ""
+		  		输入.orderby
+		  ENDORDEBY
+		 ENDSELECT
+		ENDQUERY
+	ENDIF

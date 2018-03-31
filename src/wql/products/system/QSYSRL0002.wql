@@ -1,0 +1,114 @@
+[交易说明]
+	交易名：		组织机构表查询
+	所属模块：	系统功能
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、科室				【EA_BI_DepartMent】
+	版本经历：	
+				1、v1.0		于猛			2015-01-23 14:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	输入.dept_id						TYPEAS		s_stype
+	输入.dept_name					TYPEAS		s_stype
+	输入.parent_dept					TYPEAS		s_stype
+	输入.code_py						TYPEAS		s_stype
+	输入.code_wb						TYPEAS		s_stype
+	输入.code_sj						TYPEAS		s_stype
+	输入.code_qt						TYPEAS		s_stype
+	输入.mzsy						TYPEAS		s_stype
+	输入.zysy						TYPEAS		s_stype
+	输入.yjsy						TYPEAS		s_stype
+	输入.bqsy						TYPEAS		s_stype
+	输入.actual_id					TYPEAS		s_stype
+	输入.is_zyy						TYPEAS		s_stype
+	输入.area_id						TYPEAS		s_stype
+	输入.ordercode					TYPEAS		s_stype
+	输入.createdt					TYPEAS		s_stype
+	输入.status						TYPEAS		s_stype
+	输入.remark						TYPEAS		s_stype
+
+
+
+	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有人员
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				a.dept_id
+				,a.dept_name
+				,(select b.dept_name from EA_BI_DepartMent b where b.dept_id=a.dept_id) as dept_idname
+				,a.parent_dept
+				,a.code_py
+				,a.code_wb
+				,a.code_sj
+				,a.code_qt
+				,a.mzsy
+				,a.zysy
+				,a.yjsy
+				,a.bqsy
+				,a.actual_id
+				,a.is_zyy
+				,a.area_id
+				,a.ordercode
+				,a.createdt
+				,a.status
+				,a.remark
+				,(select count(*) from EA_BI_DepartMent b where b.parent_dept = a.dept_id) as childs
+				,(select count(*) from EA_BI_Person b where b.dept_id = a.dept_id) as childs2
+				,'org' as nodetype
+			FROM EA_BI_DepartMent a
+			WHERE 1=1 
+			OPTION 输入.dept_id <> ""
+				a.dept_id = 输入.dept_id
+			ENDOPTION
+			OPTION 输入.dept_name <> ""
+				a.dept_name like "%" UNIONSTR 输入.dept_name UNIONSTR "%"
+			ENDOPTION
+			OPTION 输入.parent_dept <> ""
+				a.parent_dept = 输入.parent_dept
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	

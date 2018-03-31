@@ -1,0 +1,312 @@
+[交易说明]
+	交易名：	按外部ID用户接口
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、组织信息表【UUM_UU_ORGINFO】
+						2、人员信息表【UUM_UU_PERSONINFO】
+						3、用户表【UUM_UU_ACCOUNT】
+						4、系统参数信息【PF_PB_Parameter】
+						5、人员兼职部门表【UUM_UU_PERSONDEPTEX】
+						
+	版本经历：	
+				1、v1.0		廖树平			2015/8/28 10:54:57		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--add/mdf/del
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	##输入.person_uuid						TYPEAS	s_uuid
+	##输入.depart_uuid						TYPEAS	s_uuid
+	##输入.person_code						TYPEAS	s_code
+	##输入.person_name						TYPEAS	s_name
+	##输入.login_name							TYPEAS	s_mname
+	##输入.emp_no									TYPEAS	s_code
+	##输入.gender_scode						TYPEAS	s_diccode
+	##输入.politics_scode					TYPEAS	s_diccode
+	##输入.diploma_scode					TYPEAS	s_diccode
+	##输入.birth_date							TYPEAS	s_date
+	##输入.entry_date							TYPEAS	s_date
+	##输入.cer_type_scode					TYPEAS	s_diccode
+	##输入.id_no									TYPEAS	s_code
+	##输入.master_email						TYPEAS	s_mname
+	##输入.backup_email						TYPEAS	s_mname
+	##输入.phone_no								TYPEAS	s_code
+	##输入.office_phone_no				TYPEAS	s_code
+	##输入.room_no								TYPEAS	s_code
+	##输入.master_mobile					TYPEAS	s_code
+	##输入.backup_mobile					TYPEAS	s_code
+	##输入.display_order					TYPEAS	n_sn
+	##输入.status_scode						TYPEAS	s_diccode
+	##输入.sign_pic								TYPEAS	s_file
+	##输入.sign_picname						TYPEAS	s_mname
+	##输入.remark									TYPEAS	s_comment
+	##输入.account_uuid						TYPEAS	s_uuid
+	
+	##执行代码（add、update、delete）
+	##执行信息（新增、修改、删除）
+	##用户hr编码
+	##由门户系统提供的应用系统类型标识码（oa）
+	##用户姓名
+	##用户门户账号 
+	##用户账号状态（active：正常、disabled：用户锁定、delete：已删除）
+	##用户所在单位名称
+	##用户所在单位编码
+	##用户所在部门名称
+	##用户所在部门编码
+	##用户排序号
+	##用户座机号
+	##用户手机号
+	##用户房间号
+	##用户CA号码
+	##用户性别（true：男，false：女）
+	##用户民族
+	##用户门户密码（经过DES加密，加密key：loc.sdzy.portal）
+	##用户兼职信息，如果为空或‘0’该账号为主账号，否则是对应的主账号兼职
+	##同步时间，异常时可能没值
+
+	
+	输入.respCode								TYPEAS	s_mname
+	输入.respMsg								TYPEAS	s_mname
+	输入.hrCode									TYPEAS	s_mname
+	输入.appType								TYPEAS	s_mname
+	输入.userName								TYPEAS	s_mname
+	输入.userUserid							TYPEAS	s_mname
+	输入.userStatus							TYPEAS	s_mname
+	输入.userCompany						TYPEAS	s_mname
+	输入.userCoNumber						TYPEAS	s_mname
+	输入.userDept								TYPEAS	s_mname
+	输入.userDeNumber						TYPEAS	s_mname
+	输入.userOrder							TYPEAS	s_mname
+	输入.userTel								TYPEAS	s_mname
+	输入.userMobile							TYPEAS	s_mname
+	输入.userRoom								TYPEAS	s_mname
+	输入.userCaid								TYPEAS	s_mname
+	输入.userCadn								TYPEAS	s_mname
+	输入.userGender							TYPEAS	s_mname
+	输入.userNation							TYPEAS	s_mname
+	输入.userPass								TYPEAS	s_mname
+	输入.userMainu							TYPEAS	s_mname
+	输入.operDate								TYPEAS	s_mname
+
+	
+	输入.operator								TYPEAS	s_uuid
+	输入.odepart								TYPEAS	s_uuid
+	输入.oorg										TYPEAS	s_uuid
+	输入.odt										TYPEAS	s_datetime
+
+	输出.uptreccnt							TYPEAS	n_sn
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.reccount					TYPEAS		n_sn
+	临时.org_uuid					TYPEAS		s_uuid
+	临时.org_type_scode		TYPEAS		s_diccode
+	临时.login_pwd				TYPEAS		s_diccode
+	临时.corp_uuid				TYPEAS		s_uuid
+	临时.status_scode			TYPEAS		s_diccode
+	临时.gender_scode			TYPEAS		s_diccode
+	临时.sysisdelete			TYPEAS		s_bool
+	临时.person_uuid			TYPEAS		s_uuid
+	临时.id_no						TYPEAS		s_mname
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	IF 输入.respCode = "add" OR 输入.respCode = "update" 
+		SELECT COUNT(1) AS SYNCCNT
+		FROM UUM_UU_ACCOUNT
+		WHERE externalid = 输入.userUserid
+		ENDSELECT
+		临时.reccount = SYNCCNT
+
+		IF 输入.respCode = "add" AND 临时.reccount = "1"
+			输入.respCode = "update"
+		ENDIF
+		
+		IF 输入.respCode = "update" AND 临时.reccount = "0"
+			输入.respCode = "add"
+		ENDIF
+	ENDIF
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF 输入.respCode = "add" OR 输入.respCode = "update"
+		SELECT org_uuid AS DEPT
+		FROM UUM_UU_ORGINFO
+		WHERE ext_id = 输入.userDeNumber
+		ENDSELECT
+		临时.org_uuid = DEPT
+		
+		SELECT org_uuid AS COPR
+		FROM UUM_UU_ORGINFO
+		WHERE ext_id = 输入.userCoNumber
+		ENDSELECT
+		临时.corp_uuid = COPR
+		
+		IF 输入.userStatus = "active"
+			临时.sysisdelete = "0"
+		ELSE
+			临时.sysisdelete = "1"
+		ENDIF
+		IF 输入.userGender = "true"
+			临时.gender_scode = "U011"
+		ELSE
+			临时.gender_scode = "U012"
+		ENDIF
+		
+		临时.id_no = " "
+
+	ENDIF
+	
+	IF 输入.respCode = "add"
+		SELECT a.paravalue AS PWD
+		FROM PF_PB_Parameter a
+		WHERE a.paracode = 'DefaultPassword'
+		ENDSELECT
+		临时.login_pwd = PWD
+		
+		INSERT INTO UUM_UU_ACCOUNT(
+			account_uuid, user_scode, user_uuid, login_name
+			, login_pwd, user_token, sysisdelete, externalid
+			, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid)
+		VALUES(
+			'WQL.APPUUID()' , 'U092' , 'WQL.APPUUID()' , 输入.userUserid
+			, 输入.userPass , 输入.userCadn , 临时.sysisdelete , 输入.userUserid
+			, '-1' , 输入.odt , '-1' , '-1' )
+		ENDINSERT
+		
+		SELECT user_uuid AS PUUID
+		FROM UUM_UU_ACCOUNT
+		WHERE externalid = 输入.userUserid
+		ENDSELECT
+		临时.person_uuid = PUUID
+		
+		IF 输入.userMainu = "" OR 输入.userMainu = "0"
+			INSERT INTO UUM_UU_PERSONINFO(
+				person_uuid, person_code, person_name, old_name
+				, by_name, nick_name, gender_scode, org_uuid
+				, depart_uuid, emp_no, politics_scode, birth_date
+				, entry_date, diploma_scode, cer_type_scode, id_no
+				, master_email, backup_email, phone_no, office_phone_no
+				, room_no, master_mobile, backup_mobile, status_scode
+				, sign_pic, sign_picname , display_order, remark
+				, nation , externalid, sysisdelete
+				, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid)
+			VALUES(
+				临时.person_uuid , 输入.hrCode , 输入.userName , 输入.userName
+				, 输入.userName , 输入.userName , 临时.gender_scode , 临时.corp_uuid
+				, 临时.org_uuid , 输入.hrCode , '' , '19000101'
+				, '19000101' , '' , 'U041' , 临时.id_no
+				, '' , '' , 输入.userTel , 输入.userTel
+				, 输入.userRoom , 输入.userMobile , 输入.userMobile , 'U051'
+				, '' , '' , WQL.APPCAST( 输入.userOrder AS NUMERIC( 9 , 0 ) ) , 输入.respMsg	
+				, 输入.userNation , 输入.hrCode , 临时.sysisdelete
+				, '-1' , 输入.odt , '-1' , '-1' )
+			ENDINSERT
+		ELSE
+			//输入.userMainu此时存放着主账号登录名
+			SELECT user_uuid AS PUUID
+			FROM UUM_UU_ACCOUNT
+			WHERE login_name = 输入.userMainu
+			ENDSELECT
+			临时.person_uuid = PUUID
+			INSERT INTO UUM_UU_PERSONDEPTEX(
+				person_uuid, depart_uuid )
+			VALUES
+				( 临时.person_uuid , 临时.org_uuid )
+			ENDINSERT
+		ENDIF		
+	ENDIF
+	
+	IF 输入.respCode = "update"
+		UPDATE UUM_UU_ACCOUNT
+		SET login_pwd = 输入.userPass
+				, user_token = 输入.userCadn
+				, sysisdelete = 临时.sysisdelete
+		WHERE externalid = 输入.userUserid
+		ENDUPDATE
+		
+		SELECT user_uuid AS PUUID
+		FROM UUM_UU_ACCOUNT
+		WHERE externalid = 输入.userUserid
+		ENDSELECT
+		临时.person_uuid = PUUID
+		
+		IF 输入.userMainu = "" OR 输入.userMainu = "0"
+			UPDATE UUM_UU_PERSONINFO
+			SET person_code = 输入.hrCode
+					, person_name = 输入.userName
+					, gender_scode = 临时.gender_scode
+					, org_uuid = 临时.corp_uuid
+					, depart_uuid = 临时.org_uuid
+					, emp_no = 输入.hrCode
+					, id_no = 临时.id_no
+					, phone_no = 输入.userTel
+					, office_phone_no = 输入.userTel
+					, room_no = 输入.userRoom
+					, master_mobile = 输入.userMobile
+					, backup_mobile = 输入.userMobile
+					, display_order = WQL.APPCAST( 输入.userOrder AS NUMERIC( 9 , 0 ) )
+					, remark = 输入.respMsg
+					, sysupdatetime = 输入.odt
+			WHERE person_uuid = 临时.person_uuid
+			ENDUPDATE
+		ELSE
+			//输入.userMainu此时存放着主账号登录名
+			SELECT user_uuid AS PUUID
+			FROM UUM_UU_ACCOUNT
+			WHERE login_name = 输入.userMainu
+			ENDSELECT
+			临时.person_uuid = PUUID
+		
+			SELECT COUNT(1) AS EXCNT
+			FROM UUM_UU_PERSONDEPTEX a
+			WHERE a.person_uuid = 临时.person_uuid AND a.depart_uuid = 临时.org_uuid
+			ENDSELECT
+			临时.reccount = EXCNT
+			IF 临时.reccount = 0
+				INSERT INTO UUM_UU_PERSONDEPTEX(
+					person_uuid, depart_uuid )
+				VALUES
+					( 临时.person_uuid , 临时.org_uuid )
+				ENDINSERT
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	IF 输入.respCode = "delete"
+		UPDATE UUM_UU_ACCOUNT
+		SET sysisdelete = '1'
+				, sysupdatetime = 输入.odt
+		WHERE externalid = 输入.userUserid
+		ENDUPDATE
+
+		SELECT user_uuid AS PUUID
+		FROM UUM_UU_ACCOUNT
+		WHERE externalid = 输入.userUserid
+		ENDSELECT
+		临时.person_uuid = PUUID
+
+		UPDATE UUM_UU_PERSONINFO
+		SET sysisdelete = '1'
+				, sysupdatetime = 输入.odt
+		WHERE person_uuid = 临时.person_uuid
+		ENDUPDATE		
+	ENDIF

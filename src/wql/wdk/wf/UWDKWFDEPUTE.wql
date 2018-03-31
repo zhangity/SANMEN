@@ -1,0 +1,198 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程委托表				【wdk_wf_depute】
+	版本经历：	
+				1、v1.0			于猛			2014-11-22 14:33:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS			s_string
+	输入.oldactorid				TYPEAS			s_sstring
+	输入.newactorid				TYPEAS			s_sstring
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--委托流水ID	
+	输入.id							TYPEAS			s_sstring
+	
+	--流程模板ID
+	输入.pdid						TYPEAS			s_sstring
+
+	--流程模板IDName
+	输入.pdname						TYPEAS			s_sstring
+	
+	--委托方式
+	输入.deputetype					TYPEAS			s_stype
+	
+	--委托环节清单
+	输入.nodenames					TYPEAS			s_lstring
+	
+	--委托开始时间
+	输入.startdt						TYPEAS			s_sstring
+	
+	--委托结束时间
+	输入.enddt						TYPEAS			s_sstring
+	
+	--原办理人ID
+	输入.actorid						TYPEAS			s_sstring
+	
+	--原办理人类型
+	输入.actortype					TYPEAS			s_sstring
+	
+	--委托人部门
+	输入.deptuuid					TYPEAS			s_sstring
+	
+	--被委托人ID
+	输入.deputeactorid				TYPEAS			s_sstring
+	
+	--被委托人类型
+	输入.deputeactortype				TYPEAS			s_sstring
+	
+	--被委托人部门
+	输入.deputedeptuuid				TYPEAS			s_sstring
+	
+	--机构id
+	 输入.unitid						TYPEAS			s_id
+	 
+	 --是否委托人签名
+	 输入.isdeputesign				TYPEAS			s_stype
+	
+	--委托时间
+	输入.createdt					TYPEAS			s_sstring
+	
+	--当前委托状态
+	输入.status						TYPEAS			s_stype
+	
+	--备注
+	输入.remark						TYPEAS			s_string
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_depute(
+				id
+				,pdid
+				,pdname
+				,deputetype
+				,nodenames
+				,startdt
+				,enddt
+				,actorid
+				,actortype
+				,deptuuid
+				,deputeactorid
+				,deputeactortype
+				,deputedeptuuid
+				,unitid
+				,isdeputesign
+				,createdt
+				,status
+				,remark
+		) values (
+				输入.id
+				,输入.pdid
+				,输入.pdname
+				,输入.deputetype
+				,输入.nodenames
+				,输入.startdt
+				,输入.enddt
+				,输入.actorid
+				,输入.actortype
+				,输入.deptuuid
+				,输入.deputeactorid
+				,输入.deputeactortype
+				,输入.deputedeptuuid
+				,输入.unitid
+				,输入.isdeputesign
+				,输入.createdt
+				,输入.status
+				,输入.remark
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#委托状态变更
+	IF 输入.flag = 201
+		UPDATE wdk_wf_depute a SET
+			a.status 	= 输入.status
+		WHERE
+			a.id 		= 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	#授权签名状态变更
+	IF 输入.flag = 202
+		UPDATE wdk_wf_depute a SET
+			a.isdeputesign 	= 输入.isdeputesign
+		WHERE
+			a.id 			= 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	
+	#作为委托人的人员替换
+	IF 输入.flag = 221
+		UPDATE wdk_wf_depute a SET
+			a.actorid = 输入.newactorid
+		WHERE
+			a.actorid = 输入.oldactorid
+		ENDUPDATE
+	ENDIF
+	
+	#作为被委托人的人员替换
+	IF 输入.flag = 222
+		UPDATE wdk_wf_depute a SET
+			a.deputeactorid = 输入.newactorid
+		WHERE
+			a.deputeactorid = 输入.oldactorid
+		ENDUPDATE
+	ENDIF
+
+	#删除委托
+	IF 输入.flag = 2
+		DELETE FROM wdk_wf_depute a
+		WHERE a.id = 输入.id
+		ENDDELETE
+	ENDIF

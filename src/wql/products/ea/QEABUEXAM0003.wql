@@ -1,0 +1,206 @@
+[交易说明]
+	交易名： 查询医生常用的检查项目列表
+	所属模块：	基础数据维护
+	功能简述：	
+	版权所有：	xxxx
+	表引用：		
+			检查单表【EA_BU_Exam】										
+			
+	版本经历：	
+				1、v1.0		俞斌			2017/1/6 15:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+[IO定义]
+	#操作符 
+	输入.flag					TYPEAS		s_string
+	
+	
+	--医生的ID
+	输入.doctor_id				TYPEAS		s_id
+
+	#检查单ID
+	输入.exam_id					TYPEAS		s_uuid
+	
+	#预约单ID
+	输入.appt_id					TYPEAS		s_uuid
+	
+	
+	#病人的ID
+	输入.patient_id				TYPEAS		s_id
+	
+	#病人的CODE
+	输入.patient_code			TYPEAS		s_id
+	
+	#病人的性别
+	输入.sex						TYPEAS		s_diccode
+	
+	#开单的开始时间
+	输入.start_dt				TYPEAS		s_datetime
+	
+	#开单的结束时间
+	输入.end_dt					TYPEAS		s_datetime
+	
+	#其他过滤sql语句
+	输入.sql						TYPEAS		f_string
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#根据医生ID，查询本医生常用使用的检查项目
+	IF 输入.flag = 1
+		IF 输入.doctor_id = ""
+			ERROR "：医生ID不能为空"
+		ENDIF
+		PAGEQUERY
+			SELECT A.EXAMITEM_ID
+               ,COUNT(A.EXAMITEM_ID) AS COUNT
+               ,(SELECT B.ITEM_NAME FROM EA_BI_EXAMITEM B  WHERE B.ITEM_ID = A.EXAMITEM_ID) AS EXAMITEM_IDNAME
+		          FROM EA_BU_EXAM A
+		         INNER JOIN EA_BI_EXAMITEM B
+		            ON A.EXAMITEM_ID = B.ITEM_ID
+		         WHERE A.DOCTOR_ID = 输入.doctor_id
+		         OPTION 输入.sex <> ""
+			  		(B.ITEM_SEX = 输入.sex or B.ITEM_SEX ='3')
+			 	 ENDOPTION
+		        GROUP BY A.EXAMITEM_ID
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+	#
+	IF 输入.flag = 2
+		IF 输入.exam_id = ""
+			ERROR "：申请单ID不能为空"
+		ENDIF
+		QUERY
+			 SELECT A.PATIENT_ID
+			 , A.PATIENT_CODE
+			 , A.exam_id
+			 , A.EXAMTYPE_ID
+			 , B.EXAMCATE_ID
+	          FROM EA_BU_EXAM A
+	         INNER JOIN EA_BI_EXAMITEM B
+            ON A.EXAMITEM_ID = B.ITEM_ID
+            WHERE A.exam_id = 输入.exam_id
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查询门诊的开单数量,已经删除的，不作为统计的范畴
+	IF 输入.flag = 3
+		IF 输入.patient_id = ""
+			ERROR "：未输入patient_id"
+		ENDIF
+		QUERY
+			SELECT a.EXAMCATE_ID, 
+					(select t8.examcate_name from EA_BI_ExamCategory t8 where t8.examcate_id = a.EXAMCATE_ID) as EXAMCATE_IDNAME, 
+				   COUNT(a.EXAMCATE_ID) AS CNT
+			  		FROM (SELECT EXAM_ID,
+			               EXAMITEM_ID,
+			               (SELECT T9.EXAMCATE_ID
+			                  FROM EA_BI_EXAMITEM T9
+			                 WHERE T9.ITEM_ID = T.EXAMITEM_ID) AS EXAMCATE_ID
+			          FROM EA_BU_EXAM T
+			         WHERE T.PATIENT_ID = 输入.patient_id
+			           AND T.CREATEDT >= 输入.start_dt
+			           AND T.CREATEDT < 输入.end_dt
+			           AND T.EXAM_TYPE = 't1'
+			           AND T.FORM_STATUS <> 's002'
+			           AND OWNCHARGE = '0') A
+			 		   GROUP BY EXAMCATE_ID
+			 ENDSELECT
+		 ENDQUERY
+	ENDIF
+	
+	#查询打印的预约单需要用到的信息
+	IF 输入.flag = 4
+		QUERY
+		SELECT A.ITEM_NAME
+			,A.PACKAGE_MONEY
+			,B.OWNCHARGE
+			,B.PATIENT_ID
+			,B.PATIENT_CODE
+			,B.PATIENT_NAME
+			,B.EXAM_TYPE
+			,B.OUT_ID
+			,A.PATIENT_EXPLAIN
+			,B.APPT_DATE
+			,B.DEVICE_ID
+			,B.EXAM_CREATE_DT
+			,B.DOCTOR_ID
+			,P.PERSON_NAME
+			,D.ROOM_ID
+			,R.ROOM_NAME
+			,R.ROOM_ADDRESS
+			,B.CHARGE_STATUS
+			,K.DEPT_NAME
+		  FROM EA_BI_EXAMITEM A
+		 INNER JOIN V_EA_BU_APPOINTMENT B
+		    ON B.EXAMITEM_ID = A.ITEM_ID
+		  LEFT JOIN EA_BI_PERSON P
+		    ON P.PERSON_ID = B.DOCTOR_ID
+		  LEFT JOIN EA_BI_DEVICE D
+		    ON D.DEVICE_ID = B.DEVICE_ID
+		  LEFT JOIN EA_BI_ROOM R
+		    ON R.ROOM_ID = D.ROOM_ID
+		  LEFT JOIN ea_bi_departmentexamtype Y
+		    ON Y.EXAMTYPE_ID = B.EXAMTYPE_ID
+		  LEFT JOIN ea_bi_department K
+		    ON K.dept_id = Y.DEPT_ID
+		 WHERE 1=1
+		 OPTION 输入.exam_id <> ""
+		 	B.EXAM_ID = 输入.exam_id
+		 ENDOPTION
+		 OPTION 输入.appt_id <> ""
+		 	B.APPT_ID = 输入.appt_id
+		 ENDOPTION
+		 ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#按照医技科室部门统计开单数量
+	IF 输入.flag = 5
+		QUERY
+			SELECT a.dept_id
+			    , a.dept_name
+			    , (SELECT COUNT (1)
+			       FROM V_EA_BU_APPOINTMENT b
+			           LEFT JOIN ea_bi_departmentexamtype Y ON Y.EXAMTYPE_ID = B.EXAMTYPE_ID
+			           LEFT JOIN ea_bi_department K ON K.dept_id = Y.DEPT_ID
+			       WHERE k.dept_id = a.dept_id 
+			          OPTION 输入.sql <> ""
+					    	输入.sql
+					  ENDOPTION 
+			       ) AS COUNT
+			FROM ea_bi_department a
+			WHERE a.yjsy = '1'
+			ENDSELECT
+		ENDQUERY
+	ENDIF

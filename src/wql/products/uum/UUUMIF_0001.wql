@@ -1,0 +1,170 @@
+[交易说明]
+	交易名：	按外部ID组织接口
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、组织信息表【UUM_UU_ORGINFO】
+						2、人员信息表【UUM_UU_PERSONINFO】
+						
+	版本经历：	
+				1、v1.0		廖树平			2015/10/5 15:23:46		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	##输入.actionflag							TYPEAS	s_code	--add/mdf/del
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	##输入.org_uuid								TYPEAS	s_uuid
+	##输入.parent_uuid						TYPEAS	s_uuid
+	##输入.org_name								TYPEAS	s_mname
+	##输入.org_code								TYPEAS	s_code
+	##输入.org_type_scode					TYPEAS	s_diccode
+	##输入.org_level_scode				TYPEAS	s_diccode
+	##输入.display_order					TYPEAS	n_sn
+	##输入.remark									TYPEAS	s_comment
+	##输入.simple_name						TYPEAS	s_comment
+	
+	##执行代码（add、update、delete）
+	##执行信息（新增、修改、删除）
+	##由门户系统提供的应用系统类型标识码（oa）
+	##部门名称
+	##部门编号
+	##部门信息状态（active：正常、disabled：锁定、delete：已删除）
+	##部门所属单位编码
+	##部门的上级组织编码
+	##部门简称
+	##部门排序号
+	##同步时间，异常时可能没值
+
+	
+	输入.respCode								TYPEAS	s_mname
+	输入.respMsg								TYPEAS	s_mname
+	输入.appType								TYPEAS	s_mname
+	输入.groupName							TYPEAS	s_mname
+	输入.groupID								TYPEAS	s_mname
+	输入.groupStatus						TYPEAS	s_mname
+	输入.groupCoNumber					TYPEAS	s_mname
+	输入.groupUpid							TYPEAS	s_mname
+	输入.groupDisplayname				TYPEAS	s_mname
+	输入.groupOrder							TYPEAS	s_mname
+	输入.operDate								TYPEAS	s_mname
+	
+	输入.operator								TYPEAS	s_uuid
+	输入.odepart								TYPEAS	s_uuid
+	输入.oorg										TYPEAS	s_uuid
+	输入.odt										TYPEAS	s_datetime
+	输入.manage_unit_uuid				TYPEAS	s_uuid
+
+	输出.uptreccnt							TYPEAS	n_sn
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.reccount					TYPEAS		n_sn
+	临时.org_type_scode		TYPEAS		s_diccode
+	临时.org_level_scode	TYPEAS		s_diccode
+	临时.parent_uuid			TYPEAS		s_uuid
+	临时.sysisdelete			TYPEAS		s_bool
+	临时.mng_uuid					TYPEAS		s_uuid
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	IF 输入.respCode = "add" OR 输入.respCode = "update" 
+		SELECT COUNT(1) AS SYNCCNT
+		FROM UUM_UU_ORGINFO
+		WHERE ext_id = 输入.groupID
+		ENDSELECT
+		临时.reccount = SYNCCNT
+
+		IF 输入.respCode = "add" AND 临时.reccount = "1"
+			输入.respCode = "update"
+		ENDIF
+		
+		IF 输入.respCode = "update" AND 临时.reccount = "0"
+			输入.respCode = "add"
+		ENDIF
+	ENDIF
+	
+
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.respCode = "add" OR 输入.respCode = "update" 
+		IF 输入.groupStatus = "active"
+			临时.sysisdelete = "0"
+		ELSE
+			临时.sysisdelete = "1"
+		ENDIF
+
+		IF 输入.manage_unit_uuid = ""
+			临时.mng_uuid = "00000000000000000000000000000000"
+		ENDIF
+		
+		SELECT org_uuid AS PID
+		FROM UUM_UU_ORGINFO
+		WHERE ext_id = 输入.groupUpid
+		ENDSELECT
+		临时.parent_uuid = PID
+	ENDIF
+	
+	IF 输入.respCode = "add"
+		--新增时判断部门类型及部门级别
+		临时.org_type_scode = "U073"
+		临时.org_level_scode = "U085"
+		IF 输入.groupID = 输入.groupCoNumber
+			临时.org_type_scode = "U072"
+			临时.org_level_scode = "U082"
+		ENDIF
+		IF 输入.groupUpid = 输入.groupCoNumber
+			临时.org_type_scode = "U073"
+			临时.org_level_scode = "U084"
+		ENDIF
+		
+		INSERT INTO UUM_UU_ORGINFO(
+			org_uuid, org_code, org_name, parent_uuid
+			, org_type_scode, org_level_scode, display_order, remark
+			, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid
+			, sys_code , manage_unit_uuid , simple_name , sysisdelete
+			, ext_id , ext_parent_id )
+		VALUES(
+			'WQL.APPUUID()' , '00' , 输入.groupName , 临时.parent_uuid
+			, 临时.org_type_scode , 临时.org_level_scode , WQL.APPCAST( 输入.groupOrder AS NUMERIC( 9 , 0 ) ), 输入.respMsg
+			, '-1' , 输入.odt , '-1' , '-1'
+			, F_NewOrgSysCode( 临时.parent_uuid ) , 临时.mng_uuid , 输入.groupDisplayname , 临时.sysisdelete
+			, 输入.groupID , 输入.groupUpid )
+		ENDINSERT
+	ENDIF
+	
+	IF 输入.respCode = "update"
+		UPDATE UUM_UU_ORGINFO
+		SET org_name = 输入.groupName
+				, parent_uuid = 临时.parent_uuid
+				, display_order = WQL.APPCAST( 输入.groupOrder AS NUMERIC( 9 , 0 ) )
+				, remark = 输入.respMsg
+				
+				, sysupdatetime = 输入.odt
+		WHERE ext_id = 输入.groupID
+		ENDUPDATE
+	ENDIF
+	
+	IF 输入.respCode = "delete"
+		UPDATE UUM_UU_ORGINFO
+		SET sysisdelete = '1'
+		WHERE ext_id = 输入.groupID
+		ENDUPDATE
+	ENDIF

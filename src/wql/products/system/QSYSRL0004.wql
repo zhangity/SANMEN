@@ -1,0 +1,165 @@
+[交易说明]
+	交易名：		公用角色表
+	所属模块：	系统公用
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、人员对应角色表		【EA_SYS_Person_Role】
+	版本经历：	
+				1、v1.0		于猛			2015-01-26 13:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--系统ID
+	输入.id						TYPEAS		s_id
+	
+	--用户ID
+	输入.person_id					TYPEAS		s_id
+	
+	--角色ID
+	输入.roleid					TYPEAS		s_id
+	
+	--创建时间
+	输入.createdt				TYPEAS		s_sstring
+	
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询人员角色表
+	IF	输入.flag = 1
+		PAGEQUERY
+			SELECT
+				id
+				,userid
+				,roleid
+				,createdt
+				FROM EA_SYS_Person_Role  a
+				WHERE 1=1
+				OPTION 输入.id <> ""
+					a.id = 输入.id
+				ENDOPTION
+				OPTION 输入.userid <> ""
+					a.userid = 输入.userid
+				ENDOPTION
+				OPTION 输入.roleid <> ""
+					a.roleid = 输入.roleid
+				ENDOPTION
+				OPTION 输入.createdt <> ""
+					a.createdt = 输入.createdt
+				ENDOPTION
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+	#查询人员角色表（附带人员详细信息）
+	IF	输入.flag = 2
+		PAGEQUERY
+			SELECT
+				a.id			as id
+				,a.person_id	as person_id
+				,a.roleid		as roleid
+				,a.createdt		as createdt
+				,b.dept_id		as dept_id
+				,(select c.dept_name from EA_BI_DepartMent c where c.dept_id=b.dept_id) as dept_idname
+				,b.person_name	as person_name
+				,b.person_sex	as person_sex
+				,b.birthday		as birthday
+				,b.ygzw			as ygzw
+				,b.ygjb			as ygjb
+				,b.code_py		as code_py
+				,b.code_wb		as code_wb
+				,b.code_sj		as code_sj
+				,b.code_qt		as code_qt
+				,b.kss			as kss
+				,b.ordercode	as ordercode
+				#,b.createdt		as createdt
+				,b.status		as status
+				,b.remark		as remark
+			FROM EA_SYS_Person_Role  a
+			left join EA_BI_Person b on b.person_id = a.person_id
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.person_id <> ""
+				a.person_id = 输入.person_id
+			ENDOPTION
+			OPTION 输入.roleid <> ""
+				a.roleid = 输入.roleid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+	
+	#普通查询所有人员角色表
+	IF	输入.flag = 3
+		QUERY
+			SELECT
+				id
+				,person_id
+				,roleid
+				,createdt
+				FROM EA_SYS_Person_Role  a
+				WHERE 1=1
+				OPTION 输入.id <> ""
+					a.id = 输入.id
+				ENDOPTION
+				OPTION 输入.person_id <> ""
+					a.person_id = 输入.person_id
+				ENDOPTION
+				OPTION 输入.roleid <> ""
+					a.roleid = 输入.roleid
+				ENDOPTION
+				OPTION 输入.createdt <> ""
+					a.createdt = 输入.createdt
+				ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

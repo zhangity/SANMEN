@@ -1,0 +1,163 @@
+[交易说明]
+	交易名：	组织机构信息维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、组织信息表【UUM_UU_ORGINFO】
+						2、人员信息表【UUM_UU_PERSONINFO】
+						
+	版本经历：	
+				1、v1.0		廖树平			2015/8/2 16:31:54		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--add/mdf/del
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.org_uuid								TYPEAS	s_uuid
+	输入.parent_uuid						TYPEAS	s_uuid
+	输入.org_name								TYPEAS	s_mname
+	输入.org_code								TYPEAS	s_code
+	输入.org_type_scode					TYPEAS	s_diccode
+	输入.org_level_scode				TYPEAS	s_diccode
+	输入.display_order					TYPEAS	n_sn
+	输入.remark									TYPEAS	s_comment
+	输入.simple_name						TYPEAS	s_comment
+	
+	输入.operator								TYPEAS	s_uuid
+	输入.odepart								TYPEAS	s_uuid
+	输入.oorg										TYPEAS	s_uuid
+	输入.odt										TYPEAS	s_datetime
+	输入.manage_unit_uuid				TYPEAS	s_uuid
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.reccount					TYPEAS		n_sn
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	//IF 输入.actionflag = add
+		//判断组织名称的唯一性
+		//SELECT COUNT(1) AS RECCNT
+		//FROM UUM_UU_ORGINFO a
+		//WHERE a.org_name = 输入.org_name AND a.sysisdelete = '0'
+		//ENDSELECT
+		//临时.reccount = RECCNT
+		//IF 临时.reccount > 0
+		//	ERROR "输入的组织名称已被使用，不能新增!"
+		//ENDIF
+		//判断组织代码的唯一性
+		//SELECT COUNT(1) AS RECCNT
+		//FROM UUM_UU_ORGINFO a
+		//WHERE a.org_code = 输入.org_code AND a.sysisdelete = '0'
+		//ENDSELECT
+		//临时.reccount = RECCNT
+		//IF 临时.reccount > 0
+		//	ERROR "输入的组织代码已被使用，不能新增!"
+		//ENDIF
+	//ENDIF
+	
+	//IF 输入.actionflag = mdf
+		//组织代码不允许修改
+		//SELECT COUNT(1) AS RECCNT
+		//FROM UUM_UU_ORGINFO a
+		//WHERE a.org_uuid = 输入.org_uuid AND a.org_code <> 输入.org_code
+		//ENDSELECT
+		//临时.reccount = RECCNT
+		//IF 临时.reccount > 0
+		//	ERROR "组织代码不能修改!"
+		//ENDIF
+		//判断组织名称的唯一性
+		//SELECT COUNT(1) AS RECCNT
+		//FROM UUM_UU_ORGINFO a
+		//WHERE a.org_name = 输入.org_name AND a.org_uuid <> 输入.org_uuid AND a.sysisdelete = '0'
+		//ENDSELECT
+		//临时.reccount = RECCNT
+		//IF 临时.reccount > 0
+		//	ERROR "输入的组织名称已被使用，不能修改!"
+		//ENDIF
+		//判断组织代码的唯一性
+		//SELECT COUNT(1) AS RECCNT
+		//FROM UUM_UU_ORGINFO a
+		//WHERE a.org_code = 输入.org_code AND a.org_uuid <> 输入.org_uuid AND a.sysisdelete = '0'
+		//ENDSELECT
+		//临时.reccount = RECCNT
+		//IF 临时.reccount > 0
+		//	ERROR "输入的组织代码已被使用，不能修改!"
+		//ENDIF
+	//ENDIF
+
+	IF 输入.actionflag = del
+		//已有人员归属的组织不能删除
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_PERSONINFO a
+		WHERE (a.depart_uuid = 输入.org_uuid OR a.org_uuid = 输入.org_uuid )
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "输入的组织已有人员归属，不能删除!"
+		ENDIF
+		//已有子级部门不能删除
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_ORGINFO a
+		WHERE (a.parent_uuid = 输入.org_uuid AND a.sysisdelete = '0')
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "输入的组织已有子级机构，请先删除子级机构!"
+		ENDIF
+	ENDIF	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.actionflag = add
+		INSERT INTO UUM_UU_ORGINFO(
+			org_uuid, org_code, org_name, parent_uuid
+			, org_type_scode, org_level_scode, display_order, remark
+			, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid
+			, sys_code , manage_unit_uuid , simple_name )
+		VALUES(
+			输入.org_uuid , 输入.org_code , 输入.org_name , 输入.parent_uuid
+			, 输入.org_type_scode , 输入.org_level_scode , 输入.display_order , 输入.remark
+			, 输入.operator , 输入.odt , 输入.odepart , 输入.oorg
+			, F_NewOrgSysCode( 输入.parent_uuid ) , 输入.manage_unit_uuid , 输入.simple_name )
+		ENDINSERT
+	ENDIF
+	
+	IF 输入.actionflag = mdf
+		UPDATE UUM_UU_ORGINFO
+		SET org_name = 输入.org_name
+				, parent_uuid = 输入.parent_uuid
+				, org_type_scode = 输入.org_type_scode
+				, org_level_scode = 输入.org_level_scode
+				, display_order = 输入.display_order
+				, remark = 输入.remark
+				, simple_name = 输入.simple_name
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE org_uuid = 输入.org_uuid
+		ENDUPDATE
+	ENDIF
+	
+	IF 输入.actionflag = del
+		UPDATE UUM_UU_ORGINFO
+		SET sysisdelete = '1'
+		WHERE org_uuid = 输入.org_uuid
+		ENDUPDATE
+	ENDIF

@@ -1,0 +1,58 @@
+[交易说明]
+  交易名：    查询MQ消息列表
+  所属模块：  系统功能
+  功能简述：  
+  版权所有：  杭州新世纪
+  表引用：    
+  版本经历：  
+
+[数据库]
+  --指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+  输入.server_uuid      TYPEAS    s_string
+  输入.begintime        TYPEAS    s_string
+  输入.endtime        TYPEAS    s_string
+  
+[临时表]
+  --这边列出来的临时表就会在运行期动态创建
+  
+[临时变量]
+  --所有中间过程变量均可在此处定义
+  
+[业务过程]
+
+  ##########################################
+  #      1、输入输出检查         #
+  ##########################################
+
+  
+  ##########################################
+  #      2、主过程前处理         #
+  ##########################################
+  
+  
+  ##########################################
+  #      3、业务主过程          #
+  ##########################################
+  
+  
+  PAGEQUERY
+    SELECT
+        a.msg_uuid
+        ,a.server_uuid
+        ,a.receivetime
+        ,a.dtlcount
+      FROM WDK_MQ_MSG  a
+      WHERE 1=1
+      OPTION 输入.server_uuid <> ""
+        a.server_uuid = 输入.server_uuid
+      ENDOPTION
+      OPTION 输入.begintime <> ""
+        a.receivetime >= 输入.begintime
+      ENDOPTION
+      OPTION 输入.endtime <> ""
+        a.receivetime <= 输入.endtime
+      ENDOPTION
+    ENDSELECT
+  ENDPAGEQUERY

@@ -1,0 +1,187 @@
+[交易说明]
+  交易名：    MQ服务维护
+  所属模块：  系统功能
+  功能简述：  
+  版权所有：  杭州新世纪
+  表引用：    
+  版本经历：  
+
+[数据库]
+  --指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+  #操作符   1-新增  2-修改  3-删除
+  输入.flag                   TYPEAS    s_string
+  --服务标识
+  输入.server_uuid            TYPEAS    s_string
+  --服务编码
+  输入.server_code            TYPEAS    s_string
+  --服务名称
+  输入.server_name            TYPEAS    s_string
+  --服务地址
+  输入.hostname               TYPEAS    s_string
+  --通道
+  输入.channel                TYPEAS    s_string
+  --编码
+  输入.ccsid                  TYPEAS    n_sn
+  --端口
+  输入.port                   TYPEAS    n_sn
+  --队列管理器
+  输入.qmname                 TYPEAS    s_string
+  --远程传输队列
+  输入.qname_get              TYPEAS    s_string
+  --远程发送队列
+  输入.qname_put              TYPEAS    s_string
+  --用户名
+  输入.userid                 TYPEAS    s_string
+  --口令
+  输入.pwd                    TYPEAS    s_string
+  --MQ处理类
+  输入.busiclass              TYPEAS    s_string
+  --运行模式
+  输入.runmodel               TYPEAS    s_string
+  --说明
+  输入.remark                 TYPEAS    s_string
+  --参数数量
+  输入.propcount              TYPEAS    s_string
+  --参数标识
+  输入明细.prop_uuid_arr      TYPEAS    s_string
+  --参数值
+  输入明细.prop_value_arr     TYPEAS    s_string
+  --参数说明
+  输入明细.prop_remark_arr    TYPEAS    s_string
+
+[临时表]
+  --这边列出来的临时表就会在运行期动态创建
+  
+[临时变量]
+  --所有中间过程变量均可在此处定义
+     
+[业务过程]
+
+  ##########################################
+  #      1、输入输出检查         #
+  ##########################################
+
+  
+  ##########################################
+  #      2、主过程前处理         #
+  ##########################################
+  
+  
+  ##########################################
+  #      3、业务主过程          #
+  ##########################################
+  
+  
+  #对操作符进行判断，如果没有输入则提示错误
+  IF 输入.flag = ""
+    ERROR "：未输入操作符"
+  ENDIF
+  
+  
+  #新增
+  IF 输入.flag = 1
+    INSERT INTO WDK_MQ_Server (
+        server_uuid
+        ,server_code
+        ,server_name
+        ,hostname
+        ,channel
+        ,ccsid
+        ,port
+        ,qmname
+        ,qname_get
+        ,qname_put
+        ,userid
+        ,pwd
+        ,busiclass
+        ,runmodel
+        ,remark
+        ,IsActive
+      ) values (
+        输入.server_uuid
+      ,输入.server_code
+      ,输入.server_name
+      ,输入.hostname
+      ,输入.channel
+      ,输入.ccsid
+      ,输入.port
+      ,输入.qmname
+      ,输入.qname_get
+      ,输入.qname_put
+      ,输入.userid
+      ,输入.pwd
+      ,输入.busiclass
+      ,输入.runmodel
+      ,输入.remark
+      ,'1'
+    )
+    ENDINSERT
+    
+    LOOP 输入.propcount
+      INSERT INTO WDK_MQ_ServerProp (
+        prop_uuid
+        ,server_uuid
+        ,prop_value
+        ,remark
+      ) values (
+        输入明细.prop_uuid_arr
+        ,输入.server_uuid
+        ,输入明细.prop_value_arr
+        ,输入明细.prop_remark_arr
+      )
+      ENDINSERT
+    ENDLOOP
+  ENDIF
+  
+  
+  #修改
+  IF 输入.flag = 2
+    UPDATE WDK_MQ_Server SET
+      server_code = 输入.server_code
+      ,server_name = 输入.server_name
+      ,hostname   = 输入.hostname
+      ,channel    = 输入.channel
+      ,ccsid      = 输入.ccsid
+      ,port       = 输入.port
+      ,qmname     = 输入.qmname
+      ,qname_get  = 输入.qname_get
+      ,qname_put  = 输入.qname_put
+      ,userid     = 输入.userid
+      ,pwd        = 输入.pwd
+      ,busiclass  = 输入.busiclass
+      ,runmodel   = 输入.runmodel
+      ,remark     = 输入.remark
+    WHERE server_uuid = 输入.server_uuid
+    ENDUPDATE
+    
+    DELETE FROM WDK_MQ_ServerProp
+      WHERE server_uuid = 输入.server_uuid
+    ENDDELETE
+    
+    LOOP 输入.propcount
+      INSERT INTO WDK_MQ_ServerProp (
+        prop_uuid
+        ,server_uuid
+        ,prop_value
+        ,remark
+      ) values (
+        输入明细.prop_uuid_arr
+        ,输入.server_uuid
+        ,输入明细.prop_value_arr
+        ,输入明细.prop_remark_arr
+      )
+      ENDINSERT
+    ENDLOOP
+  ENDIF
+  
+  
+  
+  #删除
+  IF 输入.flag = 3
+    UPDATE WDK_MQ_Server SET
+      isactive = '0'
+    WHERE server_uuid = 输入.server_uuid
+    ENDUPDATE
+  ENDIF

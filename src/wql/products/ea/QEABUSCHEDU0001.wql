@@ -1,0 +1,137 @@
+[交易说明]
+	交易名： 设备排班查询
+	所属模块：	预约定时任务排班
+	功能简述：	
+	版权所有：	xxxx
+	表引用：		
+												
+			
+	版本经历：	
+				1、v1.0		俞斌		2016/12/11 15:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+[IO定义]
+	#操作符  
+	输入.flag					TYPEAS		s_string
+	
+	#定时任务开始日期
+	输入.start_dt				TYPEAS		s_datetime
+	
+	#定时任务截止日期
+	输入.schedu_dt				TYPEAS		s_datetime
+	
+	
+	输入.device_id 				TYPEAS		s_string 
+	输入.schedu_ampm 			TYPEAS		s_code
+	
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.lock_dt					TYPEAS		s_datetime
+	临时.lock_ampm 				TYPEAS		s_code
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#1、不能存在已经被预约单选择的号码实例
+	IF 输入.flag = 1
+		IF 输入.start_dt = ""
+			ERROR "：未输入start_dt"
+		ENDIF
+		IF 输入.schedu_dt = ""
+			ERROR "：未输入schedu_dt"
+		ENDIF
+		QUERY
+			SELECT 
+				T0.SCHEDU_ID
+		       ,T0.DEVICE_ID
+		       ,T0.SCHEDU_DATE
+		       ,T0.SCHEDU_WEEK
+		       ,T0.SCHEDU_WEEKDAY
+		       ,T0.AMPM
+		       ,T0.WORK_START
+		       ,T0.WORK_END
+		       ,T0.APPT_QUOTA
+		       ,T0.SPLITNUM
+		       ,T0.DOCTOR_ID
+		       ,T0.MZSY
+		       ,T0.ZYSY
+		       ,T0.YJSY
+		       ,T0.BQSY
+		       ,T0.LOCKTYPE
+		       ,T0.UNLOCKDEPTID
+		       ,T0.ORDERCODE
+		       ,T0.CREATEDT
+		       ,T0.STATUS
+		       ,T0.REMARK
+		       ,(SELECT count(1) FROM EA_BU_NUMBER T9 WHERE T9.SCHEDU_ID = T0.SCHEDU_ID AND T9.appt_id is not null and T9.appt_id<>'') as USED
+			  FROM EA_BI_DEVICESCHEDU T0
+			 WHERE SCHEDU_DATE <= 输入.schedu_dt
+			   AND SCHEDU_DATE >= 输入.start_dt
+			 ORDER BY   T0.DEVICE_ID, T0.SCHEDU_DATE, T0.AMPM
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	IF 输入.flag = 2
+		IF 输入.device_id = ""
+			ERROR "：未输入device_id"
+		ENDIF
+		IF 输入.schedu_dt = ""
+			ERROR "：未输入schedu_dt"
+		ENDIF
+		IF 输入.schedu_ampm = ""
+			ERROR "：未输入schedu_ampm"
+		ENDIF
+		临时.lock_dt = 输入.schedu_dt
+		临时.lock_ampm = 输入.schedu_ampm
+		QUERY
+			SELECT A.NUMBER_ID,
+		       A.APPT_ID,
+		       A.DEVICE_ID,
+		       A.SCHEDU_ID,
+		       A.SCHEDU_DT,
+		       A.SCHEDU_AMPM,
+		       A.SCHEDU_SECTION,
+		       A.SCHEDU_POINT,
+		       A.NUMBER_TYPE,
+		       b.lock_type AS LOCKTYPE,
+		       A.LOCKSOURCE,
+		       b.unlockdeptid as UNLOCKDEPTID,
+		       b.LOCK_ID,
+		       a.ADD_ID,
+		       a.CREATEDT,
+		       a.ORDERCODE
+			  FROM EA_BU_NUMBER A
+			  LEFT JOIN EA_BU_Lock B
+			  ON A.SCHEDU_POINT = B.lock_point
+			  WHERE a.device_id= 输入.device_id and a.schedu_dt= 输入.schedu_dt and a.schedu_ampm = 输入.schedu_ampm
+			  AND　b.device_id =输入.device_id and b.lock_dt = 临时.lock_dt and b.lock_ampm = 临时.lock_ampm
+		  ENDSELECT
+		ENDQUERY
+	ENDIF

@@ -1,0 +1,137 @@
+[交易说明]
+	交易名：	角色功能授权维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、角色功能权限表【UUM_UA_ROLEFUNC】
+						2、功能信息表【UUM_UA_FUNCTION】
+						
+	版本经历：	
+				1、v1.0		廖树平		2015/8/3 16:22:48		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--ref
+	输入.detailcount						TYPEAS	n_sn
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.role_uuid							TYPEAS	s_uuid
+	输入明细.func_uuidarr				TYPEAS	s_uuid
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.func_uuid					TYPEAS	s_uuid
+	临时.parent_uuid				TYPEAS	s_uuid
+	临时.button_uuid				TYPEAS	s_uuid
+	临时.func_type					TYPEAS	s_diccode
+	临时.reccnt							TYPEAS	n_sn
+	临时明细.func_uuid			TYPEAS	s_uuid
+	临时明细.right_level		TYPEAS	s_diccode
+	临时明细.right_str			TYPEAS	s_mname
+	临时.oricnt							TYPEAS	n_sn
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.actionflag = "ref"
+		#记录原有的角色功能数据权限
+		SELECT DISTINCT func_uuid AS func_uuid
+			, right_level AS right_level
+			, right_str AS right_str
+		FROM UUM_UA_ROLEFUNC
+		WHERE role_uuid = 输入.role_uuid
+		ENDSELECT
+		临时明细.func_uuid = func_uuid
+		临时明细.right_level = right_level
+		临时明细.right_str = right_str
+		#
+		SELECT COUNT(DISTINCT func_uuid) AS oricnt
+		FROM UUM_UA_ROLEFUNC
+		WHERE role_uuid = 输入.role_uuid
+		ENDSELECT
+		临时.oricnt = oricnt
+		
+		DELETE FROM UUM_UA_ROLEFUNC
+		WHERE role_uuid = 输入.role_uuid
+		ENDDELETE
+		
+		LOOP 输入.detailcount
+			临时.func_uuid = 输入明细.func_uuidarr
+			
+			SELECT a.func_type AS functype
+							, a.parent_uuid AS parentuuid
+			FROM UUM_UA_FUNCTION a
+			WHERE a.func_uuid = 临时.func_uuid
+			ENDSELECT
+			临时.func_type = functype
+			临时.parent_uuid = parentuuid
+			
+			IF 临时.func_type <> ""
+				IF 临时.func_type = "U121"
+					临时.button_uuid = 输入.actionflag
+				ENDIF
+				IF 临时.func_type = "U122"
+					临时.button_uuid = 输入.actionflag
+				ENDIF
+				IF 临时.func_type = "U123"
+					SELECT COUNT(1) AS BTNCNT
+					FROM UUM_UA_FUNCTION
+					WHERE parent_uuid = 临时.func_uuid
+					ENDSELECT
+					临时.reccnt = BTNCNT
+					IF 临时.reccnt = 0
+						临时.button_uuid = 输入.actionflag
+					ENDIF
+				ENDIF				
+				IF 临时.func_type = "U124"
+					临时.button_uuid = 临时.func_uuid
+					临时.func_uuid = 临时.parent_uuid
+				ENDIF
+			ENDIF
+			
+			IF 临时.func_type = "U121" OR 临时.func_type = "U122" OR ( 临时.func_type = "U123" AND 临时.reccnt = 0 ) OR 临时.func_type = "U124"
+				SELECT COUNT(1) AS ROLECNT
+				FROM UUM_UA_ROLEFUNC
+				WHERE role_uuid = 输入.role_uuid AND func_uuid = 临时.func_uuid AND button_uuid = 临时.button_uuid
+				ENDSELECT
+				临时.reccnt = ROLECNT
+				IF 临时.reccnt = 0
+					INSERT INTO UUM_UA_ROLEFUNC(
+						role_uuid
+						, func_uuid
+						, button_uuid)
+					VALUES(
+						输入.role_uuid
+						, 临时.func_uuid
+						, 临时.button_uuid)
+					ENDINSERT
+				ENDIF
+			ENDIF
+		ENDLOOP
+		
+		LOOP 临时.oricnt
+			UPDATE UUM_UA_ROLEFUNC
+			SET right_level = 临时明细.right_level
+				, right_str = 临时明细.right_str
+			WHERE role_uuid = 输入.role_uuid AND func_uuid = 临时明细.func_uuid
+			ENDUPDATE
+		ENDLOOP
+	ENDIF

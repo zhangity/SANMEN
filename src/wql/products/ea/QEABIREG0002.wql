@@ -1,0 +1,75 @@
+[交易说明]
+	交易名： 预约规则查询
+	所属模块：	基础数据维护
+	功能简述：	
+	版权所有：	xxxx
+	表引用：		
+				规则模板表【EA_BI_RegularTemp】
+				规则参数表【EA_BI_RegularParam】
+				规则实例表【EA_BI_RegularInst】
+				规则参数实例表【EA_BI_RegularParamInst】
+	版本经历：	
+				1、v1.0		俞斌		2017/1/13 15:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+[IO定义]
+	#操作符 
+	输入.flag					TYPEAS		s_string
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#查询规则引擎
+	IF 输入.flag = 1
+		QUERY
+			SELECT T1.INST_ID
+				, T1.INST_NAME
+				, T2.ANALYSIS_CLAZZ as clazz
+			 FROM EA_BI_REGULARINST T1
+			 INNER JOIN EA_BI_REGULARTEMP T2
+			 ON T1.TEMP_ID = T2.TEMP_ID	
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查询规则参数
+	IF 输入.flag = 2
+		QUERY
+			SELECT A1.PARAM_NAME
+				, A2.FIELD_VALUE
+				, A2.INST_ID
+		      FROM EA_BI_REGULARPARAM A1
+		     INNER JOIN EA_BI_REGULARPARAMINST A2
+		        ON A1.PARAM_ID = A2.PARAM_ID
+			ENDSELECT
+		ENDQUERY
+	ENDIF

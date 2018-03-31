@@ -1,0 +1,97 @@
+[交易说明]
+	交易名：		取应用详细信息
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、应用信息表【UUM_UA_APPLICATION】
+				2、系统基础数据表【PF_PB_SysDicInfo】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/25 15:07:47		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--应用标识
+	输入.app_uuid									TYPEAS	s_uuid
+	
+	--应用名称
+	输入.app_name									TYPEAS	s_mname
+	
+	--应用编码
+	输入.app_code									TYPEAS	s_code
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	QUERY
+		SELECT a.app_uuid
+			, a.app_name
+			, a.app_code
+			, a.short_name
+			, a.app_ver
+			, a.app_type
+			, a.app_ip
+			, a.app_port
+			, a.app_deploy_name
+			, b.DicAliasName AS app_typename
+			, c.DicAliasName AS deploy_typename
+			, a.deploy_type
+			, a.home_url
+			, a.login_url
+			, a.deploy_date
+			, a.data_right
+			, a.manufacturer
+			, a.display_order
+			, a.ws_url
+			, a.ws_user
+			, a.ws_pwd
+			, a.remark
+		FROM UUM_UA_APPLICATION a
+			INNER JOIN PF_PB_SysDicInfo b ON a.app_type = b.DicSCode
+			INNER JOIN PF_PB_SysDicInfo c ON a.deploy_type = c.DicSCode
+		WHERE a.sysisdelete = '0'
+		OPTION 输入.app_uuid <> ""
+			a.app_uuid = 输入.app_uuid
+		ENDOPTION
+		OPTION 输入.app_name <> ""
+			a.app_name LIKE CONCAT("%" , 输入.app_name , "%")
+		ENDOPTION
+		OPTION 输入.app_code <> ""
+			a.app_code LIKE CONCAT("%" , 输入.app_code , "%")
+		ENDOPTION
+		ENDSELECT
+	ENDQUERY
+	
+	#对操作符进行判断，如果没有输入则提示错误

@@ -1,0 +1,176 @@
+[交易说明]
+	交易名：		查询系统菜单表
+	所属模块：	系统公用
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、系统菜单表			【wdk_menu】
+	版本经历：	
+				1、v1.0		于猛			2015-01-13 13:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--菜单编码集合
+	输入.menucodes				TYPEAS	f_string
+	
+	
+	--菜单编码
+	输入.menucode				TYPEAS	s_sstring
+	
+	--所属应用编码
+	输入.appcode					TYPEAS	s_sstring
+	
+	--菜单名称
+	输入.menuname				TYPEAS	s_sstring
+	
+	--菜单缩写
+	输入.shortname				TYPEAS	s_sstring
+	
+	--菜单描述
+	输入.menudesc				TYPEAS	s_string
+	
+	--菜单类型
+	输入.menutype				TYPEAS	s_stype
+	
+	--链接地址
+	输入.menuurl					TYPEAS	s_string
+	
+	--附加参数
+	输入.menuparam				TYPEAS	s_sstring
+	
+	--菜单级别
+	输入.menulevel				TYPEAS	s_stype
+	
+	--排序编码
+	输入.ordercode				TYPEAS	s_sstring
+	
+	--父菜单编码
+	输入.parentmenucode			TYPEAS	s_sstring
+	
+	--菜单图标
+	输入.menuicon				TYPEAS	s_sstring
+	
+	--是否菜单
+	输入.ismenu					TYPEAS	s_stype
+	
+	--菜单状态
+	输入.status					TYPEAS	s_stype
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询字典表
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				menucode
+				,appcode
+				,menuname
+				,shortname
+				,menudesc
+				,menutype
+				,menuurl
+				,menuparam
+				,menulevel
+				,ordercode
+				,parentmenucode
+				,menuicon
+				,ismenu
+				,status
+				FROM wdk_menu  a
+				WHERE 1=1
+				OPTION 输入.menucode <> ""
+					a.menucode = 输入.menucode
+				ENDOPTION
+				OPTION 输入.menucodes <> ""
+					a.menucode in ( 输入.menucodes )
+				ENDOPTION
+				OPTION 输入.appcode <> ""
+					a.appcode = 输入.appcode
+				ENDOPTION
+				OPTION 输入.menuname <> ""
+					a.menuname = 输入.menuname
+				ENDOPTION
+				OPTION 输入.shortname <> ""
+					a.shortname like "%" UNIONSTR 输入.shortname UNIONSTR "%"
+				ENDOPTION
+				OPTION 输入.menudesc <> ""
+					a.menudesc = 输入.menudesc
+				ENDOPTION
+				OPTION 输入.menutype <> ""
+					a.menutype = 输入.menutype
+				ENDOPTION
+				OPTION 输入.menuurl <> ""
+					a.menuurl = 输入.menuurl
+				ENDOPTION
+				OPTION 输入.menuparam <> ""
+					a.menuparam = 输入.menuparam
+				ENDOPTION
+				OPTION 输入.menulevel <> ""
+					a.menulevel = 输入.menulevel
+				ENDOPTION
+				OPTION 输入.ordercode <> ""
+					a.ordercode = 输入.ordercode
+				ENDOPTION
+				OPTION 输入.parentmenucode <> ""
+					a.parentmenucode = 输入.parentmenucode
+				ENDOPTION
+				OPTION 输入.menuicon <> ""
+					a.menuicon = 输入.menuicon
+				ENDOPTION
+				OPTION 输入.ismenu <> ""
+					a.ismenu = 输入.ismenu
+				ENDOPTION
+				OPTION 输入.status <> ""
+					a.status = 输入.status
+				ENDOPTION
+				OPTION 输入.sql <> ""
+					输入.sql	
+				ENDOPTION
+				ORDERBY 输入.orderby <> ""
+					输入.orderby
+				ENDORDERBY	
+			ENDSELECT
+		ENDQUERY
+	ENDIF

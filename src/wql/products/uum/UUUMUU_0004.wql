@@ -1,0 +1,256 @@
+[交易说明]
+	交易名：	人员信息维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、组织信息表【UUM_UU_ORGINFO】
+						2、人员信息表【UUM_UU_PERSONINFO】
+						3、用户表【UUM_UU_ACCOUNT】
+						4、系统参数信息【PF_PB_Parameter】
+						
+	版本经历：	
+				1、v1.0		廖树平			2015/8/28 10:54:57		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--add/mdf/del
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.person_uuid						TYPEAS	s_uuid
+	输入.depart_uuid						TYPEAS	s_uuid
+	输入.person_code						TYPEAS	s_code
+	输入.person_name						TYPEAS	s_name
+	输入.login_name							TYPEAS	s_mname
+	输入.emp_no									TYPEAS	s_code
+	输入.gender_scode						TYPEAS	s_diccode
+	输入.politics_scode					TYPEAS	s_diccode
+	输入.diploma_scode					TYPEAS	s_diccode
+	输入.birth_date							TYPEAS	s_date
+	输入.entry_date							TYPEAS	s_date
+	输入.cer_type_scode					TYPEAS	s_diccode
+	输入.id_no									TYPEAS	s_code
+	输入.master_email						TYPEAS	s_mname
+	输入.backup_email						TYPEAS	s_mname
+	输入.phone_no								TYPEAS	s_code
+	输入.office_phone_no				TYPEAS	s_code
+	输入.room_no								TYPEAS	s_code
+	输入.master_mobile					TYPEAS	s_code
+	输入.backup_mobile					TYPEAS	s_code
+	输入.display_order					TYPEAS	n_sn
+	输入.status_scode						TYPEAS	s_diccode
+	输入.sign_pic								TYPEAS	s_file
+	输入.sign_picname						TYPEAS	s_mname
+	输入.remark									TYPEAS	s_comment
+	输入.account_uuid						TYPEAS	s_uuid
+	
+	输入.operator								TYPEAS	s_uuid
+	输入.odepart								TYPEAS	s_uuid
+	输入.oorg										TYPEAS	s_uuid
+	输入.odt										TYPEAS	s_datetime
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.reccount					TYPEAS		n_sn
+	临时.org_uuid					TYPEAS		s_uuid
+	临时.org_type_scode		TYPEAS		s_diccode
+	临时.login_pwd				TYPEAS		s_diccode
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	IF 输入.actionflag = "add"
+		//判断登录名的唯一性
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_ACCOUNT a
+		WHERE a.login_name = 输入.login_name AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的登录名已被使用，不能新增!"
+		ENDIF
+		//判断人员编码的唯一性
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_PERSONINFO a
+		WHERE a.person_code = 输入.person_code AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的人员编码已被使用，不能新增!"
+		ENDIF
+	ENDIF
+	
+	IF 输入.actionflag = "mdf"
+		//人员编码不允许修改
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_PERSONINFO a
+		WHERE a.person_uuid <> 输入.person_uuid AND a.person_code = 输入.person_code
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：人员编码不能修改!"
+		ENDIF
+		//判断人员编码的唯一性
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_PERSONINFO a
+		WHERE a.person_code = 输入.person_code AND a.person_uuid <> 输入.person_uuid AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的人员编码已被使用，不能修改!"
+		ENDIF
+		//判断登录名的唯一性
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_ACCOUNT a
+		WHERE a.account_uuid <> 输入.account_uuid AND a.login_name = 输入.login_name
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的登录名已被使用，不能修改!"
+		ENDIF
+	ENDIF
+
+	IF 输入.actionflag = "del"
+
+	ENDIF	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF ( 输入.actionflag = "add" OR 输入.actionflag = "mdf" )
+		临时.org_uuid = 输入.depart_uuid
+		
+		SELECT a.org_type_scode AS OTCODE
+		FROM UUM_UU_ORGINFO a
+		WHERE a.org_uuid = 输入.depart_uuid
+		ENDSELECT
+		临时.org_type_scode = OTCODE
+		
+		LOOP 10
+			IF 临时.org_type_scode = "U073"
+				SELECT b.org_type_scode AS OTCODE
+					, a.parent_uuid AS ORGUUID
+				FROM UUM_UU_ORGINFO a
+					INNER JOIN UUM_UU_ORGINFO b ON a.parent_uuid = b.org_uuid
+				WHERE a.org_uuid = 临时.org_uuid
+				ENDSELECT
+				临时.org_type_scode = OTCODE
+				临时.org_uuid = ORGUUID
+			ENDIF
+		ENDLOOP
+	ENDIF
+	
+	IF 输入.actionflag = "add"
+		INSERT INTO UUM_UU_PERSONINFO(
+			person_uuid, person_code, person_name, old_name
+			, by_name, nick_name, gender_scode, org_uuid
+			, depart_uuid, emp_no, politics_scode, birth_date
+			, entry_date, diploma_scode, cer_type_scode, id_no
+			,is_saler, is_purcher, is_warehouse_keeper, master_email
+			, backup_email, phone_no, office_phone_no
+			, room_no, master_mobile, backup_mobile, status_scode
+			, sign_pic, sign_picname , display_order, remark			
+			, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid, sysisdelete)
+		VALUES(
+			输入.person_uuid , 输入.person_code , 输入.person_name , 输入.person_name
+			, 输入.person_name , 输入.person_name , 输入.gender_scode , 临时.org_uuid
+			, 输入.depart_uuid , 输入.emp_no , 输入.politics_scode , 输入.birth_date
+			,输入.entry_date , 输入.diploma_scode , 输入.cer_type_scode , 输入.id_no
+			, '0' , '0' , '0' , 输入.master_email , 输入.backup_email , 输入.phone_no , 输入.office_phone_no
+			, 输入.room_no , 输入.master_mobile , 输入.backup_mobile , 输入.status_scode
+			, 输入.sign_pic , 输入.sign_picname , 输入.display_order , 输入.remark	
+			, 输入.operator , 输入.odt , 输入.odepart , 输入.oorg , '0')
+		ENDINSERT
+		
+		SELECT a.paravalue AS PWD
+		FROM PF_PB_Parameter a
+		WHERE a.paracode = 'DefaultPassword'
+		ENDSELECT
+		临时.login_pwd = PWD
+		
+		INSERT INTO UUM_UU_ACCOUNT(
+			account_uuid, user_scode, user_uuid, login_name
+			, login_pwd, sysisdelete
+			, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid)
+		VALUES(
+			输入.account_uuid , 'U092' , 输入.person_uuid , 输入.login_name
+			, 临时.login_pwd , '0'
+			, 输入.operator , 输入.odt , 输入.odepart , 输入.oorg )
+		ENDINSERT
+	ENDIF
+	
+	IF 输入.actionflag = "mdf"
+		UPDATE UUM_UU_PERSONINFO
+		SET person_code = 输入.person_code
+				, person_name = 输入.person_name
+				, gender_scode = 输入.gender_scode
+				, org_uuid = 临时.org_uuid
+				, depart_uuid = 输入.depart_uuid
+				, emp_no = 输入.emp_no
+				, politics_scode = 输入.politics_scode
+				, birth_date = 输入.birth_date
+				, entry_date = 输入.entry_date
+				, diploma_scode = 输入.diploma_scode
+				, cer_type_scode = 输入.cer_type_scode
+				, id_no = 输入.id_no
+				, master_email = 输入.master_email
+				, backup_email = 输入.backup_email
+				, phone_no = 输入.phone_no
+				, office_phone_no = 输入.office_phone_no
+				, room_no = 输入.room_no
+				, master_mobile = 输入.master_mobile
+				, backup_mobile = 输入.backup_mobile
+				, status_scode = 输入.status_scode
+				, sign_pic = 输入.sign_pic
+				, sign_picname = 输入.sign_picname
+				, display_order = 输入.display_order
+				, remark = 输入.remark
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE person_uuid = 输入.person_uuid
+		ENDUPDATE
+		
+		UPDATE UUM_UU_ACCOUNT
+		SET login_name = 输入.login_name
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE account_uuid = 输入.account_uuid
+		ENDUPDATE
+	ENDIF
+	
+	IF 输入.actionflag = "del"
+		//判断是否存在多个登录帐号
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UU_ACCOUNT a
+		WHERE a.user_uuid = 输入.person_uuid AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount <= 1
+			UPDATE UUM_UU_PERSONINFO
+			SET sysisdelete = '1'
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+			WHERE person_uuid = 输入.person_uuid
+			ENDUPDATE
+		ENDIF
+		UPDATE UUM_UU_ACCOUNT
+		SET sysisdelete = '1'
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE account_uuid = 输入.account_uuid
+		ENDUPDATE
+	ENDIF

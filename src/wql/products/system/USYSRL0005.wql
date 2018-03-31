@@ -1,0 +1,125 @@
+[交易说明]
+	交易名：		用户角色对应表
+	所属模块：	系统公用
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、角色对应功能表		【EA_SYS_Role_Fun】
+	版本经历：	
+				1、v1.0		于猛			2015-01-26 13:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag					TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--系统ID
+	输入.id						TYPEAS		s_id
+	
+	--角色ID
+	输入.roleid					TYPEAS		s_id
+	
+	--功能编码
+	输入.funcode					TYPEAS		s_sstring
+	
+	--功能类型
+	输入.funtype					TYPEAS		s_stype
+	
+	--创建时间
+	输入.createdt				TYPEAS		s_sstring
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	临时.count					TYPEAS		s_string
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		
+		###  step1、检查当前是否有重复定义
+		SELECT 
+			count(*) 	as COUNT
+		FROM EA_SYS_Role_Fun a
+		where 1=1
+			AND a.funcode = 输入.funcode
+			AND a.roleid = 输入.roleid
+		ENDSELECT
+		
+		临时.count	=	COUNT
+		
+		###  step2、如果没有重复定义的，则插入
+		IF 临时.count = "0" THEN
+			INSERT INTO EA_SYS_Role_Fun(
+	    		id
+				,roleid
+				,funcode
+				,funtype
+				,createdt
+	    	) values (
+				输入.id
+				,输入.roleid
+				,输入.funcode
+				,输入.funtype
+				,输入.createdt
+			)
+			ENDINSERT
+		ENDIF
+	ENDIF
+	
+	#修改
+	IF 输入.flag = 2
+	ENDIF
+	
+	
+	#按个删除
+	IF 输入.flag = 3
+		DELETE FROM EA_SYS_Role_Fun a
+		WHERE 1=1
+			AND a.funcode = 输入.funcode
+			AND a.roleid = 输入.roleid
+		ENDDELETE
+	ENDIF
+
+	#按菜单删除
+	IF 输入.flag = 4
+		DELETE FROM EA_SYS_Role_Fun a
+		WHERE 1=1
+			AND a.funcode = 输入.funcode
+		ENDDELETE
+	ENDIF

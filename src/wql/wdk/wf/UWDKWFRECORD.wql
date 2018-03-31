@@ -1,0 +1,745 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+	表引用：		
+				1、任务处理流水表			【wdk_wf_record】
+	版本经历：	
+				1、v1.0			于猛			2014-11-21 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	--是否是最后一个结束节点
+	输入.isend					TYPEAS		s_string
+	
+	输入.newpdid					TYPEAS		s_string
+	输入.oldpiid					TYPEAS		s_string
+	输入.newpiid					TYPEAS		s_string
+	
+	
+	
+	--流水UUID
+	输入.id						TYPEAS		s_sstring
+	
+	--流程模板ID
+	输入.pdid					TYPEAS		s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS		s_stype
+	
+	--当前处理节点名称
+	输入.nodename				TYPEAS		s_sstring
+	
+	--节点对应页面
+	输入.nodepage				TYPEAS		s_string
+
+	--当前节点类型
+	输入.nodetype				TYPEAS		s_sstring
+	
+	--会签类型
+	输入.signtype				TYPEAS		s_stype
+	
+	--当前处理任务ID
+	输入.taskid					TYPEAS		s_string
+	
+	--子任务ID
+	输入.subtaskid				TYPEAS		s_stype
+	
+	--发起者id
+	输入.createactorid			TYPEAS		s_sstring
+	
+	--发起者类型
+	输入.createactortype			TYPEAS		s_sstring
+	
+	--流程创建者部门
+	输入.createdeptuuid			TYPEAS		s_sstring
+	
+	--发起时间
+	输入.createdt				TYPEAS		s_sstring
+	
+	--任务送达时间
+	输入.taskcreatedt			TYPEAS		s_sstring
+	
+	--办理者id
+	输入.actorid					TYPEAS		s_sstring
+	
+	--办理者类型
+	输入.actortype				TYPEAS		s_stype
+	
+	--办理者部门
+	输入.deptuuid				TYPEAS		s_sstring
+	
+	--原始办理者id
+	输入.originactorid			TYPEAS		s_sstring
+	
+	--原始办理者类型
+	输入.originactortype			TYPEAS		s_stype
+	
+	--原始办理者部门
+	输入.origindeptuuid			TYPEAS		s_sstring
+	
+	--关联待办流水
+	输入.todoid					TYPEAS		s_id
+	
+	--代理类型
+	输入.agenttype				TYPEAS		s_sstring
+	
+	--操作类型
+	输入.opertype				TYPEAS		s_stype	
+	
+	--办理意见
+	输入.opercomment				TYPEAS		s_string
+
+	--办理时间
+	输入.operdt					TYPEAS		s_sstring
+	
+	--目标转向
+	输入.target					TYPEAS		s_sstring
+	
+	--目标环节办理人
+	输入.targetactors			TYPEAS		s_lstring
+	
+	--前一任务流水记录	
+	输入.preid					TYPEAS		s_sstring
+
+	--当前任务状态
+	输入.status					TYPEAS		s_stype
+	
+	--流程办结时间
+	输入.completedt				TYPEAS		s_sstring
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	--办理记录历史变量
+	临时.count								TYPEAS		n_integer
+	临时.id									TYPEAS		s_string
+	临时.preid								TYPEAS		s_string
+				
+				
+	临时明细.id								TYPEAS		s_id
+	临时明细.pdid							TYPEAS		s_sstring
+	临时明细.piid							TYPEAS		s_string
+	临时明细.nodename						TYPEAS		s_sstring
+	临时明细.nodepage						TYPEAS		s_string
+	临时明细.nodetype						TYPEAS		s_sstring
+	临时明细.signtype						TYPEAS		s_stype
+	临时明细.taskid							TYPEAS		s_string
+	临时明细.subtaskid						TYPEAS		s_string
+	临时明细.createactorid					TYPEAS		s_sstring
+	临时明细.createactortype					TYPEAS		s_sstring
+	临时明细.createdeptuuid					TYPEAS		s_sstring
+	临时明细.createdt						TYPEAS		s_sstring
+	临时明细.taskcreatedt					TYPEAS		s_sstring
+	临时明细.actorid							TYPEAS		s_sstring
+	临时明细.actortype						TYPEAS		s_stype
+	临时明细.deptuuid						TYPEAS		s_sstring
+	临时明细.originactorid					TYPEAS		s_sstring
+	临时明细.originactortype					TYPEAS		s_stype
+	临时明细.origindeptuuid					TYPEAS		s_sstring
+	临时明细.todoid							TYPEAS		s_id
+	临时明细.agenttype						TYYPEAS		s_sstring
+	临时明细.opertype						TYPEAS		s_stype
+	临时明细.opercomment						TYPEAS		s_string
+	临时明细.operdt							TYPEAS		s_sstring
+	临时明细.target							TYPEAS		s_sstring
+	临时明细.targetactors					TYPEAS		s_lstring
+	临时明细.preid							TYPEAS		s_sstring
+	临时明细.status							TYPEAS		s_stype
+
+	
+	
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+	
+		--1、插入记录
+		INSERT INTO wdk_wf_record(
+    			id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,createactorid
+				,createactortype
+				,createdeptuuid
+				,createdt
+				,taskcreatedt
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,todoid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,target
+				,targetactors
+				,preid
+				,status
+    	) values (
+				输入.id
+				,输入.pdid
+				,输入.piid
+				,输入.nodename
+				,输入.nodepage
+				,输入.nodetype
+				,输入.signtype
+				,输入.taskid
+				,输入.subtaskid
+				,输入.createactorid
+				,输入.createactortype
+				,输入.createdeptuuid
+				,输入.createdt
+				,输入.taskcreatedt
+				,输入.actorid
+				,输入.actortype
+				,输入.deptuuid
+				,输入.originactorid
+				,输入.originactortype
+				,输入.origindeptuuid
+				,输入.todoid
+				,输入.agenttype
+				,输入.opertype
+				,输入.opercomment
+				,输入.operdt
+				,输入.target
+				,输入.targetactors
+				,输入.preid
+				,输入.status
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#2、办理记录删除活动库，插入历史库
+	IF 输入.flag = 2
+		--1、查找当前实例所有关联的办理记录
+		SELECT 
+			id						as	ID
+			,pdid					as	PDID
+			,piid					as	PIID
+			,nodename				as	NODENAME
+			,nodepage				as	NODEPAGE
+			,nodetype				as	NODETYPE
+			,signtype				as	SIGNTYPE
+			,taskid					as	TASKID
+			,subtaskid				as	SUBTASKID
+			,createactorid			as	CREATEACTORID
+			,createactortype		as	CREATEACTORTYPE
+			,createdeptuuid			as	CREATEDEPTUUID
+			,createdt				as	CREATEDT
+			,taskcreatedt			as	TASKCREATEDT
+			,actorid				as	ACTORID
+			,actortype				as	ACTORTYPE
+			,deptuuid				as	DEPTUUID
+			,originactorid			as	ORIGINACTORID
+			,originactortype		as	ORIGINACTORTYPE
+			,origindeptuuid			as	ORIGINDEPTUUID
+			,todoid					as	TODOID
+			,agenttype				as	AGENTTYPE
+			,opertype				as	OPERTYPE
+			,opercomment			as	OPERCOMMENT
+			,operdt					as	OPERDT
+			,target					as	TARGET
+			,targetactors			as	TARGETACTORS
+			,preid					as	PREID
+			,status					as	STATUS
+		FROM wdk_wf_record a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		SELECT 
+			count(*)						as	COUNT
+		FROM wdk_wf_record a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		--2、中间变量赋值
+		临时.count								= COUNT
+		
+		临时明细.id								= ID
+		临时明细.pdid							= PDID
+		临时明细.piid							= PIID
+		临时明细.nodename						= NODENAME
+		临时明细.nodepage						= NODEPAGE
+		临时明细.nodetype						= NODETYPE
+		临时明细.signtype						= SIGNTYPE
+		临时明细.taskid							= TASKID 
+		临时明细.subtaskid						= SUBTASKID
+		临时明细.createactorid					= CREATEACTORID
+		临时明细.createactortype					= CREATEACTORTYPE
+		临时明细.createdeptuuid					= CREATEDEPTUUID
+		临时明细.createdt						= CREATEDT
+		临时明细.taskcreatedt					= TASKCREATEDT
+		临时明细.actorid							= ACTORID
+		临时明细.actortype						= ACTORTYPE
+		临时明细.deptuuid						= DEPTUUID
+		临时明细.originactorid					= ORIGINACTORID
+		临时明细.originactortype					= ORIGINACTORTYPE
+		临时明细.origindeptuuid					= ORIGINDEPTUUID
+		临时明细.todoid							= TODOID
+		临时明细.agenttype						= AGENTTYPE
+		临时明细.opertype						= OPERTYPE
+		临时明细.opercomment						= OPERCOMMENT
+		临时明细.operdt							= OPERDT
+		临时明细.target							= TARGET
+		临时明细.targetactors					= TARGETACTORS
+		临时明细.preid							= PREID
+		临时明细.status							= STATUS
+
+		--3、插入历史库
+		LOOP 临时.count
+			INSERT INTO wdk_wf_record_his(
+    			id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,createactorid
+				,createactortype
+				,createdeptuuid
+				,createdt
+				,taskcreatedt
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,todoid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,target
+				,targetactors
+				,preid
+				,status
+				,completedt
+    	) values (
+				临时明细.id
+				,临时明细.pdid
+				,临时明细.piid
+				,临时明细.nodename
+				,临时明细.nodepage
+				,临时明细.nodetype
+				,临时明细.signtype
+				,临时明细.taskid
+				,临时明细.subtaskid
+				,临时明细.createactorid
+				,临时明细.createactortype
+				,临时明细.createdeptuuid
+				,临时明细.createdt
+				,临时明细.taskcreatedt
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.deptuuid
+				,临时明细.originactorid
+				,临时明细.originactortype
+				,临时明细.origindeptuuid
+				,临时明细.todoid
+				,临时明细.agenttype
+				,临时明细.opertype
+				,临时明细.opercomment
+				,临时明细.operdt
+				,临时明细.target
+				,临时明细.targetactors
+				,临时明细.preid
+				,临时明细.status
+				,输入.completedt
+			)
+			ENDINSERT
+		ENDLOOP
+		
+		-4、删除活动库
+		DELETE FROM wdk_wf_record a
+		WHERE a.piid = 输入.piid
+		ENDDELETE
+	ENDIF
+	
+	
+	#202、删除历史库，插入办理记录活动库
+	IF 输入.flag = 202
+		--1、查找当前实例所有关联的办理记录
+		SELECT 
+			id						as	ID
+			,pdid					as	PDID
+			,piid					as	PIID
+			,nodename				as	NODENAME
+			,nodepage				as	NODEPAGE
+			,nodetype				as	NODETYPE
+			,signtype				as	SIGNTYPE
+			,taskid					as	TASKID
+			,subtaskid				as	SUBTASKID
+			,createactorid			as	CREATEACTORID
+			,createactortype		as	CREATEACTORTYPE
+			,createdeptuuid			as	CREATEDEPTUUID
+			,createdt				as	CREATEDT
+			,taskcreatedt			as	TASKCREATEDT
+			,actorid				as	ACTORID
+			,actortype				as	ACTORTYPE
+			,deptuuid				as	DEPTUUID
+			,originactorid			as	ORIGINACTORID
+			,originactortype		as	ORIGINACTORTYPE
+			,origindeptuuid			as	ORIGINDEPTUUID
+			,todoid					as	TODOID
+			,agenttype				as	AGENTTYPE
+			,opertype				as	OPERTYPE
+			,opercomment			as	OPERCOMMENT
+			,operdt					as	OPERDT
+			,target					as	TARGET
+			,targetactors			as	TARGETACTORS
+			,preid					as	PREID
+			,status					as	STATUS
+		FROM wdk_wf_record_his a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		SELECT 
+			count(*)						as	COUNT
+		FROM wdk_wf_record_his a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		--2、中间变量赋值
+		临时.count								= COUNT
+		
+		临时明细.id								= ID
+		临时明细.pdid							= PDID
+		临时明细.piid							= PIID
+		临时明细.nodename						= NODENAME
+		临时明细.nodepage						= NODEPAGE
+		临时明细.nodetype						= NODETYPE
+		临时明细.signtype						= SIGNTYPE
+		临时明细.taskid							= TASKID 
+		临时明细.subtaskid						= SUBTASKID
+		临时明细.createactorid					= CREATEACTORID
+		临时明细.createactortype					= CREATEACTORTYPE
+		临时明细.createdeptuuid					= CREATEDEPTUUID
+		临时明细.createdt						= CREATEDT
+		临时明细.taskcreatedt					= TASKCREATEDT
+		临时明细.actorid							= ACTORID
+		临时明细.actortype						= ACTORTYPE
+		临时明细.deptuuid						= DEPTUUID
+		临时明细.originactorid					= ORIGINACTORID
+		临时明细.originactortype					= ORIGINACTORTYPE
+		临时明细.origindeptuuid					= ORIGINDEPTUUID
+		临时明细.todoid							= TODOID
+		临时明细.agenttype						= AGENTTYPE
+		临时明细.opertype						= OPERTYPE
+		临时明细.opercomment						= OPERCOMMENT
+		临时明细.operdt							= OPERDT
+		临时明细.target							= TARGET
+		临时明细.targetactors					= TARGETACTORS
+		临时明细.preid							= PREID
+		临时明细.status							= STATUS
+
+		--3、插入活动库
+		LOOP 临时.count
+			INSERT INTO wdk_wf_record(
+    			id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,createactorid
+				,createactortype
+				,createdeptuuid
+				,createdt
+				,taskcreatedt
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,todoid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,target
+				,targetactors
+				,preid
+				,status
+    	) values (
+				临时明细.id
+				,临时明细.pdid
+				,临时明细.piid
+				,临时明细.nodename
+				,临时明细.nodepage
+				,临时明细.nodetype
+				,临时明细.signtype
+				,临时明细.taskid
+				,临时明细.subtaskid
+				,临时明细.createactorid
+				,临时明细.createactortype
+				,临时明细.createdeptuuid
+				,临时明细.createdt
+				,临时明细.taskcreatedt
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.deptuuid
+				,临时明细.originactorid
+				,临时明细.originactortype
+				,临时明细.origindeptuuid
+				,临时明细.todoid
+				,临时明细.agenttype
+				,临时明细.opertype
+				,临时明细.opercomment
+				,临时明细.operdt
+				,临时明细.target
+				,临时明细.targetactors
+				,临时明细.preid
+				,临时明细.status
+			)
+			ENDINSERT
+		ENDLOOP
+		
+		-4、删除历史库
+		DELETE FROM wdk_wf_record_his a
+		WHERE a.piid = 输入.piid
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	#3、设置流水记录为被追回，被追回的流水记录不会出现在经办中
+	IF 输入.flag = 3
+		UPDATE wdk_wf_record a SET
+			a.status = 输入.status
+		WHERE 1=1
+			AND a.id = 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	
+	#4、修改流水记录的办理意见
+	IF 输入.flag = 4
+		UPDATE wdk_wf_record a SET
+			a.opercomment = 输入.opercomment
+		WHERE 1=1
+			AND a.id = 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	#5、删除指定流程实例的流水记录
+	IF 输入.flag = 5
+		DELETE FROM wdk_wf_record a
+		WHERE a.piid = 输入.piid
+		ENDDELETE
+	ENDIF
+	
+	#51、删除指定流程实例的流水记录
+	IF 输入.flag = 51
+		DELETE FROM wdk_wf_record a
+		WHERE a.pdid = 输入.pdid
+		ENDDELETE
+	ENDIF
+	
+	#6、操作流水复制
+	IF 输入.flag = 6
+		--1、查找当前实例所有关联的办理记录
+		SELECT 
+			id							as	ID
+			,pdid						as	PDID
+			,piid						as	PIID
+			,createactorid				as	CREATEACTORID	
+			,createactortype			as	CREATEACTORTYPE	
+			,createdt					as	CREATEDT
+			,taskcreatedt				as	TASKCREATEDT	
+			,taskid						as	TASKID
+			,subtaskid					as	SUBTASKID
+			,signtype					as	SIGNTYPE
+			,nodename					as	NODENAME
+			,nodetype					as	NODETYPE
+			,nodepage					as	NODEPAGE
+			,actorid					as	ACTORID
+			,actortype					as	ACTORTYPE
+			,originactorid				as	ORIGINACTORID
+			,originactortype			as	ORIGINACTORTYPE
+			,agenttype					as	AGENTTYPE
+			,tasktype					as	TASKTYPE
+			,operdt						as	OPERDT
+			,opercomment				as	OPERCOMMENT
+			,target						as	TARGET
+			,targetactors				as	TARGETACTORS
+			,forwardtype				as	FORWARDTYPE
+			,preid						as	PREID
+			,status						as	STATUS
+		FROM wdk_wf_record a
+		WHERE 1=1
+			AND a.piid = 输入.oldpiid
+		ENDSELECT
+		
+		SELECT 
+			count(*)						as	COUNT
+		FROM wdk_wf_record a
+		WHERE 1=1
+			AND a.piid = 输入.oldpiid
+		ENDSELECT
+		
+		--2、中间变量赋值
+		临时.count								= 	COUNT
+		
+		临时明细.id								=	ID
+		临时明细.pdid							=	PDID
+		临时明细.piid							=	PIID
+		临时明细.createactorid					=	CREATEACTORID
+		临时明细.createactortype					=	CREATEACTORTYPE
+		临时明细.createdt						=	CREATEDT
+		临时明细.taskcreatedt					=	TASKCREATEDT
+		临时明细.taskid							=	TASKID
+		临时明细.subtaskid						=	SUBTASKID
+		临时明细.signtype						=	SIGNTYPE
+		临时明细.nodename						=	NODENAME
+		临时明细.nodetype						=	NODETYPE
+		临时明细.nodepage						=	NODEPAGE
+		临时明细.actorid							=	ACTORID
+		临时明细.actortype						=	ACTORTYPE
+		临时明细.originactorid					=	ORIGINACTORID
+		临时明细.originactortype					=	ORIGINACTORTYPE
+		临时明细.agenttype						=	AGENTTYPE
+		临时明细.tasktype						=	TASKTYPE
+		临时明细.operdt							=	OPERDT
+		临时明细.opercomment						=	OPERCOMMENT
+		临时明细.target							=	TARGET
+		临时明细.targetactors					=	TARGETACTORS
+		临时明细.forwardtype						=	FORWARDTYPE
+		临时明细.preid							=	PREID
+		临时明细.status							=	STATUS
+		
+		
+			
+		--3、复制并插入
+		
+		LOOP 临时.count
+			临时.id	= WQL.APPUUID()
+			INSERT INTO wdk_wf_record(
+    			id
+				,pdid
+				,piid
+				,createactorid
+				,createactortype
+				,createdt
+				,taskcreatedt
+				,taskid
+				,subtaskid
+				,signtype
+				,nodename
+				,nodetype
+				,nodepage
+				,actorid
+				,actortype
+				,originactorid
+				,originactortype
+				,agenttype
+				,tasktype
+				,operdt
+				,opercomment
+				,target
+				,targetactors
+				,forwardtype
+				,preid
+				,status
+	    	) values (
+				临时.id
+				,输入.newpdid
+				,输入.newpiid
+				,临时明细.createactorid
+				,临时明细.createactortype
+				,临时明细.createdt
+				,临时明细.taskcreatedt
+				,临时明细.taskid
+				,临时明细.subtaskid
+				,临时明细.signtype
+				,临时明细.nodename
+				,临时明细.nodetype
+				,临时明细.nodepage
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.originactorid
+				,临时明细.originactortype
+				,临时明细.agenttype
+				,临时明细.tasktype
+				,临时明细.operdt
+				,临时明细.opercomment
+				,临时明细.target
+				,临时明细.targetactors
+				,临时明细.forwardtype
+				,临时.preid
+				,临时明细.status
+			)
+			ENDINSERT
+			
+			临时.preid = 临时.id
+		ENDLOOP
+		
+		QUERY
+			SELECT
+				distinct 临时.id		as	TASKRECORDID
+			FROM wdk_wf_record
+			ENDSELECT
+		
+		ENDQUERY
+	ENDIF

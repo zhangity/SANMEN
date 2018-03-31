@@ -1,0 +1,56 @@
+[交易说明]
+	交易名：	角色功能数据权限维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、角色功能权限表【UUM_UA_ROLEFUNC】
+						
+	版本经历：	
+				1、v1.0		廖树平		2015/8/27 14:45:04		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--mdf
+	输入.detailcount						TYPEAS	n_sn
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.role_uuid						TYPEAS	s_uuid
+	输入明细.func_uuidarr			TYPEAS	s_uuid
+	输入明细.right_levelarr		TYPEAS	s_diccode
+	输入明细.right_strarr			TYPEAS	s_mname
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.actionflag = "mdf"
+		LOOP 输入.detailcount
+			UPDATE UUM_UA_ROLEFUNC
+			SET right_level = 输入明细.right_levelarr
+					, right_str = 输入明细.right_strarr
+			WHERE role_uuid = 输入.role_uuid
+							AND func_uuid = 输入明细.func_uuidarr
+			ENDUPDATE
+		ENDLOOP
+	ENDIF

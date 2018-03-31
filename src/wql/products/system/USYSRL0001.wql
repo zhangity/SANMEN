@@ -1,0 +1,335 @@
+[交易说明]
+	交易名：		人员信息更新
+	所属模块：	系统功能
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、用户表				【wdk_person】
+	版本经历：	
+				1、v1.0		于猛			2015-01-23 14:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--分管的部门，关联 OM_UUM_ORG
+	输入.manageorgcode				TYPEAS		s_string
+	
+	--是否部门负责人，关联 用户表【OM_UUM_PERSON】
+	输入.isheader					TYPEAS		s_string
+		
+		
+	--人员ID
+	输入.userid						TYPEAS		s_id
+	
+	--登录账号
+	输入.loginname					TYPEAS		s_name
+	
+	--登录密码
+	输入.loginpwd					TYPEAS		s_sstring
+	
+	--姓名
+	输入.username					TYPEAS		s_name
+	
+	--性别主键
+	输入.sexid						TYPEAS		s_code
+	
+	--员工编号
+	输入.employeeid					TYPEAS		s_id
+	
+	--所属组织机构编码
+	输入.orgcode						TYPEAS		s_code
+	
+	--部门内部排序序号
+	输入.ordercode					TYPEAS		s_string
+	
+	--所属岗位
+	输入.postcode					TYPEAS		s_sstring
+	
+	--职位
+	输入.jobname						TYPEAS		s_string
+	
+	--身份证号码
+	输入.idcard						TYPEAS		s_name
+	
+	--内部邮箱
+	输入.intraemail					TYPEAS		s_sstring
+	
+	--外部邮箱
+	输入.interemail					TYPEAS		s_sstring
+	
+	--移动电话
+	输入.mobilephone					TYPEAS		s_phone
+	
+	--虚拟号
+	输入.virtualmobilephone			TYPEAS		s_phone
+	
+	--家庭电话
+	输入.homephone					TYPEAS		s_phone
+	
+	--即时消息账号
+	输入.lcs							TYPEAS		s_sstring
+	
+	--是否激活
+	输入.activated					TYPEAS		s_stype
+	
+	--数据推送时间
+	输入.pushtime					TYPEAS		s_sstring
+	
+	--用户类型
+	输入.accounttypecode				TYPEAS		s_name
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_person(
+    		userid
+			,loginname
+			,loginpwd
+			,username
+			,sexid
+			,employeeid
+			,orgcode
+			,ordercode
+			,idcard
+			,intraemail
+			,interemail
+			,mobilephone
+			,virtualmobilephone
+			,homephone
+			,lcs
+			,activated
+			,pushtime
+			,accounttypecode
+    	) values (
+    		输入.userid
+			,输入.loginname
+			,输入.loginpwd
+			,输入.username
+			,输入.sexid
+			,输入.employeeid
+			,输入.orgcode
+			,输入.ordercode
+			,输入.idcard
+			,输入.intraemail
+			,输入.interemail
+			,输入.mobilephone
+			,输入.virtualmobilephone
+			,输入.homephone
+			,输入.lcs
+			,输入.activated
+			,输入.pushtime
+			,输入.accounttypecode
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#修改人员信息
+	IF 输入.flag = 2
+	
+	ENDIF
+	
+	
+	
+	#删除
+	IF 输入.flag = 3
+		DELETE FROM wdk_person
+		WHERE userid = 输入.userid
+		ENDDELETE
+	ENDIF
+	
+	
+	#修改人员信息，需要关联三张表
+	IF 输入.flag = 4
+		
+		#step1、更新wdk_person表
+		UPDATE wdk_person a SET
+			a.jobname = 输入.jobname
+		WHERE 1=1
+			AND a.userid = 输入.userid
+		ENDUPDATE
+		
+		#step2、更新om_uum_person表
+		
+		#删除当前部门负责人
+		UPDATE OM_UUM_PERSON a SET
+			a.isHeader = ''
+		WHERE 1=1
+			AND a.userOrgId = ( select b.userOrgId from OM_UUM_PERSON b where b.userid = 输入.userid)
+		ENDUPDATE
+		
+		#添加新的部门负责人
+		UPDATE OM_UUM_PERSON a SET
+			a.isHeader = 输入.isheader
+		WHERE 1=1
+			AND a.userId = 输入.userid
+		ENDUPDATE
+		
+		
+		#step3、更新om_uum_org表
+		
+		#删除旧的
+		UPDATE OM_UUM_ORG a SET
+			a.orgLeader = ''
+		WHERE 1=1
+			AND a.orgLeader = 输入.userid
+		ENDUPDATE		
+			
+		#添加新的
+		IF 输入.manageorgcode <> ""
+			UPDATE OM_UUM_ORG a SET
+				a.orgLeader = 输入.userid
+			WHERE 1=1
+				AND a.orgId = 输入.manageorgcode
+			ENDUPDATE			
+		ENDIF
+		
+	ENDIF
+	
+	
+	
+	
+	#用户同步：新增
+	IF 输入.flag = 201
+		INSERT INTO wdk_person(
+    		userid
+			,loginname
+			,loginpwd
+			,username
+			,sexid
+			,employeeid
+			,idcard
+			,intraemail
+			,interemail
+			,mobilephone
+			,virtualmobilephone
+			,homephone
+			,lcs
+			,activated
+			,pushtime
+			,accounttypecode
+    	) values (
+    		输入.userid
+			,输入.loginname
+			,输入.loginpwd
+			,输入.username
+			,输入.sexid
+			,输入.employeeid
+			,输入.idcard
+			,输入.intraemail
+			,输入.interemail
+			,输入.mobilephone
+			,输入.virtualmobilephone
+			,输入.homephone
+			,输入.lcs
+			,输入.activated
+			,输入.pushtime
+			,输入.accounttypecode
+		)
+		ENDINSERT
+	ENDIF
+	
+	#用户同步：修改
+	IF	输入.flag = 202
+		UPDATE wdk_person a SET
+			a.loginname						=	输入.loginname
+			,a.loginpwd						=	输入.loginpwd
+			,a.username						=	输入.username
+			,a.sexid						=	输入.sexid
+			,a.employeeid					=	输入.employeeid
+			,a.idcard						=	输入.idcard
+			,a.intraemail					=	输入.intraemail
+			,a.interemail					=	输入.interemail
+			,a.mobilephone					=	输入.mobilephone
+			,a.virtualmobilephone			=	输入.virtualmobilephone
+			,a.homephone					=	输入.homephone
+			,a.lcs							=	输入.lcs
+			,a.activated					=	输入.activated
+			,a.pushtime						=	输入.pushtime
+			,a.accounttypecode				=	输入.accounttypecode
+		WHERE
+			a.userid						=	输入.userid
+		ENDUPDATE
+	ENDIF
+	
+	#用户同步：删除
+	IF 输入.flag = 203
+		DELETE FROM wdk_person a
+		WHERE a.userid = 输入.userid
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	#用户组织关系同步：新增
+	IF	输入.flag = 301
+		UPDATE wdk_person a SET
+			a.orgcode						=	输入.orgcode
+			,a.ordercode					=	输入.ordercode
+			,a.pushtime						=	输入.pushtime
+		WHERE
+			a.loginname						=	输入.loginname
+		ENDUPDATE
+	ENDIF
+	
+	#用户组织关系同步：修改
+	IF 输入.flag = 302
+		UPDATE wdk_person a SET
+			a.orgcode						=	输入.orgcode
+			,a.ordercode					=	输入.ordercode
+			,a.pushtime						=	输入.pushtime
+		WHERE
+			a.loginname						=	输入.loginname
+		ENDUPDATE
+	ENDIF
+	
+	#用户组织关系同步：删除
+	IF 输入.flag = 303
+		UPDATE wdk_person a SET
+			a.orgcode						=	''
+			,a.ordercode					=	''
+			,a.pushtime						=	输入.pushtime
+		WHERE
+			a.loginname						=	输入.loginname
+		ENDUPDATE
+	
+	ENDIF
+	
+	

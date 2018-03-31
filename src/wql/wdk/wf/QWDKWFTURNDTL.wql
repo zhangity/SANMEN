@@ -1,0 +1,169 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、转办交办任务明细表			【wdk_wf_turn_detail】
+	版本经历：	
+				1、v1.0			于猛			2015-07-03 16:47:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	
+	--流水ID
+	输入.id						TYPEAS	s_id
+	
+	--流程模板ID
+	输入.pdid					TYPEAS	s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS	s_string
+	
+	--原始待办ID
+	输入.origintodoid			TYPEAS	s_id
+	
+	--交办记录
+	输入.turnid					TYPEAS	s_id
+	
+	--对应待办id
+	输入.todoid					TYPEAS	s_id
+	
+	--办理人id
+	输入.actorid					TYPEAS	s_sstring
+	
+	--办理人类型
+	输入.actortype				TYPEAS	s_sstring
+	
+	--办理人部门
+	输入.deptuuid				TYPEAS	s_sstring
+	
+	--是否办理完成
+	输入.iscomplete				TYPEAS	s_stype
+	
+	--办理时间
+	输入.operdt					TYPEAS	s_sstring
+	
+	--办理意见
+	输入.opercomment				TYPEAS	s_string
+	
+	--排序序号
+	输入.ordercode				TYPEAS	s_sstring
+	
+	--创建时间
+	输入.createdt				TYPEAS	s_sstring
+	
+	--状态
+	输入.status					TYPEAS	s_stype
+
+
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				id
+				,pdid
+				,piid
+				,origintodoid
+				,turnid
+				,todoid
+				,actorid
+				,actortype
+				,deptuuid
+				,iscomplete
+				,operdt
+				,opercomment
+				,ordercode
+				,createdt
+				,status
+			FROM wdk_wf_turn_detail  a
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.origintodoid <> ""
+				a.origintodoid = 输入.origintodoid
+			ENDOPTION
+			OPTION 输入.turnid <> ""
+				a.turnid = 输入.turnid
+			ENDOPTION
+			OPTION 输入.todoid <> ""
+				a.todoid = 输入.todoid
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.actortype <> ""
+				a.actortype = 输入.actortype
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.iscomplete <> ""
+				a.iscomplete = 输入.iscomplete
+			ENDOPTION
+			OPTION 输入.operdt <> ""
+				a.operdt = 输入.operdt
+			ENDOPTION
+			OPTION 输入.ordercode <> ""
+				a.ordercode = 输入.ordercode
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDQUERY
+	ENDIF

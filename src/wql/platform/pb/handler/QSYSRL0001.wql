@@ -1,0 +1,373 @@
+[交易说明]
+	交易名：		人员信息查询
+	所属模块：	系统功能
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、用户表				【wdk_person】
+	版本经历：	
+				1、v1.0		于猛			2015-01-23 14:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--人员的数组
+	输入.userids						TYPEAS		s_id
+	
+	
+	--人员ID
+	输入.userid						TYPEAS		s_id
+	
+	--登录账号
+	输入.loginname					TYPEAS		s_name
+	
+	--登录密码
+	输入.loginpwd					TYPEAS		s_sstring
+	
+	--姓名
+	输入.username					TYPEAS		s_name
+	
+	--性别主键
+	输入.sexid						TYPEAS		s_code
+	
+	--员工编号
+	输入.employeeid					TYPEAS		s_id
+	
+	--所属组织机构编码
+	输入.orgcode						TYPEAS		s_code
+	
+	--部门内部排序序号
+	输入.ordercode					TYPEAS		s_string
+	
+	--所属岗位
+	输入.postcode					TYPEAS		s_sstring
+	
+	--职位
+	输入.jobname						TYPEAS		s_string
+	
+	--身份证号码
+	输入.idcard						TYPEAS		s_name
+	
+	--内部邮箱
+	输入.intraemail					TYPEAS		s_sstring
+	
+	--外部邮箱
+	输入.interemail					TYPEAS		s_sstring
+	
+	--移动电话
+	输入.mobilephone					TYPEAS		s_phone
+	
+	--虚拟号
+	输入.virtualmobilephone			TYPEAS		s_phone
+	
+	--家庭电话
+	输入.homephone					TYPEAS		s_phone
+	
+	--即时消息账号
+	输入.lcs							TYPEAS		s_sstring
+	
+	--是否激活
+	输入.activated					TYPEAS		s_stype
+	
+	--数据推送时间
+	输入.pushtime					TYPEAS		s_sstring
+	
+	--用户类型
+	输入.accounttypecode				TYPEAS		s_name
+
+
+	
+	
+	--查询使用
+	输入.parentorgcode				TYPEAS		s_sstring
+	输入.childorgname				TYPEAS		s_sstring
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有人员
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				userid
+				,loginname
+				,loginpwd
+				,username
+				,sexid
+				,employeeid
+				,orgcode
+				,(select orgn_name from wdk_org b where b.orgn_code=a.orgcode) as orgname
+				,ordercode
+				,postcode
+				,jobname
+				,idcard
+				,intraemail
+				,interemail
+				,mobilephone
+				,virtualmobilephone
+				,homephone
+				,lcs
+				,activated
+				,pushtime
+				,accounttypecode
+				,'person' as nodetype
+			FROM wdk_person  a
+			WHERE 1=1
+			OPTION 输入.userid <> ""
+				a.userid = 输入.userid
+			ENDOPTION
+			OPTION 输入.userids <> ""
+				a.userid in (输入.userids)
+			ENDOPTION
+			OPTION 输入.loginname <> ""
+				a.loginname = 输入.loginname
+			ENDOPTION
+			OPTION 输入.loginpwd <> ""
+				a.loginpwd = 输入.loginpwd
+			ENDOPTION
+			OPTION 输入.username <> ""
+				a.username like CONCAT("%" , 输入.username , "%")
+			ENDOPTION
+			OPTION 输入.sexid <> ""
+				a.sexid = 输入.sexid
+			ENDOPTION
+			OPTION 输入.employeeid <> ""
+				a.employeeid = 输入.employeeid
+			ENDOPTION
+			OPTION 输入.orgcode <> ""
+				a.orgcode = 输入.orgcode
+			ENDOPTION
+			OPTION 输入.ordercode <> ""
+				a.ordercode = 输入.ordercode
+			ENDOPTION
+			OPTION 输入.postcode <> ""
+				a.postcode = 输入.postcode
+			ENDOPTION
+			OPTION 输入.jobname <> ""
+				a.jobname = 输入.jobname
+			ENDOPTION
+			OPTION 输入.idcard <> ""
+				a.idcard = 输入.idcard
+			ENDOPTION
+			OPTION 输入.intraemail <> ""
+				a.intraemail = 输入.intraemail
+			ENDOPTION
+			OPTION 输入.interemail <> ""
+				a.interemail = 输入.interemail
+			ENDOPTION
+			OPTION 输入.mobilephone <> ""
+				a.mobilephone = 输入.mobilephone
+			ENDOPTION
+			OPTION 输入.virtualmobilephone <> ""
+				a.virtualmobilephone = 输入.virtualmobilephone
+			ENDOPTION
+			OPTION 输入.homephone <> ""
+				a.homephone = 输入.homephone
+			ENDOPTION
+			OPTION 输入.lcs <> ""
+				a.lcs = 输入.lcs
+			ENDOPTION
+			OPTION 输入.activated <> ""
+				a.activated = 输入.activated
+			ENDOPTION
+			OPTION 输入.pushtime <> ""
+				a.pushtime = 输入.pushtime
+			ENDOPTION
+			OPTION 输入.accounttypecode <> ""
+				a.accounttypecode = 输入.accounttypecode
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#分页查询所有人员
+	IF	输入.flag = 2
+		PAGEQUERY
+			SELECT
+				a.userid
+				,a.loginname
+				,a.loginpwd
+				,a.username
+				,a.sexid
+				,a.employeeid
+				,a.orgcode
+				,(select orgn_name from wdk_org b where b.orgn_code = a.orgcode) as orgname
+				,a.ordercode
+				,a.postcode
+				,(select post_type_name from wdk_post d where d.post_type_code = a.postcode) as postname
+				,a.jobname
+				,a.idcard
+				,a.intraemail
+				,a.interemail
+				,a.mobilephone
+				,a.virtualmobilephone
+				,a.homephone
+				,a.lcs
+				,a.activated
+				,a.pushtime
+				,a.accounttypecode
+				,'person' as nodetype
+				,(select isHeader from OM_UUM_PERSON c where c.userId = a.userid) as isheader
+				,(case (select isHeader from OM_UUM_PERSON c where c.userId = a.userid) when '1' then '是' else '否' end) as isheadername
+		       	,(select f.orgn_code from wdk_org f where f.orgn_code = (select orgId from OM_UUM_ORG g where g.orgLeader = a.userid)) as manageorgcode 
+		       	,(select h.orgn_name from wdk_org h where h.orgn_code = (select orgId from OM_UUM_ORG i where i.orgLeader = a.userid)) as manageorgname 
+			FROM wdk_person  a
+			left join OM_UUM_ORG e on e.orgLeader = a.userid
+			WHERE 1=1
+			OPTION 输入.userid <> ""
+				a.userid = 输入.userid
+			ENDOPTION
+			OPTION 输入.userids <> ""
+				a.userid in (输入.userids)
+			ENDOPTION
+			OPTION 输入.loginname <> ""
+				a.loginname = 输入.loginname
+			ENDOPTION
+			OPTION 输入.loginpwd <> ""
+				a.loginpwd = 输入.loginpwd
+			ENDOPTION
+			OPTION 输入.username <> ""
+				a.username like CONCAT("%" , 输入.username , "%")
+			ENDOPTION
+			OPTION 输入.sexid <> ""
+				a.sexid = 输入.sexid
+			ENDOPTION
+			OPTION 输入.employeeid <> ""
+				a.employeeid = 输入.employeeid
+			ENDOPTION
+			OPTION 输入.orgcode <> ""
+				a.orgcode = 输入.orgcode
+			ENDOPTION
+			OPTION 输入.ordercode <> ""
+				a.ordercode = 输入.ordercode
+			ENDOPTION
+			OPTION 输入.idcard <> ""
+				a.idcard = 输入.idcard
+			ENDOPTION
+			OPTION 输入.intraemail <> ""
+				a.intraemail = 输入.intraemail
+			ENDOPTION
+			OPTION 输入.interemail <> ""
+				a.interemail = 输入.interemail
+			ENDOPTION
+			OPTION 输入.mobilephone <> ""
+				a.mobilephone = 输入.mobilephone
+			ENDOPTION
+			OPTION 输入.virtualmobilephone <> ""
+				a.virtualmobilephone = 输入.virtualmobilephone
+			ENDOPTION
+			OPTION 输入.homephone <> ""
+				a.homephone = 输入.homephone
+			ENDOPTION
+			OPTION 输入.lcs <> ""
+				a.lcs = 输入.lcs
+			ENDOPTION
+			OPTION 输入.activated <> ""
+				a.activated = 输入.activated
+			ENDOPTION
+			OPTION 输入.pushtime <> ""
+				a.pushtime = 输入.pushtime
+			ENDOPTION
+			OPTION 输入.accounttypecode <> ""
+				a.accounttypecode = 输入.accounttypecode
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+	
+	
+	
+	#查询指定部门的负责人ID
+	IF	输入.flag = 3
+		QUERY
+			SELECT
+				a.userid		as userid
+			FROM OM_UUM_PERSON a
+			WHERE 1=1
+				AND a.userorgid		= 输入.orgcode
+				AND a.isheader		= '1'
+			ENDSELECT	
+		ENDQUERY
+	ENDIF
+
+	
+	#查找指定部门下面某一个子部门的部门负责人
+	IF	输入.flag = 4
+		QUERY
+			SELECT
+				a.userid		as userid
+			FROM OM_UUM_PERSON a
+			WHERE 1=1
+				AND a.userorgid		= (
+					select 
+						orgn_code 
+					from wdk_org b
+					where 1=1
+						and b.prnt_orgn_code = 输入.parentorgcode
+						and b.orgn_name like 输入.childorgname
+				)
+				AND a.isheader		= '1'
+			ENDSELECT	
+		ENDQUERY
+	ENDIF
+	
+	
+	#查询部门的分管领导
+	IF	输入.flag = 5
+		QUERY
+			SELECT
+				a.orgleader		as userid
+			FROM OM_UUM_ORG a
+			WHERE 1=1
+				AND a.orgId = 输入.orgcode
+			ENDSELECT
+		ENDQUERY
+	ENDIF

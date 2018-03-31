@@ -1,0 +1,261 @@
+[交易说明]
+	交易名：		取应用功能树
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、应用信息表【UUM_UA_APPLICATION】
+				2、功能信息表【UUM_UA_FUNCTION】
+				3、角色功能权限表【UUM_UA_ROLEFUNC】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/18 11:57:57		创建
+				2、v1.1		廖树平			2015/8/20 9:48:31		修改按上级取下级的写法
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	--输入.flag								TYPEAS		s_type
+	--01:全部 02:有授权
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--上级标识
+	输入.parent_uuid			TYPEAS	s_uuid
+
+	--是否同步
+	输入.issync						TYPEAS	s_bool
+	
+	--角色标识
+	输入.role_uuid				TYPEAS	s_uuid
+	
+	--功能类型
+	输入.func_type				TYPEAS	s_uuid
+	
+	--是否删除
+	输入.sysisdelete			TYPEAS	s_bool
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	UUM_UA_FUNCTREE_T
+	UUM_UA_FUNCTREE_T2
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.func_type									TYPEAS	s_diccode
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	DELETE FROM UUM_UA_FUNCTREE_T
+	WHERE node_uuid IS NULL OR node_uuid IS NOT NULL
+	ENDDELETE
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF 输入.parent_uuid = "" OR 输入.parent_uuid = "-1"
+		IF 输入.issync = "1"
+		 QUERY
+			SELECT DISTINCT a.app_uuid AS node_uuid
+				, a.app_code AS node_code
+				, a.app_name AS node_name
+				, '-1' AS parent_uuid
+				, a.display_order
+				, 1 AS typeorder
+			FROM UUM_UA_APPLICATION a
+				LEFT JOIN UUM_UA_FUNCTION b ON a.app_uuid = b.app_uuid
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+			WHERE a.sysisdelete = '0'
+			OPTION 输入.role_uuid <> "" AND 输入.role_uuid <> "-1"
+					c.role_uuid = 输入.role_uuid
+			ENDOPTION
+			UNION ALL
+			SELECT DISTINCT b.func_uuid AS node_uuid
+				, b.func_code AS node_code
+				, b.func_name AS node_name
+				, CASE b.func_type WHEN 'U121' THEN 'b.app_uuid' ELSE b.parent_uuid END AS parent_uuid
+				, b.display_order
+				, 2 AS typeorder
+			FROM UUM_UA_FUNCTION b
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+			WHERE 1 = 1
+			OPTION 输入.sysisdelete <> ""
+				b.sysisdelete = 输入.sysisdelete
+			ENDOPTION
+			OPTION 输入.func_type <> ""
+					b.func_type <= 输入.func_type
+			ENDOPTION
+			OPTION 输入.role_uuid <> "" AND 输入.role_uuid <> "-1"
+					c.role_uuid = 输入.role_uuid
+			ENDOPTION
+			ORDER BY typeorder, display_order
+			ENDSELECT
+		 ENDQUERY
+		ELSE
+		 QUERY
+			SELECT DISTINCT a.app_uuid AS node_uuid
+				, a.app_code AS node_code
+				, a.app_name AS node_name
+				, '-1' AS parent_uuid
+				, a.display_order
+				, 1 AS typeorder
+			FROM UUM_UA_APPLICATION a
+				LEFT JOIN UUM_UA_FUNCTION b ON a.app_uuid = b.app_uuid
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+			WHERE a.sysisdelete = '0'
+			OPTION 输入.role_uuid <> "" AND 输入.role_uuid <> "-1"
+					c.role_uuid = 输入.role_uuid
+			ENDOPTION
+			ORDER BY a.display_order
+			ENDSELECT
+		 ENDQUERY
+		ENDIF
+	ELSE
+		IF 输入.issync = "1"
+		 INSERT INTO UUM_UA_FUNCTREE_T(
+		 		node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type)
+		 SELECT DISTINCT b.func_uuid AS node_uuid
+				, b.func_code AS node_code
+				, b.func_name AS node_name
+				, CASE b.func_type WHEN 'U121' THEN b.app_uuid ELSE b.parent_uuid END AS parent_uuid
+				, b.display_order
+				, 1 AS typeorder
+				, b.func_type
+		 FROM UUM_UA_FUNCTION b
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+		 WHERE  1 = 1
+		 				AND ( 输入.sysisdelete = '' OR 输入.sysisdelete <> '' AND b.sysisdelete = 输入.sysisdelete )
+		 				AND ( b.app_uuid = 输入.parent_uuid OR b.parent_uuid = 输入.parent_uuid )
+		 				AND ( 输入.func_type = '' OR 输入.func_type <> '' AND b.func_type <= 输入.func_type )
+						AND ( 输入.role_uuid = '' OR 输入.role_uuid = '-1'
+							OR 输入.role_uuid <> '' AND 输入.role_uuid <> '-1' AND c.role_uuid = 输入.role_uuid )
+		 ENDINSERT
+		 
+		INSERT INTO UUM_UA_FUNCTREE_T2(
+		 		node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type)
+			select 
+				node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type
+				from UUM_UA_FUNCTREE_T
+		ENDINSERT
+	
+	LOOP 10
+		 	SELECT MAX(d.node_type) AS NTYPE
+		 	FROM UUM_UA_FUNCTREE_T d
+		 	ENDSELECT
+		 	临时.func_type = NTYPE
+		 	INSERT INTO UUM_UA_FUNCTREE_T(
+		 		node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type)
+		 	SELECT DISTINCT b.func_uuid AS node_uuid
+				, b.func_code AS node_code
+				, b.func_name AS node_name
+				, CASE b.func_type WHEN 'U121' THEN b.app_uuid ELSE b.parent_uuid END AS parent_uuid
+				, b.display_order
+				, d.node_level + 1 AS typeorder
+				, b.func_type
+			FROM UUM_UA_FUNCTION b
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+				INNER JOIN UUM_UA_FUNCTREE_T2 d ON b.parent_uuid = d.node_uuid
+			WHERE d.node_type = 临时.func_type
+						AND ( 输入.sysisdelete = '' OR 输入.sysisdelete <> '' AND b.sysisdelete = 输入.sysisdelete )
+						AND ( 输入.func_type = '' OR 输入.func_type <> '' AND b.func_type <= 输入.func_type )
+						AND ( 输入.role_uuid = '' OR 输入.role_uuid = '-1'
+							OR 输入.role_uuid <> '' AND 输入.role_uuid <> '-1' AND c.role_uuid = 输入.role_uuid )
+		 	ENDINSERT
+		 ENDLOOP
+		 
+		 QUERY
+			SELECT DISTINCT d.node_uuid
+				, d.node_name
+				, d.node_code
+				, d.parent_uuid
+				, d.display_order
+				, d.node_level AS typeorder
+			FROM UUM_UA_FUNCTREE_T d
+			ENDSELECT			
+		 ENDQUERY	
+		ELSE
+		 QUERY
+			SELECT DISTINCT b.func_uuid AS node_uuid
+				, b.func_code AS node_code
+				, b.func_name AS node_name
+				, CASE b.func_type WHEN 'U121' THEN b.app_uuid ELSE b.parent_uuid END AS parent_uuid
+				, b.display_order
+				, 2 AS typeorder
+			FROM UUM_UA_FUNCTION b
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+			WHERE b.app_uuid = 输入.parent_uuid AND b.parent_uuid = '-1'
+			OPTION 输入.sysisdelete <> ""
+				b.sysisdelete = 输入.sysisdelete
+			ENDOPTION
+			OPTION 输入.func_type <> ""
+					b.func_type <= 输入.func_type
+			ENDOPTION
+			OPTION 输入.role_uuid <> "" AND 输入.role_uuid <> "-1"
+					c.role_uuid = 输入.role_uuid
+			ENDOPTION
+			UNION ALL
+			SELECT DISTINCT b.func_uuid AS node_uuid
+				, b.func_code AS node_code
+				, b.func_name AS node_name
+				, CASE b.func_type WHEN 'U121' THEN b.app_uuid ELSE b.parent_uuid END AS parent_uuid
+				, b.display_order
+				, 2 AS typeorder
+			FROM UUM_UA_FUNCTION b
+				LEFT JOIN UUM_UA_ROLEFUNC c ON b.func_uuid = c.func_uuid
+			WHERE b.parent_uuid = 输入.parent_uuid
+			OPTION 输入.sysisdelete <> ""
+				b.sysisdelete = 输入.sysisdelete
+			ENDOPTION
+			OPTION 输入.func_type <> ""
+					b.func_type <= 输入.func_type
+			ENDOPTION
+			OPTION 输入.role_uuid <> "" AND 输入.role_uuid <> "-1"
+					c.role_uuid = 输入.role_uuid
+			ENDOPTION
+			ORDER BY typeorder, display_order
+			ENDSELECT
+		 ENDQUERY
+		ENDIF
+	ENDIF
+	
+	#对操作符进行判断，如果没有输入则提示错误

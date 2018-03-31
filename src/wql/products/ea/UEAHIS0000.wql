@@ -1,0 +1,84 @@
+[交易说明]
+	交易名： 医生开完检查单后，把检查申请单的数据提交到HIS系统数据库中，
+	所属模块：	医生开检查单提交
+	功能简述：	这里采用直接插入HIS系统数据库的方式实现数据同步
+	版权所有：	
+	表引用：		
+			
+	版本经历：	
+				1、v1.0		俞斌		2016/12/22 15:32:08		创建
+
+[数据库]
+	HIS
+	
+[IO定义]
+	输入.BMC					TYPEAS		s_id
+	输入.step				TYPEAS		n_integer
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.DQZ					TYPEAS		n_integer
+	
+	临时.OLDVAL					TYPEAS		n_integer
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	IF 输入.BMC = ""
+		输入.BMC = "MS_YJ01"
+	ENDIF
+	
+	IF 输入.step  = ""
+		输入.step = 1
+	ENDIF
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	SELECT COUNT(*)			AS		COUNT
+		from 
+		GY_IDENTITY_MS 
+		where BMC = 输入.BMC
+	ENDSELECT
+	
+	临时.DQZ				=	COUNT
+	
+	IF 临时.DQZ = 0
+		  INSERT 
+		  	  INTO 
+			  GY_IDENTITY_MS 
+			  (BMC,DQZ,CSZ,DZZ) 
+			  values (输入.BMC,输入.step,1,1)
+		  ENDINSERT
+	ELSE
+		SELECT
+			DQZ AS OLDVAL
+			from GY_IDENTITY_MS 
+			where BMC = 输入.BMC
+		ENDSELECT
+		临时.OLDVAL			 =  OLDVAL + 输入.step
+		 UPDATE 
+			 GY_IDENTITY_MS 
+			 set DQZ=临时.OLDVAL
+			 where BMC = 输入.BMC
+		 ENDUPDATE
+	ENDIF
+	
+	QUERY
+		SELECT
+			DQZ 
+			from GY_IDENTITY_MS 
+			where BMC = 输入.BMC
+		ENDSELECT
+	ENDQUERY
+	
+	

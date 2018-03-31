@@ -1,0 +1,129 @@
+[交易说明]
+	交易名： 医生开完检查单后，把检查申请单的数据提交到HIS系统数据库中，
+	所属模块：	医生开检查单提交
+	功能简述：	这里采用直接插入HIS系统数据库的方式实现数据同步
+	版权所有：	
+	表引用：		
+			
+	版本经历：	
+				1、v1.0		俞斌		2016/12/22 15:32:08		创建
+
+[数据库]
+	HIS
+	
+[IO定义]
+		#医技序号
+		输入.YJXH			TYPEAS			n_integer
+		#病人ID
+		输入.BRID			TYPEAS			n_integer
+		#病人姓名
+		输入.BRXM			TYPEAS			s_seq
+		#开单日期
+		输入.KDRQ			TYPEAS			s_timestamp
+		#科室代码
+		输入.KSDM			TYPEAS			n_integer
+		#医生代码
+		输入.YSDM			TYPEAS			s_code
+		#就诊序号
+		输入.JZXH			TYPEAS			n_integer
+		#规定病种项目
+		输入.GDBZXM			TYPEAS			s_name
+		
+		#明细表的数量
+		输入.dtl_count		TYPEAS	 		n_sn
+		
+		#识别序号select DQZ from GY_IDENTITY_MS where BMC='MS_YJ02'
+		输入明细.SBXH		TYPEAS	 		n_integer
+		#医技序号关联MS_YJ01.YJXH
+		#医疗项目序号select * from gy_ylsf where FYXH in ('20171')
+		输入明细.YLXH		TYPEAS	 		n_sn
+		#
+		输入明细.XMLX		TYPEAS	 		n_sn
+		#
+		输入明细.YJZX		TYPEAS	 		n_sn
+		#医疗单价
+		输入明细.YLDJ		TYPEAS	 		n_integer
+		#医疗数量
+		输入明细.YLSL		TYPEAS	 		n_sn
+		#合计金额
+		输入明细.HJJE		TYPEAS	 		n_integer
+		#费用归别，select * from GY_SFXM
+		输入明细.FYGB		TYPEAS	 		n_sn
+		#自费比例
+		输入明细.ZFBL		TYPEAS	 		n_sn
+		#是否自费
+		输入.ZFSY			TYPEAS	 		n_sn
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	INSERT 
+		INTO MS_YJ01(
+			YJXH
+			,BRID
+			,BRXM
+			,KDRQ
+			,KSDM
+			,YSDM
+			,JZXH
+			,GDBZXM
+		)
+		VALUES(
+			输入.YJXH
+			,输入.BRID
+			,输入.BRXM
+			,输入.KDRQ
+			,输入.KSDM
+			,输入.YSDM
+			,输入.JZXH
+			,输入.GDBZXM
+		)
+	ENDINSERT
+	
+	LOOP 输入.dtl_count
+	  INSERT INTO MS_YJ02 (SBXH
+		,YJXH
+		,YLXH
+		,XMLX
+		,YJZX
+		,YLDJ
+		,YLSL
+		,HJJE
+		,FYGB
+		,ZFBL
+		,ZFSY)
+	VALUES
+	    (输入明细.SBXH
+		,输入.YJXH
+		,输入明细.YLXH
+		,输入明细.XMLX
+		,输入明细.YJZX
+		,输入明细.YLDJ
+		,输入明细.YLSL
+		,输入明细.HJJE
+		,输入明细.FYGB
+		,输入明细.ZFBL
+		,输入.ZFSY)
+	  ENDINSERT
+	ENDLOOP
+	
+	

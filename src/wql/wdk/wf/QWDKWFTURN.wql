@@ -1,0 +1,197 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、转办交办记录表			【wdk_wf_turn】
+	版本经历：	
+				1、v1.0			于猛			2015-07-03 16:47:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	
+	--流水ID
+	输入.id						TYPEAS s_id
+	
+	--原始待办记录
+	输入.todoid					TYPEAS s_string
+	
+	--流程模板ID
+	输入.pdid					TYPEAS s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS s_string
+	
+	--当前处理环节
+	输入.nodename				TYPEAS s_string
+	
+	--节点对应页面
+	输入.nodepage				TYPEAS s_string
+	
+	--环节标题
+	输入.nodetitle				TYPEAS s_string
+	
+	--当前节点类型
+	输入.nodetype				TYPEAS s_sstring
+	
+	--会签类型
+	输入.signtype				TYPEAS s_stype
+	
+	--当前处理任务ID
+	输入.taskid					TYPEAS s_string
+	
+	--子任务ID
+	输入.subtaskid				TYPEAS s_string
+	
+	--交办人id
+	输入.actorid					TYPEAS s_sstring
+	
+	--交办人类型
+	输入.actortype				TYPEAS s_sstring
+	
+	--交办人部门
+	输入.deptuuid				TYPEAS s_sstring
+	
+	--交办时间
+	输入.createdt				TYPEAS s_sstring
+	
+	--交办原因
+	输入.remark					TYPEAS s_string
+	
+	--交办类型
+	输入.turntype				TYPEAS s_sstring
+	
+	--处理方式
+	输入.opertype				TYPEAS s_stype
+	
+	--办结时间
+	输入.operdt					TYPEAS s_sstring
+	
+	--当前交办状态
+	输入.status					TYPEAS s_stype
+
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				id
+				,todoid
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetitle
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,actorid
+				,actortype
+				,deptuuid
+				,createdt
+				,remark
+				,turntype
+				,opertype
+				,operdt
+				,status
+			FROM wdk_wf_turn  a
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.todoid <> ""
+				a.todoid = 输入.todoid
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.nodepage <> ""
+				a.nodepage = 输入.nodepage
+			ENDOPTION
+			OPTION 输入.nodetype <> ""
+				a.nodetype = 输入.nodetype
+			ENDOPTION
+			OPTION 输入.nodetitle <> ""
+				a.nodetitle LIKE CONCAT("%" , 输入.nodetitle , "%" )
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.turntype <> ""
+				a.turntype = 输入.turntype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.operdt <> ""
+				a.operdt = 输入.operdt
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDQUERY
+	ENDIF

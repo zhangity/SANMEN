@@ -1,0 +1,136 @@
+[交易说明]
+	交易名： 查询医生常用的检查项目列表
+	所属模块：	基础数据维护
+	功能简述：	
+	版权所有：	xxxx
+	表引用：		
+			检查单表【EA_BU_Exam】										
+			
+	版本经历：	
+				1、v1.0		俞斌			2017/1/6 15:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+[IO定义]
+	#操作符 
+	输入.flag					TYPEAS		s_string
+	
+	
+	--医技科室的部门ID
+	输入.dept_id					TYPEAS		s_id
+	
+	#开单的开始时间
+	输入.start_dt				TYPEAS		s_datetime
+	
+	#开单的结束时间
+	输入.end_dt					TYPEAS		s_datetime
+	
+	#检查类型ID
+	输入.examtype_id				TYPEAS		s_id
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#
+	IF 输入.flag = 1
+		QUERY
+			SELECT A.EXAMTYPE_ID
+					,(select C.examtype_name  from EA_BI_EXAMTYPE C where C.EXAMTYPE_ID = A.EXAMTYPE_ID)as  EXAMTYPE_IDNAME
+			       ,COUNT(A.EXAMTYPE_ID) AS EXAM_COUNT
+			       ,SUM(B.PACKAGE_MONEY) AS PACKAGE_MONEY
+			  FROM V_EA_BU_APPOINTMENT A
+			 INNER JOIN EA_BI_EXAMITEM B
+			    ON B.ITEM_ID = A.EXAMITEM_ID
+			 WHERE A.EXAMTYPE_ID IS NOT NULL
+			 OPTION 输入.dept_id	 <> ""
+			 	A.EXAMTYPE_ID IN (select t.examtype_id from EA_BI_DepartMentExamType t where t.dept_id = 输入.dept_id)
+			 ENDOPTION
+			 OPTION 输入.start_dt <> ""
+			 	a.appt_date >= 输入.start_dt
+			 ENDOPTION
+			 OPTION 输入.end_dt	 <> ""
+			 	a.appt_date <= 输入.end_dt
+			 ENDOPTION
+			 GROUP BY A.EXAMTYPE_ID
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#
+	IF 输入.flag = 2
+		QUERY
+			SELECT B.EXAMCATE_ID
+			,(select C.examcate_name  from EA_BI_ExamCategory C where C.examcate_id = B.EXAMCATE_ID)as  EXAMCATE_IDNAME
+		       ,COUNT(A.EXAMTYPE_ID) AS EXAM_COUNT
+		       ,SUM(B.PACKAGE_MONEY) AS PACKAGE_MONEY
+			  FROM V_EA_BU_APPOINTMENT A
+			  LEFT JOIN EA_BI_EXAMITEM B
+			    ON B.ITEM_ID = A.EXAMITEM_ID
+			 WHERE A.EXAMTYPE_ID IS NOT NULL
+			 OPTION 输入.examtype_id <> ""
+			 	B.EXAMTYPE_ID = 输入.examtype_id
+			 ENDOPTION
+			 OPTION 输入.start_dt <> ""
+			 	a.appt_date >= 输入.start_dt
+			 ENDOPTION
+			 OPTION 输入.end_dt	 <> ""
+			 	a.appt_date <= 输入.end_dt
+			 ENDOPTION
+			 GROUP BY B.EXAMCATE_ID
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	IF 输入.flag = 3
+		QUERY
+			SELECT t.examtype_id
+			,t.examtype_name
+			,(select count(1)  FROM V_EA_BU_APPOINTMENT A
+			 INNER JOIN EA_BI_EXAMITEM B
+			    ON B.ITEM_ID = A.EXAMITEM_ID
+			 WHERE A.EXAMTYPE_ID IS NOT NULL
+			 AND A.EXAMTYPE_ID = t.examtype_id
+			 OPTION 输入.dept_id	 <> ""
+			 	A.EXAMTYPE_ID IN (select y.examtype_id from EA_BI_DepartMentExamType y where y.dept_id = 输入.dept_id)
+			 ENDOPTION
+			 OPTION 输入.start_dt <> ""
+			 	a.appt_date >= 输入.start_dt
+			 ENDOPTION
+			 OPTION 输入.end_dt	 <> ""
+			 	a.appt_date <= 输入.end_dt
+			 ENDOPTION
+			 ) as count
+			 FROM EA_BI_EXAMTYPE T
+			 WHERE 1=1
+			 OPTION 输入.dept_id	 <> ""
+			 	t.examtype_id IN (select y.examtype_id from EA_BI_DepartMentExamType y where y.dept_id = 输入.dept_id)
+			 ENDOPTION
+			 ENDSELECT
+		ENDQUERY
+	ENDIF

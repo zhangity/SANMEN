@@ -1,0 +1,755 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、任务待办表				【wdk_wf_todo】
+	版本经历：	
+				1、v1.0			于猛			2015-06-18 16:47:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	
+	
+	
+	--待办ID
+	输入.id							TYPEAS	s_id
+	
+	--流程模板ID
+	输入.pdid						TYPEAS	s_sstring
+	
+	--流程实例ID
+	输入.piid						TYPEAS	s_string
+	
+	--当前处理节点名称
+	输入.nodename					TYPEAS	s_sstring
+	
+	--不包含的节点名称
+	输入.notnodename					TYPEAS	f_sstring
+	
+	--节点对应页面
+	输入.nodepage					TYPEAS	s_string
+	
+	--环节标题
+	输入.nodetitle					TYPEAS	s_sstring
+	
+	--当前节点类型
+	输入.nodetype					TYPEAS	s_sstring
+	
+	--会签类型
+	输入.signtype					TYPEAS	s_stype
+	
+	--当前处理任务ID
+	输入.taskid						TYPEAS	s_string
+	
+	--子任务ID
+	输入.subtaskid					TYPEAS	s_string
+	
+	--待办标题
+	输入.title						TYPEAS	s_string
+	
+	--办理者id
+	输入.actorid						TYPEAS	s_sstring
+	
+	--办理者类型
+	输入.actortype					TYPEAS	s_stype
+	
+	--办理者部门
+	输入.deptuuid					TYPEAS	s_id
+	
+	--原始办理者id
+	输入.originactorid				TYPEAS	s_sstring
+	
+	--原始办理者类型
+	输入.originactortype				TYPEAS	s_stype
+	
+	--原始办理者部门
+	输入.origindeptuuid				TYPEAS	s_id
+	
+	--代理类型
+	输入.agenttype					TYPEAS	s_sstring
+	
+	--操作类型
+	输入.opertype					TYPEAS	s_stype
+	
+	--办理意见
+	输入.opercomment					TYPEAS	s_string
+	
+	--办理时间
+	输入.operdt						TYPEAS	s_sstring
+	
+	--超期时间
+	输入.overduetime					TYPEAS	s_sstring
+	
+	--任务领取人
+	输入.lockactorid					TYPEAS	s_id
+	
+	--任务领取人类型
+	输入.lockactortype				TYPEAS	s_stype
+	
+	--任务领取人部门
+	输入.lockdeptuuid				TYPEAS	s_id
+	
+	--任务领取时间
+	输入.lockdt						TYPEAS	s_sstring
+	
+	--待办发送人
+	输入.sendactorid					TYPEAS	s_id
+	
+	--待办发送人类型
+	输入.sendactortype				TYPEAS	s_stype
+	
+	--待办发送人部门
+	输入.senddeptuuid				TYPEAS	s_id
+	
+	--待办发送时间
+	输入.senddt						TYPEAS	s_sstring
+	
+	--状态
+	输入.status						TYPEAS	s_stype
+	输入.allstatus					TYPEAS	n_stype
+	
+	--待办类型
+	输入.todotype					TYPEAS	s_stype
+	
+	--抄送状态
+	输入.ccstatus					TYPEAS	s_stype
+	输入.allccstatus					TYPEAS	n_stype
+	
+	--转办ID
+	输入.turnid						TYPEAS	s_id
+	
+	--机构ID
+	输入.unitid						TYPEAS	s_id
+	
+	--前一待办记录
+	输入.pretodoid					TYPEAS	s_id
+	
+	--办理到期日期
+	输入.limitdt						TYPEAS	s_sstring
+	
+	--到期距离天数
+	输入.limittime					TYPEAS	s_sstring
+	
+	--黄牌警告到期日期
+	输入.warnyellowdt				TYPEAS	s_sstring
+	
+	--黄牌警告距离天数
+	输入.warnyellowtime				TYPEAS	s_sstring
+	
+	--红牌警告到期日期
+	输入.warnreddt					TYPEAS	s_sstring
+	
+	--红牌警告距离天数
+	输入.warnredtime					TYPEAS	s_sstring
+
+	--创建时间
+	输入.createdt					TYPEAS	s_sstring
+	
+	--流程办结时间
+	输入.completedt					TYPEAS	s_sstring
+	
+	--是否挂起
+	输入.issuspend					TYPEAS	s_stype
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有
+	IF	输入.flag = 1
+		PAGEQUERY
+			SELECT
+				a.id
+				,a.pdid
+				,a.piid
+				,a.nodename
+				,a.nodepage
+				,a.nodetitle
+				,a.nodetype
+				,a.signtype
+				,a.taskid
+				,a.subtaskid
+				,a.title
+				,a.actorid
+				,a.actortype
+				,a.deptuuid
+				,a.originactorid
+				,a.originactortype
+				,a.origindeptuuid
+				,a.agenttype
+				,a.opertype
+				,a.opercomment
+				,a.operdt
+				,a.overduetime
+				,a.lockactorid
+				,a.lockactortype
+				,a.lockdeptuuid
+				,a.lockdt
+				,a.sendactorid
+				,a.sendactortype
+				,a.senddeptuuid
+				,a.senddt
+				,a.status
+				,case a.status when '0' then '待办'
+				 			 when '1' then '经办'
+				 			 when '2' then '被办理'
+				 			 end as statusname
+				,a.todotype
+				,a.turnid
+				,a.unitid
+				,a.pretodoid
+				,a.limitdt
+				,a.limittime
+				,a.warnyellowdt
+				,a.warnyellowtime
+				,a.warnreddt
+				,a.warnredtime
+				,a.createdt
+				,b.isdeputesign as isdeputesign
+				,a.issuspend
+				,a.app_uuid
+				,a.todosort
+			FROM wdk_wf_todo  a
+			LEFT JOIN wdk_wf_depute b on b.id = a.depute_id
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.notnodename <> ""
+				a.nodename NOT IN ( 输入.notnodename )
+			ENDOPTION
+			OPTION 输入.title <> ""
+				a.title LIKE CONCAT("%" , 输入.title , "%" )
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			OPTION 输入.origindeptuuid <> ""
+				a.origindeptuuid = 输入.origindeptuuid
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.lockactorid <> ""
+				a.lockactorid = 输入.lockactorid
+			ENDOPTION
+			OPTION 输入.sendactorid <> ""
+				a.sendactorid = 输入.sendactorid
+			ENDOPTION
+			OPTION 输入.pretodoid <> ""
+				a.pretodoid = 输入.pretodoid
+			ENDOPTION
+			OPTION 输入.unitid <> ""
+				a.unitid = 输入.unitid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.todotype <> ""
+				a.todotype = 输入.todotype
+			ENDOPTION
+			OPTION 输入.ccstatus <> ""
+				a.ccstatus = 输入.ccstatus
+			ENDOPTION
+			OPTION 输入.allccstatus <> ""
+				a.ccstatus in ( 输入.allccstatus )
+			ENDOPTION
+			OPTION 输入.turnid <> ""
+				a.turnid = 输入.turnid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.issuspend <> ""
+				a.issuspend = 输入.issuspend
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+
+	
+	
+	#查询待办记录
+	IF	输入.flag = 201
+		QUERY
+			SELECT
+				a.id
+				,a.pdid
+				,a.piid
+				,a.nodename
+				,a.nodepage
+				,a.nodetitle
+				,a.nodetype
+				,a.signtype
+				,a.taskid
+				,a.subtaskid
+				,a.title
+				,a.actorid
+				,a.actortype
+				,a.deptuuid
+				,a.originactorid
+				,a.originactortype
+				,a.origindeptuuid
+				,a.agenttype
+				,a.opertype
+				,a.opercomment
+				,a.operdt
+				,a.overduetime
+				,a.lockactorid
+				,a.lockactortype
+				,a.lockdeptuuid
+				,a.lockdt
+				,a.sendactorid
+				,a.sendactortype
+				,a.senddeptuuid
+				,a.senddt
+				,a.status
+				,case a.status when '0' then '待办'
+				 			 when '1' then '经办'
+				 			 when '2' then '被办理'
+				 			 else ''
+				 			 end as statusname
+				,a.todotype
+				,a.ccstatus
+				,a.turnid
+				,a.unitid
+				,a.pretodoid
+				,a.limitdt
+				,a.limittime
+				,a.warnyellowdt
+				,a.warnyellowtime
+				,a.warnreddt
+				,a.warnredtime
+				,a.createdt
+				,b.isdeputesign as isdeputesign
+				,a.issuspend
+				,a.app_uuid
+				,a.todosort
+			FROM wdk_wf_todo  a
+			LEFT JOIN wdk_wf_depute b on b.id = a.depute_id
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.notnodename <> ""
+				a.nodename NOT IN ( 输入.notnodename )
+			ENDOPTION
+			OPTION 输入.title <> ""
+				a.title LIKE CONCAT("%" , 输入.title , "%" )
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			OPTION 输入.origindeptuuid <> ""
+				a.origindeptuuid = 输入.origindeptuuid
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.lockactorid <> ""
+				a.lockactorid = 输入.lockactorid
+			ENDOPTION
+			OPTION 输入.sendactorid <> ""
+				a.sendactorid = 输入.sendactorid
+			ENDOPTION
+			OPTION 输入.pretodoid <> ""
+				a.pretodoid = 输入.pretodoid
+			ENDOPTION
+			OPTION 输入.unitid <> ""
+				a.unitid = 输入.unitid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.todotype <> ""
+				a.todotype = 输入.todotype
+			ENDOPTION
+			OPTION 输入.ccstatus <> ""
+				a.ccstatus = 输入.ccstatus
+			ENDOPTION
+			OPTION 输入.allccstatus <> ""
+				a.ccstatus in ( 输入.allccstatus )
+			ENDOPTION
+			OPTION 输入.turnid <> ""
+				a.turnid = 输入.turnid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.issuspend <> ""
+				a.issuspend = 输入.issuspend
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	#查询历史待办表
+	IF	输入.flag = 202
+		QUERY
+			SELECT
+				a.id
+				,a.pdid
+				,a.piid
+				,a.nodename
+				,a.nodepage
+				,a.nodetitle
+				,a.nodetype
+				,a.signtype
+				,a.taskid
+				,a.subtaskid
+				,a.title
+				,a.actorid
+				,a.actortype
+				,a.deptuuid
+				,a.originactorid
+				,a.originactortype
+				,a.origindeptuuid
+				,a.agenttype
+				,a.opertype
+				,a.opercomment
+				,a.operdt
+				,a.overduetime
+				,a.lockactorid
+				,a.lockactortype
+				,a.lockdeptuuid
+				,a.lockdt
+				,a.sendactorid
+				,a.sendactortype
+				,a.senddeptuuid
+				,a.senddt
+				,a.status
+				,case a.status when '0' then '待办'
+				 			 when '1' then '经办'
+				 			 when '2' then '被办理'
+				 			 else ''
+				 			 end as statusname
+				,a.todotype
+				,a.ccstatus
+				,a.turnid
+				,a.unitid
+				,a.pretodoid
+				,a.limitdt
+				,a.limittime
+				,a.warnyellowdt
+				,a.warnyellowtime
+				,a.warnreddt
+				,a.warnredtime
+				,a.createdt
+				,a.completedt
+				,b.isdeputesign as isdeputesign
+				,a.issuspend
+				,a.app_uuid
+				,a.todosort
+			FROM wdk_wf_todo_his  a
+			LEFT JOIN wdk_wf_depute b on b.id = a.depute_id
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.title <> ""
+				a.title LIKE CONCAT("%" , 输入.title , "%" )
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			OPTION 输入.origindeptuuid <> ""
+				a.origindeptuuid = 输入.origindeptuuid
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.lockactorid <> ""
+				a.lockactorid = 输入.lockactorid
+			ENDOPTION
+			OPTION 输入.sendactorid <> ""
+				a.sendactorid = 输入.sendactorid
+			ENDOPTION
+			OPTION 输入.pretodoid <> ""
+				a.pretodoid = 输入.pretodoid
+			ENDOPTION
+			OPTION 输入.unitid <> ""
+				a.unitid = 输入.unitid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.todotype <> ""
+				a.todotype = 输入.todotype
+			ENDOPTION
+			OPTION 输入.ccstatus <> ""
+				a.ccstatus = 输入.ccstatus
+			ENDOPTION
+			OPTION 输入.turnid <> ""
+				a.turnid = 输入.turnid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.issuspend <> ""
+				a.issuspend = 输入.issuspend
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	
+	
+	
+	
+	
+	#查询个人待办以及委托待办
+	IF	输入.flag = 301
+		PAGEQUERY
+			SELECT
+				a.id
+				,a.pdid
+				,a.piid
+				,a.nodename
+				,a.nodepage
+				,a.nodetitle
+				,a.nodetype
+				,a.signtype
+				,a.taskid
+				,a.subtaskid
+				,a.title
+				,a.actorid
+				,a.actortype
+				,a.deptuuid
+				,a.originactorid
+				,a.originactortype
+				,a.origindeptuuid
+				,a.agenttype
+				,a.opertype
+				,a.opercomment
+				,a.operdt
+				,a.overduetime
+				,a.lockactorid
+				,a.lockactortype
+				,a.lockdeptuuid
+				,a.lockdt
+				,a.sendactorid
+				,a.sendactortype
+				,a.senddeptuuid
+				,a.senddt
+				,a.status
+				,case a.status when '0' then '待办'
+				 			 when '1' then '经办'
+				 			 when '2' then '被办理'
+				 			 end as statusname
+				,a.todotype
+				,a.ccstatus
+				,a.turnid
+				,a.unitid
+				,a.pretodoid
+				,a.limitdt
+				,a.limittime
+				,a.warnyellowdt
+				,a.warnyellowtime
+				,a.warnreddt
+				,a.warnredtime
+				,a.createdt
+				,b.isdeputesign
+				,a.issuspend
+				,a.app_uuid
+				,a.todosort
+			FROM wdk_wf_todo  a
+			left join wdk_wf_depute b on b.id = a.depute_id
+			WHERE 1=1
+			OPTION 输入.actorid <> "" 
+				a.actorid		= 输入.actorid
+			ENDOPTION
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.title <> ""
+				a.title LIKE CONCAT("%" , 输入.title , "%" )
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.lockactorid <> ""
+				a.lockactorid = 输入.lockactorid
+			ENDOPTION
+			OPTION 输入.sendactorid <> ""
+				a.sendactorid = 输入.sendactorid
+			ENDOPTION
+			OPTION 输入.pretodoid <> ""
+				a.pretodoid = 输入.pretodoid
+			ENDOPTION
+			OPTION 输入.unitid <> ""
+				a.unitid = 输入.unitid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.todotype <> ""
+				a.todotype = 输入.todotype
+			ENDOPTION
+			OPTION 输入.ccstatus <> ""
+				a.ccstatus = 输入.ccstatus
+			ENDOPTION
+			OPTION 输入.turnid <> ""
+				a.turnid = 输入.turnid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.issuspend <> ""
+				a.issuspend = 输入.issuspend
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF

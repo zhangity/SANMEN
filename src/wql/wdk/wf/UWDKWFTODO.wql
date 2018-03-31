@@ -1,0 +1,1184 @@
+﻿[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、任务待办表				【wdk_wf_todo】
+	版本经历：	
+				1、v1.0			于猛			2015-06-18 16:47:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	
+	--待办ID
+	输入.id							TYPEAS	s_id
+	
+	--流程模板ID
+	输入.pdid						TYPEAS	s_sstring
+	
+	--流程实例ID
+	输入.piid						TYPEAS	s_string
+	
+	--当前处理节点名称
+	输入.nodename					TYPEAS	s_sstring
+	
+	--节点对应页面
+	输入.nodepage					TYPEAS	s_string
+
+	--环节标题
+	输入.nodetitle					TYPEAS	s_sstring
+	
+	--当前节点类型
+	输入.nodetype					TYPEAS	s_sstring
+	
+	--会签类型
+	输入.signtype					TYPEAS	s_stype
+	
+	--当前处理任务ID
+	输入.taskid						TYPEAS	s_string
+	
+	--子任务ID
+	输入.subtaskid					TYPEAS	s_string
+	
+	--待办标题
+	输入.title						TYPEAS	s_string
+	
+	--办理者id
+	输入.actorid						TYPEAS	s_sstring
+	
+	--办理者类型
+	输入.actortype					TYPEAS	s_stype
+	
+	--办理者部门
+	输入.deptuuid					TYPEAS	s_id
+	
+	--原始办理者id
+	输入.originactorid				TYPEAS	s_sstring
+	
+	--原始办理者类型
+	输入.originactortype				TYPEAS	s_stype
+	
+	--原始办理者部门
+	输入.origindeptuuid				TYPEAS	s_id
+	
+	--代理类型
+	输入.agenttype					TYPEAS	s_sstring
+	
+	--操作类型
+	输入.opertype					TYPEAS	s_stype
+	
+	--办理意见
+	输入.opercomment					TYPEAS	s_string
+	
+	--办理时间
+	输入.operdt						TYPEAS	s_sstring
+	
+	--超期时间
+	输入.overduetime					TYPEAS	s_sstring
+	
+	--任务领取人
+	输入.lockactorid					TYPEAS	s_id
+	
+	--任务领取人类型
+	输入.lockactortype				TYPEAS	s_stype
+	
+	--任务领取人部门
+	输入.lockdeptuuid				TYPEAS	s_id
+	
+	--任务领取时间
+	输入.lockdt						TYPEAS	s_sstring
+	
+	--待办发送人
+	输入.sendactorid					TYPEAS	s_id
+	
+	--待办发送人类型
+	输入.sendactortype				TYPEAS	s_stype
+	
+	--待办发送人部门
+	输入.senddeptuuid				TYPEAS	s_id
+	
+	--待办发送时间
+	输入.senddt						TYPEAS	s_sstring
+	
+	--状态
+	输入.status						TYPEAS	s_stype
+	
+	--待办类型
+	输入.todotype					TYPEAS	s_stype
+	
+	--抄送状态
+	输入.ccstatus					TYPEAS	s_stype
+	
+	--阅读时间
+	输入.readdt						TYPEAS	s_sstring
+	
+	--转办ID
+	输入.turnid						TYPEAS	s_id
+	
+	--机构ID
+	输入.unitid						TYPEAS	s_id
+	
+	--前一待办记录
+	输入.pretodoid					TYPEAS	s_id
+	
+	--办理到期日期
+	输入.limitdt						TYPEAS	s_sstring
+	
+	--到期距离天数
+	输入.limittime					TYPEAS	s_sstring
+	
+	--黄牌警告到期日期
+	输入.warnyellowdt				TYPEAS	s_sstring
+	
+	--黄牌警告距离天数
+	输入.warnyellowtime				TYPEAS	s_sstring
+	
+	--红牌警告到期日期
+	输入.warnreddt					TYPEAS	s_sstring
+	
+	--红牌警告距离天数
+	输入.warnredtime					TYPEAS	s_sstring
+
+	--创建时间
+	输入.createdt					TYPEAS	s_sstring
+
+	--流程办结时间
+	输入.completedt					TYPEAS	s_sstring
+	
+	--应用ID
+	输入.app_uuid					TYPEAS	s_sstring
+
+	--待办分类
+	输入.todosort					TYPEAS	s_sstring
+	
+	--委托流水ID
+	输入.depute_id					TYPEAS	s_sstring
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	临时.taskid						TYPEAS	s_sstring
+	临时.subtaskid					TYPEAS	s_sstring
+	临时.todotype					TYPEAS	s_sstring
+	临时.count						TYPEAS	n_integer
+	
+	临时明细.id						TYPEAS	s_sstring
+	临时明细.pdid					TYPEAS	s_sstring
+	临时明细.piid					TYPEAS	s_sstring
+	临时明细.nodename				TYPEAS	s_sstring
+	临时明细.nodepage				TYPEAS	s_sstring
+	临时明细.nodetitle				TYPEAS	s_sstring
+	临时明细.nodetype				TYPEAS	s_sstring
+	临时明细.signtype				TYPEAS	s_sstring
+	临时明细.taskid					TYPEAS	s_sstring
+	临时明细.subtaskid				TYPEAS	s_sstring
+	临时明细.title					TYPEAS	s_sstring
+	临时明细.actorid					TYPEAS	s_sstring
+	临时明细.actortype				TYPEAS	s_sstring
+	临时明细.deptuuid				TYPEAS	s_sstring
+	临时明细.originactorid			TYPEAS	s_sstring
+	临时明细.originactortype			TYPEAS	s_sstring
+	临时明细.origindeptuuid			TYPEAS	s_sstring
+	临时明细.agenttype				TYPEAS	s_sstring
+	临时明细.opertype				TYPEAS	s_sstring
+	临时明细.opercomment				TYPEAS	s_sstring
+	临时明细.operdt					TYPEAS	s_sstring
+	临时明细.overduetime				TYPEAS	s_sstring
+	临时明细.lockactorid				TYPEAS	s_sstring
+	临时明细.lockactortype			TYPEAS	s_sstring
+	临时明细.lockdeptuuid			TYPEAS	s_sstring
+	临时明细.lockdt					TYPEAS	s_sstring
+	临时明细.sendactorid				TYPEAS	s_sstring
+	临时明细.sendactortype			TYPEAS	s_sstring
+	临时明细.senddeptuuid			TYPEAS	s_sstring
+	临时明细.senddt					TYPEAS	s_sstring
+	临时明细.status					TYPEAS	s_sstring
+	临时明细.todotype				TYPEAS	s_sstring
+	临时明细.ccstatus				TYPEAS	s_sstring
+	临时明细.readdt					TYPEAS	s_sstring
+	临时明细.turnid					TYPEAS	s_sstring
+	临时明细.unitid					TYPEAS	s_sstring
+	临时明细.pretodoid				TYPEAS	s_sstring
+	临时明细.limitdt					TYPEAS	s_sstring
+	临时明细.limittime				TYPEAS	s_sstring
+	临时明细.warnyellowdt			TYPEAS	s_sstring
+	临时明细.warnyellowtime			TYPEAS	s_sstring
+	临时明细.warnreddt				TYPEAS	s_sstring
+	临时明细.warnredtime				TYPEAS	s_sstring
+	临时明细.createdt				TYPEAS	s_sstring
+	临时明细.issuspend				TYPEAS	s_sstring
+	临时明细.app_uuid				TYPEAS	s_sstring
+	临时明细.todosort				TYPEAS	s_sstring
+	临时明细.depute_id				TYPEAS	s_sstring
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_todo(
+			id
+			,pdid
+			,piid
+			,nodename
+			,nodepage
+			,nodetitle
+			,nodetype
+			,signtype
+			,taskid
+			,subtaskid
+			,title
+			,actorid
+			,actortype
+			,deptuuid
+			,originactorid
+			,originactortype
+			,origindeptuuid
+			,agenttype
+			,opertype
+			,opercomment
+			,operdt
+			,overduetime
+			,lockactorid
+			,lockactortype
+			,lockdeptuuid
+			,lockdt
+			,sendactorid
+			,sendactortype
+			,senddeptuuid
+			,senddt
+			,status
+			,todotype
+			,ccstatus
+			,turnid
+			,unitid
+			,pretodoid
+			,limitdt
+			,limittime
+			,warnyellowdt
+			,warnyellowtime
+			,warnreddt
+			,warnredtime
+			,createdt
+			,app_uuid
+			,todosort
+			,depute_id
+    	) values (
+			输入.id
+			,输入.pdid
+			,输入.piid
+			,输入.nodename
+			,输入.nodepage
+			,输入.nodetitle
+			,输入.nodetype
+			,输入.signtype
+			,输入.taskid
+			,输入.subtaskid
+			,输入.title
+			,输入.actorid
+			,输入.actortype
+			,输入.deptuuid
+			,输入.originactorid
+			,输入.originactortype
+			,输入.origindeptuuid
+			,输入.agenttype
+			,输入.opertype
+			,输入.opercomment
+			,输入.operdt
+			,输入.overduetime
+			,输入.lockactorid
+			,输入.lockactortype
+			,输入.lockdeptuuid
+			,输入.lockdt
+			,输入.sendactorid
+			,输入.sendactortype
+			,输入.senddeptuuid
+			,输入.senddt
+			,输入.status
+			,输入.todotype
+			,输入.ccstatus
+			,输入.turnid
+			,输入.unitid
+			,输入.pretodoid
+			,输入.limitdt
+			,输入.limittime
+			,输入.warnyellowdt
+			,输入.warnyellowtime
+			,输入.warnreddt
+			,输入.warnredtime
+			,输入.createdt
+			,输入.app_uuid
+			,输入.todosort
+			,输入.depute_id
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#修改意见
+	IF 输入.flag = 21
+		UPDATE wdk_wf_todo a SET
+			a.operdt			=	输入.operdt
+			,a.opercomment		=	输入.opercomment
+		WHERE a.id = 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	#修改意见及原始办理人
+	IF 输入.flag = 22
+		UPDATE wdk_wf_todo a SET
+			a.operdt				=	输入.operdt
+			,a.opercomment			=	输入.opercomment
+			,a.actorid				=	输入.actorid
+			,a.actortype			=	输入.actortype
+			,a.deptuuid				=	输入.deptuuid
+			,a.agenttype			=	输入.agenttype
+			,a.originactorid		=	输入.originactorid
+			,a.originactortype		=	输入.originactortype
+			,a.origindeptuuid		=	输入.origindeptuuid
+		WHERE a.id = 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	#修改意见并结束待办
+	IF 输入.flag = 23
+		UPDATE wdk_wf_todo a SET
+			a.operdt			=	输入.operdt
+			,a.opertype			=	输入.opertype
+			,a.opercomment		=	输入.opercomment
+			,a.status		    = '1'
+		WHERE a.id = 输入.id
+		ENDUPDATE
+		
+		UPDATE wdk_wf_todo_his a SET
+			a.operdt			=	输入.operdt
+			,a.opertype			=	输入.opertype
+			,a.opercomment		=	输入.opercomment
+			,a.status		    = '1'
+		WHERE a.id = 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	#删除
+	IF 输入.flag = 3
+		DELETE FROM wdk_wf_todo a
+		WHERE a.id = 输入.id
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	#根据流程实例删除
+	IF 输入.flag = 4
+		DELETE FROM wdk_wf_todo a
+		WHERE a.piid = 输入.piid
+		ENDDELETE
+	ENDIF
+	#根据流程实例删除
+	IF 输入.flag = 41
+		DELETE FROM wdk_wf_todo a
+		WHERE a.pdid = 输入.pdid
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	#领取
+	IF 输入.flag = 101
+		#查询出当前任务所属的主任务
+		SELECT
+			taskid		as	taskid
+			,subtaskid	as 	subtaskid
+			,todotype	as	todotype
+		FROM wdk_wf_todo a
+		WHERE a.id = 输入.id
+		ENDSELECT
+		
+		临时.taskid 		= taskid
+		临时.subtaskid 	= subtaskid
+		临时.todotype	= todotype
+		
+		#如果是正常待办，则以taskid和subtaskid为准
+		IF 临时.todotype = 0
+			#先将该主任务关联的所有其他待办关闭
+			UPDATE wdk_wf_todo a SET
+				a.status 		= '2'
+			WHERE 1=1
+				AND a.taskid 		= 临时.taskid
+			OPTION 临时.subtaskid <> ""
+				a.subtaskid		= 临时.subtaskid
+			ENDOPTION
+				AND a.id 		   <> 输入.id
+				AND a.status        = '0'
+			ENDUPDATE
+			
+			UPDATE wdk_wf_todo a SET
+				a.lockactorid 		= 输入.lockactorid
+				,a.lockactortype	= 输入.lockactortype
+				,a.lockdeptuuid		= 输入.lockdeptuuid
+				,a.lockdt			= 输入.lockdt
+			WHERE 1=1
+				AND a.id 			= 输入.id
+			ENDUPDATE
+		ELSE
+		#如果是转办，则以ID为准
+			UPDATE wdk_wf_todo a SET
+				a.lockactorid 		= 输入.lockactorid
+				,a.lockactortype	= 输入.lockactortype
+				,a.lockdeptuuid		= 输入.lockdeptuuid
+				,a.lockdt			= 输入.lockdt
+			WHERE 1=1
+				AND a.id 			= 输入.id
+			ENDUPDATE
+		ENDIF
+		
+	ENDIF
+	
+	#领退
+	IF 输入.flag = 102
+		#查询出当前任务所属的主任务
+		SELECT
+			taskid		as	taskid
+			,subtaskid	as 	subtaskid
+			,todotype	as	todotype
+		FROM wdk_wf_todo a
+		WHERE a.id = 输入.id
+		ENDSELECT
+		
+		临时.taskid 		= taskid
+		临时.subtaskid 	= subtaskid
+		临时.todotype	= todotype
+		
+		#如果是正常待办，则以taskid和subtaskid为准
+		IF 临时.todotype = 0
+			#将该主任务关联的所有待办的当前locker均设置为领取人
+			UPDATE wdk_wf_todo a SET
+				a.lockactorid 		= ''
+				,a.lockactortype	= ''
+				,a.lockdeptuuid		= ''
+				,a.lockdt			= ''
+				,a.status 		= '0'
+			WHERE 1=1
+				AND a.taskid 		= 临时.taskid
+			OPTION 临时.subtaskid <> ""
+				a.subtaskid		= 临时.subtaskid
+			ENDOPTION
+				AND a.id 		   <> 输入.id
+				AND a.status 		= '2'
+			ENDUPDATE
+			
+			UPDATE wdk_wf_todo a SET
+				a.lockactorid 		= ''
+				,a.lockactortype	= ''
+				,a.lockdeptuuid		= ''
+				,a.lockdt			= ''
+			WHERE 1=1
+				AND a.id 			= 输入.id
+			ENDUPDATE
+		ELSE
+		#如果是转办，则以ID为准
+			UPDATE wdk_wf_todo a SET
+				a.lockactorid 		= ''
+				,a.lockactortype	= ''
+				,a.lockdeptuuid		= ''
+				,a.lockdt			= ''
+			WHERE 1=1
+				AND a.id 			= 输入.id
+			ENDUPDATE
+		
+		ENDIF
+	ENDIF
+	
+	
+	#办理完毕
+	IF 输入.flag = 103
+		#1、查询当前待办所属的主任务
+		SELECT
+			taskid		as	taskid
+			,subtaskid	as 	subtaskid
+			,todotype	as	todotype
+		FROM wdk_wf_todo a
+		WHERE a.id = 输入.id
+		ENDSELECT
+		
+		临时.taskid 		= taskid
+		临时.subtaskid 	= subtaskid
+		临时.todotype	= todotype
+		
+		
+		#如果是正常待办，则以taskid和subtaskid为准
+		IF 临时.todotype = 0
+			#2、改变当前主任务对应的所有待办的标志位为 2（被办理）
+			UPDATE wdk_wf_todo a SET
+				a.status 			= '2'
+			WHERE 1=1
+				AND a.taskid 		= 临时.taskid
+			OPTION 临时.subtaskid <> ""
+				a.subtaskid		= 临时.subtaskid
+			ENDOPTION
+				AND a.todotype		= 临时.todotype
+			ENDUPDATE
+			
+			#3、改变当前id对应的待办任务为1（已完成）
+			UPDATE wdk_wf_todo a SET
+				a.status 			= '1'
+				,a.opertype			=	输入.opertype
+			WHERE a.id 				= 输入.id
+			ENDUPDATE
+			
+			UPDATE wdk_wf_todo_his a SET
+				a.status 			= '1'
+				,a.opertype			=	输入.opertype
+			WHERE a.id 				= 输入.id
+			ENDUPDATE
+		ELSE
+			IF 临时.todotype = 3
+				#如果阅办（抄办）
+				UPDATE wdk_wf_todo a SET
+					a.ccstatus 			= '1'
+					,a.readdt 		    = 输入.operdt
+				WHERE a.id 				= 输入.id
+				ENDUPDATE
+				
+				UPDATE wdk_wf_todo_his a SET
+					a.ccstatus 			= '1'
+					,a.readdt 		    = 输入.operdt
+				WHERE a.id 				= 输入.id
+				ENDUPDATE
+			ELSE
+				#如果是转办，则只关闭自己的待办
+				UPDATE wdk_wf_todo a SET
+					a.status 			= '1'
+					,a.opertype			=	输入.opertype
+				WHERE a.id 				= 输入.id
+				ENDUPDATE
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	
+	#追回完毕
+	IF 输入.flag = 104
+		#1、查询当前待办所属的主任务
+		SELECT
+			taskid		as	taskid
+			,subtaskid	as 	subtaskid
+		FROM wdk_wf_todo a
+		WHERE a.id = 输入.id
+		ENDSELECT
+		
+		临时.taskid 		= taskid
+		临时.subtaskid 	= subtaskid
+		
+		#2、改变当前主任务对应的所有待办的标志位为 3（被追回）
+		UPDATE wdk_wf_todo a SET
+			a.status 			= '4'
+			,a.operdt			= 输入.operdt
+		WHERE 1=1
+			AND a.taskid 		= 临时.taskid
+		OPTION 临时.subtaskid <> ""
+			a.subtaskid		= 临时.subtaskid
+		ENDOPTION
+			AND a.status		= '0'
+		ENDUPDATE
+		
+	
+	ENDIF
+	
+	
+	#交办或转办
+	IF 输入.flag = 105
+		#1、查询当前待办所属的主任务
+		SELECT
+			taskid		as	taskid
+			,subtaskid	as 	subtaskid
+		FROM wdk_wf_todo a
+		WHERE a.id = 输入.id
+		ENDSELECT
+		
+		临时.taskid 		= taskid
+		临时.subtaskid 	= subtaskid
+		
+		#2、改变当前主任务对应的所有待办的标志位为 2（被办理）
+		UPDATE wdk_wf_todo a SET
+			a.status 			= '2'
+		WHERE 1=1
+			AND a.taskid 		= 临时.taskid
+		OPTION 临时.subtaskid <> ""
+			a.subtaskid		= 临时.subtaskid
+		ENDOPTION
+		ENDUPDATE
+		
+		#3、改变当前id对应的待办任务为1（已完成）
+		UPDATE wdk_wf_todo a SET
+			a.status 			= '1'
+			,a.opertype 		= 输入.opertype
+		WHERE a.id 				= 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	#201、流程结束，待办记录移动到历史库
+	IF 输入.flag = 201
+		--1、查找当前实例所有关联的待办记录
+		SELECT 
+			id							as	ID
+			,pdid						as	PDID
+			,piid						as	PIID
+			,nodename					as	NODENAME
+			,nodepage					as	NODEPAGE
+			,nodetitle					as	NODETITLE
+			,nodetype					as	NODETYPE
+			,signtype					as	SIGNTYPE
+			,taskid						as	TASKID
+			,subtaskid					as	SUBTASKID
+			,title						as	TITLE
+			,actorid					as	ACTORID
+			,actortype					as	ACTORTYPE
+			,deptuuid					as	DEPTUUID
+			,originactorid				as	ORIGINACTORID
+			,originactortype			as	ORIGINACTORTYPE
+			,origindeptuuid				as	ORIGINDEPTUUID
+			,agenttype					as	AGENTTYPE
+			,opertype					as	OPERTYPE
+			,opercomment				as	OPERCOMMENT
+			,operdt						as	OPERDT
+			,overduetime				as	OVERDUETIME
+			,lockactorid				as	LOCKACTORID
+			,lockactortype				as	LOCKACTORTYPE
+			,lockdeptuuid				as	LOCKDEPTUUID
+			,lockdt						as	LOCKDT
+			,sendactorid				as	SENDACTORID
+			,sendactortype				as	SENDACTORTYPE
+			,senddeptuuid				as	SENDDEPTUUID
+			,senddt						as	SENDDT
+			,status						as	STATUS
+			,ccstatus					as	CCSTATUS
+			,todotype					as	TODOTYPE
+			,readdt						as	READDT
+			,turnid						as	TURNID
+			,unitid						as	UNITID
+			,pretodoid					as	PRETODOID
+			,limitdt					as	LIMITDT
+			,limittime					as	LIMITTIME
+			,warnyellowdt				as	WARNYELLOWTIME
+			,warnyellowtime				as	WARNYELLOWTIME
+			,warnreddt					as	WARNREDDT
+			,warnredtime				as	WARNREDTIME
+			,createdt					as	CREATEDT
+			,issuspend					as	ISSUSPEND
+			,app_uuid					as	APP_UUID
+			,todosort					as	TODOSORT
+			,depute_id                  as  DEPUTE_ID
+		FROM wdk_wf_todo a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		SELECT 
+			count(*)						as	COUNT
+		FROM wdk_wf_todo a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		--2、中间变量赋值
+		临时.count							= 	COUNT
+		
+		临时明细.id							=	ID
+		临时明细.pdid						=	PDID
+		临时明细.piid						=	PIID
+		临时明细.nodename					=	NODENAME
+		临时明细.nodepage					=	NODEPAGE
+		临时明细.nodetitle					=	NODETITLE
+		临时明细.nodetype					=	NODETYPE
+		临时明细.signtype					=	SIGNTYPE
+		临时明细.taskid						=	TASKID
+		临时明细.subtaskid					=	SUBTASKID
+		临时明细.title						=	TITLE
+		临时明细.actorid						=	ACTORID
+		临时明细.actortype					=	ACTORTYPE
+		临时明细.deptuuid					=	DEPTUUID
+		临时明细.originactorid				=	ORIGINACTORID
+		临时明细.originactortype				=	ORIGINACTORTYPE
+		临时明细.origindeptuuid				=	ORIGINDEPTUUID
+		临时明细.agenttype					=	AGENTTYPE
+		临时明细.opertype					=	OPERTYPE
+		临时明细.opercomment					=	OPERCOMMENT
+		临时明细.operdt						=	OPERDT
+		临时明细.overduetime					=	OVERDUETIME
+		临时明细.lockactorid					=	LOCKACTORID
+		临时明细.lockactortype				=	LOCKACTORTYPE
+		临时明细.lockdeptuuid				=	LOCKDEPTUUID
+		临时明细.lockdt						=	LOCKDT
+		临时明细.sendactorid					=	SENDACTORID
+		临时明细.sendactortype				=	SENDACTORTYPE
+		临时明细.senddeptuuid				=	SENDDEPTUUID
+		临时明细.senddt						=	SENDDT
+		临时明细.status						=	STATUS
+		临时明细.ccstatus					=	CCSTATUS
+		临时明细.todotype					=	TODOTYPE
+		临时明细.readdt						=	READDT
+		临时明细.turnid						=	TURNID
+		临时明细.unitid						=	UNITID
+		临时明细.pretodoid					=	PRETODOID
+		临时明细.limitdt						=	LIMITDT
+		临时明细.limittime					=	LIMITTIME
+		临时明细.warnyellowdt				=	WARNYELLOWTIME
+		临时明细.warnyellowtime				=	WARNYELLOWTIME
+		临时明细.warnreddt					=	WARNREDDT
+		临时明细.warnredtime					=	WARNREDTIME
+		临时明细.createdt					=	CREATEDT
+		临时明细.issuspend					=	ISSUSPEND
+		临时明细.app_uuid					=	APP_UUID
+		临时明细.todosort					=	TODOSORT
+		临时明细.depute_id					=	DEPUTE_ID
+			
+		--3、插入历史库
+		LOOP 临时.count
+			INSERT INTO wdk_wf_todo_his(
+    			id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetitle
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,title
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,overduetime
+				,lockactorid
+				,lockactortype
+				,lockdeptuuid
+				,lockdt
+				,sendactorid
+				,sendactortype
+				,senddeptuuid
+				,senddt
+				,status
+				,todotype
+				,turnid
+				,unitid
+				,pretodoid
+				,limitdt
+				,limittime
+				,warnyellowdt
+				,warnyellowtime
+				,warnreddt
+				,warnredtime
+				,createdt
+				,issuspend
+				,ccstatus
+				,readdt
+				,app_uuid
+				,todosort
+				,depute_id
+				,completedt
+	    	) values (
+				临时明细.id
+				,临时明细.pdid
+				,临时明细.piid
+				,临时明细.nodename
+				,临时明细.nodepage
+				,临时明细.nodetitle
+				,临时明细.nodetype
+				,临时明细.signtype
+				,临时明细.taskid
+				,临时明细.subtaskid
+				,临时明细.title
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.deptuuid
+				,临时明细.originactorid
+				,临时明细.originactortype
+				,临时明细.origindeptuuid
+				,临时明细.agenttype
+				,临时明细.opertype
+				,临时明细.opercomment
+				,临时明细.operdt
+				,临时明细.overduetime
+				,临时明细.lockactorid
+				,临时明细.lockactortype
+				,临时明细.lockdeptuuid
+				,临时明细.lockdt
+				,临时明细.sendactorid
+				,临时明细.sendactortype
+				,临时明细.senddeptuuid
+				,临时明细.senddt
+				,临时明细.status
+				,临时明细.todotype
+				,临时明细.turnid
+				,临时明细.unitid
+				,临时明细.pretodoid
+				,临时明细.limitdt
+				,临时明细.limittime
+				,临时明细.warnyellowdt
+				,临时明细.warnyellowtime
+				,临时明细.warnreddt
+				,临时明细.warnredtime
+				,临时明细.createdt
+				,临时明细.issuspend
+				,临时明细.ccstatus
+				,临时明细.readdt
+				,临时明细.app_uuid
+				,临时明细.todosort
+				,临时明细.depute_id
+				,输入.completedt
+			)
+			ENDINSERT
+		ENDLOOP
+		
+		-4、删除活动库
+		DELETE FROM wdk_wf_todo a
+		WHERE a.piid = 输入.piid
+		ENDDELETE
+	ENDIF
+	
+	#202、流程恢复，历史记录移动到待办库
+	IF 输入.flag = 202
+		--1、查找当前实例所有关联的历史待办记录
+		SELECT 
+			id							as	ID
+			,pdid						as	PDID
+			,piid						as	PIID
+			,nodename					as	NODENAME
+			,nodepage					as	NODEPAGE
+			,nodetitle					as	NODETITLE
+			,nodetype					as	NODETYPE
+			,signtype					as	SIGNTYPE
+			,taskid						as	TASKID
+			,subtaskid					as	SUBTASKID
+			,title						as	TITLE
+			,actorid					as	ACTORID
+			,actortype					as	ACTORTYPE
+			,deptuuid					as	DEPTUUID
+			,originactorid				as	ORIGINACTORID
+			,originactortype			as	ORIGINACTORTYPE
+			,origindeptuuid				as	ORIGINDEPTUUID
+			,agenttype					as	AGENTTYPE
+			,opertype					as	OPERTYPE
+			,opercomment				as	OPERCOMMENT
+			,operdt						as	OPERDT
+			,overduetime				as	OVERDUETIME
+			,lockactorid				as	LOCKACTORID
+			,lockactortype				as	LOCKACTORTYPE
+			,lockdeptuuid				as	LOCKDEPTUUID
+			,lockdt						as	LOCKDT
+			,sendactorid				as	SENDACTORID
+			,sendactortype				as	SENDACTORTYPE
+			,senddeptuuid				as	SENDDEPTUUID
+			,senddt						as	SENDDT
+			,status						as	STATUS
+			,ccstatus					as	CCSTATUS
+			,todotype					as	TODOTYPE
+			,readdt						as	READDT
+			,turnid						as	TURNID
+			,unitid						as	UNITID
+			,pretodoid					as	PRETODOID
+			,limitdt					as	LIMITDT
+			,limittime					as	LIMITTIME
+			,warnyellowdt				as	WARNYELLOWTIME
+			,warnyellowtime				as	WARNYELLOWTIME
+			,warnreddt					as	WARNREDDT
+			,warnredtime				as	WARNREDTIME
+			,createdt					as	CREATEDT
+			,issuspend					as	ISSUSPEND
+			,app_uuid					as	APP_UUID
+			,todosort					as	TODOSORT
+			,depute_id                  as	DEPUTE_ID
+		FROM wdk_wf_todo_his a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		SELECT 
+			count(*)						as	COUNT
+		FROM wdk_wf_todo_his a
+		WHERE 1=1
+			AND a.piid = 输入.piid
+		ENDSELECT
+		
+		--2、中间变量赋值
+		临时.count							= 	COUNT
+		
+		临时明细.id							=	ID
+		临时明细.pdid						=	PDID
+		临时明细.piid						=	PIID
+		临时明细.nodename					=	NODENAME
+		临时明细.nodepage					=	NODEPAGE
+		临时明细.nodetitle					=	NODETITLE
+		临时明细.nodetype					=	NODETYPE
+		临时明细.signtype					=	SIGNTYPE
+		临时明细.taskid						=	TASKID
+		临时明细.subtaskid					=	SUBTASKID
+		临时明细.title						=	TITLE
+		临时明细.actorid						=	ACTORID
+		临时明细.actortype					=	ACTORTYPE
+		临时明细.deptuuid					=	DEPTUUID
+		临时明细.originactorid				=	ORIGINACTORID
+		临时明细.originactortype				=	ORIGINACTORTYPE
+		临时明细.origindeptuuid				=	ORIGINDEPTUUID
+		临时明细.agenttype					=	AGENTTYPE
+		临时明细.opertype					=	OPERTYPE
+		临时明细.opercomment					=	OPERCOMMENT
+		临时明细.operdt						=	OPERDT
+		临时明细.overduetime					=	OVERDUETIME
+		临时明细.lockactorid					=	LOCKACTORID
+		临时明细.lockactortype				=	LOCKACTORTYPE
+		临时明细.lockdeptuuid				=	LOCKDEPTUUID
+		临时明细.lockdt						=	LOCKDT
+		临时明细.sendactorid					=	SENDACTORID
+		临时明细.sendactortype				=	SENDACTORTYPE
+		临时明细.senddeptuuid				=	SENDDEPTUUID
+		临时明细.senddt						=	SENDDT
+		临时明细.status						=	STATUS
+		临时明细.ccstatus					=	CCSTATUS
+		临时明细.todotype					=	TODOTYPE
+		临时明细.readdt						=	READDT
+		临时明细.turnid						=	TURNID
+		临时明细.unitid						=	UNITID
+		临时明细.pretodoid					=	PRETODOID
+		临时明细.limitdt						=	LIMITDT
+		临时明细.limittime					=	LIMITTIME
+		临时明细.warnyellowdt				=	WARNYELLOWTIME
+		临时明细.warnyellowtime				=	WARNYELLOWTIME
+		临时明细.warnreddt					=	WARNREDDT
+		临时明细.warnredtime					=	WARNREDTIME
+		临时明细.createdt					=	CREATEDT
+		临时明细.issuspend					=	ISSUSPEND
+		临时明细.app_uuid					=	APP_UUID
+		临时明细.todosort					=	TODOSORT
+		临时明细.depute_id					=	DEPUTE_ID
+			
+		--3、插入活动库
+		LOOP 临时.count
+			INSERT INTO wdk_wf_todo(
+    			id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetitle
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,title
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,overduetime
+				,lockactorid
+				,lockactortype
+				,lockdeptuuid
+				,lockdt
+				,sendactorid
+				,sendactortype
+				,senddeptuuid
+				,senddt
+				,status
+				,todotype
+				,turnid
+				,unitid
+				,pretodoid
+				,limitdt
+				,limittime
+				,warnyellowdt
+				,warnyellowtime
+				,warnreddt
+				,warnredtime
+				,createdt
+				,issuspend
+				,ccstatus
+				,readdt
+				,app_uuid
+				,todosort
+				,depute_id
+	    	) values (
+				临时明细.id
+				,临时明细.pdid
+				,临时明细.piid
+				,临时明细.nodename
+				,临时明细.nodepage
+				,临时明细.nodetitle
+				,临时明细.nodetype
+				,临时明细.signtype
+				,临时明细.taskid
+				,临时明细.subtaskid
+				,临时明细.title
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.deptuuid
+				,临时明细.originactorid
+				,临时明细.originactortype
+				,临时明细.origindeptuuid
+				,临时明细.agenttype
+				,临时明细.opertype
+				,临时明细.opercomment
+				,临时明细.operdt
+				,临时明细.overduetime
+				,临时明细.lockactorid
+				,临时明细.lockactortype
+				,临时明细.lockdeptuuid
+				,临时明细.lockdt
+				,临时明细.sendactorid
+				,临时明细.sendactortype
+				,临时明细.senddeptuuid
+				,临时明细.senddt
+				,临时明细.status
+				,临时明细.todotype
+				,临时明细.turnid
+				,临时明细.unitid
+				,临时明细.pretodoid
+				,临时明细.limitdt
+				,临时明细.limittime
+				,临时明细.warnyellowdt
+				,临时明细.warnyellowtime
+				,临时明细.warnreddt
+				,临时明细.warnredtime
+				,临时明细.createdt
+				,临时明细.issuspend
+				,临时明细.ccstatus
+				,临时明细.readdt
+				,临时明细.app_uuid
+				,临时明细.todosort
+				,临时明细.depute_id
+			)
+			ENDINSERT
+		ENDLOOP
+		
+		-4、删除历史库
+		DELETE FROM wdk_wf_todo_his a
+		WHERE a.piid = 输入.piid
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	
+	
+	#根据流程实例id、nodename和actorid删除待办
+	IF 输入.flag = 401
+		DELETE FROM wdk_wf_todo a
+		WHERE 	a.piid			= 输入.piid
+			AND	a.nodename		= 输入.nodename
+			AND a.actorid		= 输入.actorid
+			AND a.status		= '0'
+		ENDDELETE
+	ENDIF
+	
+	#根据流程实例id、nodename删除所有待办
+	IF 输入.flag = 403
+		DELETE FROM wdk_wf_todo a
+		WHERE 	a.piid			= 输入.piid
+			AND	a.nodename		= 输入.nodename
+			AND a.status		= '0'
+		ENDDELETE
+	ENDIF
+	
+	
+	#取消领取状态
+	IF 输入.flag = 402
+		UPDATE wdk_wf_todo a SET
+			a.lockactorid 		= ''
+			,a.lockactortype	= ''
+			,a.lockdeptuuid		= ''
+			,a.lockdt			= ''
+		WHERE 1=1
+			AND a.piid 			= 输入.piid
+			AND a.nodename		= 输入.nodename
+			AND a.status		= '0'
+		ENDUPDATE
+	ENDIF
+	
+	#挂起流程实例
+	IF 输入.flag = 501
+		UPDATE wdk_wf_todo a SET
+			a.issuspend 		= '1'
+		WHERE 1=1
+			AND a.piid 			= 输入.piid
+		ENDUPDATE
+	ENDIF
+	
+	#恢复流程实例
+	IF 输入.flag = 502
+		UPDATE wdk_wf_todo a SET
+			a.issuspend 		= '0'
+		WHERE 1=1
+			AND a.piid 			= 输入.piid
+		ENDUPDATE	
+	ENDIF
+	
+	#传阅的收回
+	IF 输入.flag = 503
+		UPDATE wdk_wf_todo a SET
+			a.ccstatus 		= '2'
+			,a.status 		= '1'
+		WHERE 1=1
+			AND a.id 			= 输入.id
+		ENDUPDATE
+		
+		UPDATE wdk_wf_todo_his a SET
+			a.ccstatus 		= '2'
+			,a.status 		= '1'
+		WHERE 1=1
+			AND a.id 			= 输入.id
+		ENDUPDATE
+	ENDIF

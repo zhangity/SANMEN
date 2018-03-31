@@ -1,0 +1,277 @@
+[交易说明]
+	交易名：统一消息表
+	所属模块：	消息
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		统一消息表				【PF_UN_MSG】
+	版本经历：	
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+		
+	--统一消息ID
+	输入.unmsg_uuid				TYPEAS		s_uuid
+	
+	--发送者类型
+	输入.sendertype				TYPEAS		s_code
+	
+	--发送者标识
+	输入.senderid				TYPEAS		s_uuid
+	
+	--发送者姓名
+	输入.sendername				TYPEAS		s_mname
+	
+	--消息在源系统中的ID
+	输入.msgid					TYPEAS		s_uuid
+	
+	--消息类型
+	输入.msgtype					TYPEAS		s_code
+	
+	--消息标题
+	输入.msgtitle				TYPEAS		s_mname
+	
+	--消息摘要
+	输入.msgsummary				TYPEAS		s_lname
+	
+	--消息内容
+	输入.msgcontent				TYPEAS		c_content
+	
+	--消息产生时间
+	输入.msgtime					TYPEAS		s_datetime
+	
+	--自定义发送参数
+	输入.msgparam				TYPEAS		s_mstring
+	
+	--接收者类型
+	输入.receivertype			TYPEAS		s_code
+	
+	--接收者标识
+	输入.receiverid				TYPEAS		s_uuid
+	
+	--路由方式
+	输入.routetype				TYPEAS		s_uuid
+	
+	--预定发送时间
+	输入.routetime				TYPEAS		s_datetime
+	
+	--发送状态
+	输入.status					TYPEAS		s_code
+	
+	--当前发送次数
+	输入.sendcount				TYPEAS		s_code
+	
+	--上一次处理时间
+	输入.updatetime				TYPEAS		s_datetime
+	
+	--创建时间
+	输入.createtime				TYPEAS		s_datetime
+
+	
+	
+	--所有的状态
+	输入.allstatus				TYPEAS		f_sstring
+	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#1、根据条件查询所有消息
+	IF 输入.flag = 1
+		PAGEQUERY
+		    SELECT
+				unmsg_uuid
+				,sendertype
+				,senderid
+				,sendername
+				,msgid
+				,msgtype
+				,msgtitle
+				,msgsummary
+				,msgcontent
+				,msgtime
+				,msgparam
+				,receivertype
+				,receiverid
+				,routetype
+				,routetime
+				,status
+				,sendcount
+				,updatetime
+				,createtime
+			FROM PF_UN_MSG a
+			WHERE 1=1
+			OPTION 输入.unmsg_uuid <> ""
+				a.unmsg_uuid = 输入.unmsg_uuid
+			ENDOPTION
+			OPTION 输入.sendertype <> ""
+				a.sendertype = 输入.sendertype
+			ENDOPTION
+			OPTION 输入.senderid <> ""
+				a.senderid = 输入.senderid
+			ENDOPTION
+			OPTION 输入.sendername <> ""
+				a.sendername like CONCAT("%" , 输入.sendername , "%")
+			ENDOPTION
+			OPTION 输入.msgid <> ""
+				a.msgid = 输入.msgid
+			ENDOPTION
+			OPTION 输入.msgtype <> ""
+				a.msgtype > 输入.msgtype
+			ENDOPTION
+			OPTION 输入.msgtitle <> ""
+				a.msgtitle like CONCAT("%" , 输入.msgtitle , "%")
+			ENDOPTION
+			OPTION 输入.msgsummary <> ""
+				a.msgsummary like CONCAT("%" , 输入.msgsummary , "%")
+			ENDOPTION
+			OPTION 输入.msgcontent <> ""
+				a.msgcontent like CONCAT("%" , 输入.msgcontent , "%")
+			ENDOPTION
+			OPTION 输入.msgtime <> ""
+				a.msgtime < 输入.msgtime
+			ENDOPTION
+			OPTION 输入.receivertype <> ""
+				a.receivertype = 输入.receivertype
+			ENDOPTION
+			OPTION 输入.receiverid <> ""
+				a.receiverid like CONCAT("%" , 输入.receiverid , "%")
+			ENDOPTION
+			OPTION 输入.routetype <> ""
+				a.routetype < 输入.routetype
+			ENDOPTION
+			OPTION 输入.routetime <> ""
+				a.routetime < 输入.routetime
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status < 输入.status
+			ENDOPTION
+			OPTION 输入.allstatus <> ""
+				a.status in ( 输入.allstatus )
+			ENDOPTION
+			OPTION 输入.sendcount <> ""
+				a.sendcount < 输入.sendcount
+			ENDOPTION
+			OPTION 输入.updatetime <> ""
+				a.updatetime < 输入.updatetime
+			ENDOPTION
+			OPTION 输入.createtime <> ""
+				a.createtime < 输入.createtime
+			ENDOPTION
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF
+	
+	#分页查询
+	IF 输入.flag = 2
+		PAGEQUERY
+			SELECT
+				unmsg_uuid
+				,sendertype
+				,senderid
+				,sendername
+				,msgid
+				,msgtype
+				,msgtitle
+				,msgsummary
+				,msgcontent
+				,msgtime
+				,msgparam
+				,receivertype
+				,receiverid
+				,routetype
+				,routetime
+				,status
+				,sendcount
+				,updatetime
+				,createtime
+			FROM PF_UN_MSG a
+			WHERE 1=1
+			OPTION 输入.unmsg_uuid <> ""
+				a.unmsg_uuid = 输入.unmsg_uuid
+			ENDOPTION
+			OPTION 输入.sendertype <> ""
+				a.sendertype = 输入.sendertype
+			ENDOPTION
+			OPTION 输入.senderid <> ""
+				a.senderid = 输入.senderid
+			ENDOPTION
+			OPTION 输入.sendername <> ""
+				a.sendername like CONCAT("%" , 输入.sendername , "%")
+			ENDOPTION
+			OPTION 输入.msgid <> ""
+				a.msgid = 输入.msgid
+			ENDOPTION
+			OPTION 输入.msgtype <> ""
+				a.msgtype > 输入.msgtype
+			ENDOPTION
+			OPTION 输入.msgtitle <> ""
+				a.msgtitle like CONCAT("%" , 输入.msgtitle , "%")
+			ENDOPTION
+			OPTION 输入.msgsummary <> ""
+				a.msgsummary like CONCAT("%" , 输入.msgsummary , "%")
+			ENDOPTION
+			OPTION 输入.msgcontent <> ""
+				a.msgcontent like CONCAT("%" , 输入.msgcontent , "%")
+			ENDOPTION
+			OPTION 输入.msgtime <> ""
+				a.msgtime < 输入.msgtime
+			ENDOPTION
+			OPTION 输入.receivertype <> ""
+				a.receivertype < 输入.receivertype
+			ENDOPTION
+			OPTION 输入.receiverid <> ""
+				a.receiverid like CONCAT("%" , 输入.receiverid , "%")
+			ENDOPTION
+			OPTION 输入.routetype <> ""
+				a.routetype < 输入.routetype
+			ENDOPTION
+			OPTION 输入.routetime <> ""
+				a.routetime < 输入.routetime
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status < 输入.status
+			ENDOPTION
+			OPTION 输入.sendcount <> ""
+				a.sendcount < 输入.sendcount
+			ENDOPTION
+			OPTION 输入.updatetime <> ""
+				a.updatetime < 输入.updatetime
+			ENDOPTION
+			OPTION 输入.createtime <> ""
+				a.createtime < 输入.createtime
+			ENDOPTION
+			order by createtime asc
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF

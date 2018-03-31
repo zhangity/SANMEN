@@ -1,0 +1,121 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程定义表				【wdk_wf_pd】
+	版本经历：	
+				1、v1.0			于猛			2014-11-17 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	--标识
+	输入.pdid						TYPEAS		s_string
+	
+	--名称
+	输入.pdname						TYPEAS		s_string
+	
+	--版本号
+	输入.pdversion					TYPEAS		s_string
+	
+	--中文名称
+	输入.cnname						TYPEAS		s_string
+	
+	--状态
+	输入.status						TYPEAS		s_string
+	
+	--数据库模板id
+	输入.deploymentid				TYPEAS		s_string
+	
+	--创建时间
+	输入.createdt					TYPEAS		s_string
+	
+	--wf内容
+	输入.wfcontent					TYPEAS		c_content
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_pd(
+    		pdid
+			,pdname
+			,pdversion
+			,cnname
+			,status
+			,deploymentid
+			,createdt
+			,wfcontent
+    	) values (
+    		输入.pdid
+			,输入.pdname
+			,输入.pdversion
+			,输入.cnname
+			,输入.status
+			,输入.deploymentid
+			,输入.createdt
+			,输入.wfcontent
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#修改
+	IF 输入.flag = 2
+		UPDATE wdk_wf_pd SET
+			wfcontent		=	输入.wfcontent
+		WHERE pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF
+	
+	
+	
+	#删除
+	IF 输入.flag = 3
+		DELETE FROM wdk_wf_pd
+		WHERE pdid = 输入.pdid
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	#根据名称删除
+	IF 输入.flag = 4
+		DELETE FROM wdk_wf_pd
+		WHERE pdname = 输入.pdname
+		ENDDELETE
+	ENDIF

@@ -1,0 +1,281 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、任务交办表				【wdk_wf_assign】
+	版本经历：	
+				1、v1.0			于猛			2014-11-27 14:33:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	输入.oldactorid					TYPEAS		s_sstring
+	输入.newactorid					TYPEAS		s_sstring
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--交办流水ID
+	输入.id						TYPEAS		s_sstring
+	
+	--流程模板ID
+	输入.pdid					TYPEAS		s_string
+	
+	--流程实例ID
+	输入.piid					TYPEAS		s_string
+	
+	--当前处理任务ID
+	输入.taskid					TYPEAS		s_string
+	
+	--子任务ID
+	输入.subtaskid				TYPEAS		s_string
+	
+	--原办理人ID
+	输入.actorid					TYPEAS		s_sstring
+	
+	--原办理人类型
+	输入.actortype				TYPEAS		s_stype
+	
+	--被交办人ID
+	输入.assignactorid			TYPEAS		s_sstring
+	
+	--被交办人类型
+	输入.assignactortype			TYPEAS		s_stype
+	
+	--交办时间
+	输入.createdt				TYPEAS		s_sstring
+	
+	--当前交办状态
+	输入.status					TYPEAS		s_stype
+	
+	--备注
+	输入.remark					TYPEAS		s_string
+	
+	--办结时间
+	输入.completedt				TYPEAS		s_string
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.count						TYPEAS		n_integer
+	
+	临时明细.id						TYPEAS		s_string
+	临时明细.pdid					TYPEAS		s_string
+	临时明细.piid					TYPEAS		s_string
+	临时明细.taskid					TYPEAS		s_string
+	临时明细.subtaskid				TYPEAS		s_string
+	临时明细.actorid					TYPEAS		s_string
+	临时明细.actortype				TYPEAS		s_string
+	临时明细.assignactorid			TYPEAS		s_string
+	临时明细.assignactortype			TYPEAS		s_string
+	临时明细.createdt				TYPEAS		s_string
+	临时明细.status					TYPEAS		s_string
+	临时明细.remark					TYPEAS		s_string
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_assign(
+				id
+				,pdid
+				,piid
+				,taskid
+				,subtaskid
+				,actorid
+				,actortype
+				,assignactorid
+				,assignactortype
+				,createdt
+				,status
+				,remark
+		) values (
+				输入.id
+				,输入.pdid
+				,输入.piid
+				,输入.taskid
+				,输入.subtaskid
+				,输入.actorid
+				,输入.actortype
+				,输入.assignactorid
+				,输入.assignactortype
+				,输入.createdt
+				,输入.status
+				,输入.remark
+		)
+		ENDINSERT
+	ENDIF
+
+	#删除
+	IF 输入.flag = 2
+		DELETE FROM wdk_wf_assign a
+		WHERE 
+				a.pdid		=	输入.pdid
+			AND a.piid		=	输入.piid
+			AND a.taskid	=	输入.taskid
+			AND a.subtaskid	=	输入.subtaskid
+		ENDDELETE
+	
+	ENDIF
+	
+	#删除并移至历史库
+	IF 输入.flag = 3
+	
+		#1、查询现有记录
+		SELECT
+			id					AS	ID
+			,pdid				AS	PDID
+			,piid				AS	PIID
+			,taskid				AS	TASKID
+			,subtaskid			AS	SUBTASKID
+			,actorid			AS	ACTORID
+			,actortype			AS	ACTORTYPE
+			,assignactorid		AS	ASSIGNACTORID
+			,assignactortype	AS	ASSIGNACTORTYPE
+			,createdt			AS	CREATEDT
+			,status				AS	STATUS
+			,remark				AS	REMARK
+		FROM wdk_wf_assign a
+		WHERE 1=1
+			AND	a.pdid		=	输入.pdid
+			AND a.piid		=	输入.piid
+			AND a.taskid	=	输入.taskid
+			AND a.subtaskid	=	输入.subtaskid
+		ENDSELECT
+		
+		SELECT
+			count(*)			AS		COUNT
+		FROM wdk_wf_assign a
+		WHERE 1=1
+			AND	a.pdid		=	输入.pdid
+			AND a.piid		=	输入.piid
+			AND a.taskid	=	输入.taskid
+			AND a.subtaskid	=	输入.subtaskid
+		ENDSELECT
+		
+		#2、中间变量赋值
+		
+		临时.count				=	COUNT
+		
+		临时明细.id				=	ID
+		临时明细.pdid			=	PDID
+		临时明细.piid			=	PIID
+		临时明细.taskid			=	TASKID
+		临时明细.subtaskid		=	SUBTASKID
+		临时明细.actorid			=	ACTORID
+		临时明细.actortype		=	ACTORTYPE
+		临时明细.assignactorid	=	ASSIGNACTORID
+		临时明细.assignactortype	=	ASSIGNACTORTYPE
+		临时明细.createdt		=	CREATEDT
+		临时明细.status			=	STATUS
+		临时明细.remark			=	REMARK
+		
+		
+		#3、历史库新增
+		LOOP 临时.count
+			INSERT INTO wdk_wf_assign_his(
+				id
+				,pdid
+				,piid
+				,taskid
+				,subtaskid
+				,actorid
+				,actortype
+				,assignactorid
+				,assignactortype
+				,createdt
+				,status
+				,remark
+				,completedt
+			) values (
+				临时明细.id
+				,临时明细.pdid
+				,临时明细.piid
+				,临时明细.taskid
+				,临时明细.subtaskid
+				,临时明细.actorid
+				,临时明细.actortype
+				,临时明细.assignactorid
+				,临时明细.assignactortype
+				,临时明细.createdt
+				,临时明细.status
+				,临时明细.remark
+				,输入.completedt
+			)
+			ENDINSERT
+		ENDLOOP
+		
+		#4、活动库删除
+		DELETE FROM wdk_wf_assign a
+		WHERE 1=1
+			AND	a.pdid		=	输入.pdid
+			AND a.piid		=	输入.piid
+			AND a.taskid	=	输入.taskid
+			AND a.subtaskid	=	输入.subtaskid
+		ENDDELETE
+	ENDIF
+	
+	
+	#作为交办人的人员替换
+	IF 输入.flag = 4
+		UPDATE wdk_wf_assign a SET
+			a.actorid = 输入.newactorid
+		WHERE
+			a.actorid = 输入.oldactorid
+		ENDUPDATE
+	ENDIF
+	
+	#作为被交办人的人员替换
+	IF 输入.flag = 5
+		UPDATE wdk_wf_assign a SET
+			a.assignactorid = 输入.newactorid
+		WHERE
+			a.assignactorid = 输入.oldactorid
+		ENDUPDATE
+	ENDIF
+	
+	#根据流程删除所有关联交办记录
+	IF 输入.flag = 6
+		DELETE FROM wdk_wf_assign a
+		WHERE 1=1
+			AND a.piid		=	输入.piid
+		ENDDELETE
+		
+		DELETE FROM wdk_wf_assign_his a
+		WHERE 1=1
+			AND a.piid		=	输入.piid
+		ENDDELETE
+	ENDIF

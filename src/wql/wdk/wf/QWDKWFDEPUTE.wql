@@ -1,0 +1,210 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程委托表				【wdk_wf_depute】
+	版本经历：	
+				1、v1.0			于猛			2014-11-22 14:33:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-查询所有  2-分页查询
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#当前查询的时间，用来判断时间段是否有效
+	输入.querydt					TYPEAS		s_string
+	
+	--委托环节清单
+	输入.nodename				TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--委托流水ID	
+	输入.id							TYPEAS			s_sstring
+	
+	--流程模板ID
+	输入.pdid						TYPEAS			s_sstring
+	
+	--委托方式
+	输入.deputetype					TYPEAS			s_stype
+	
+	--委托环节清单
+	输入.nodenames					TYPEAS			s_lstring
+	
+	--委托开始时间
+	输入.startdt						TYPEAS			s_sstring
+	
+	--委托结束时间
+	输入.enddt						TYPEAS			s_sstring
+	
+	--原办理人ID
+	输入.actorid						TYPEAS			s_sstring
+	
+	--原办理人类型
+	输入.actortype					TYPEAS			s_sstring
+	
+	--委托人部门
+	输入.deptuuid					TYPEAS			s_sstring
+	
+	--被委托人ID
+	输入.deputeactorid				TYPEAS			s_sstring
+	
+	--被委托人类型
+	输入.deputeactortype				TYPEAS			s_sstring
+	
+	--被委托人部门
+	输入.deputedeptuuid				TYPEAS			s_sstring
+	
+	--机构id
+	 输入.unitid						TYPEAS			s_id
+	 
+	 --是否委托人签名
+	 输入.isdeputesign				TYPEAS			s_stype
+	
+	--委托时间
+	输入.createdt					TYPEAS			s_sstring
+	
+	--当前委托状态
+	输入.status						TYPEAS			s_stype
+	
+	--备注
+	输入.remark						TYPEAS			s_string
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#根据条件查询符合要求的流水记录
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				a.id
+				,a.pdid
+				,a.pdname
+				,b.cnname
+				,a.deputetype
+				,a.nodenames
+				,a.startdt
+				,a.enddt
+				,a.actorid
+				,c.person_name as actoridname
+				,a.actortype
+				,a.deptuuid
+				,a.deputeactorid
+				,d.person_name as deputeactoridname
+				,a.deputeactortype
+				,a.deputedeptuuid
+				,a.unitid
+				,a.isdeputesign
+				,a.createdt
+				,a.status
+				,a.remark
+			FROM wdk_wf_depute  a
+			LEFT JOIN wdk_wf_pd b on b.pdid = a.pdid
+			LEFT JOIN UUM_UU_PERSONINFO c on c.person_uuid = a.actorid
+			LEFT JOIN UUM_UU_PERSONINFO d on d.person_uuid = a.deputeactorid
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.deputetype <> ""
+				a.deputetype = 输入.deputetype
+			ENDOPTION
+			OPTION 输入.nodenames <> ""
+				a.nodenames like CONCAT("%" , 输入.nodenames , "%")
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodenames like CONCAT("%" , 输入.nodename , "%")
+			ENDOPTION
+			OPTION 输入.startdt <> ""
+				a.startdt = 输入.startdt
+			ENDOPTION
+			OPTION 输入.enddt <> ""
+				a.enddt = 输入.enddt
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.actortype <> ""
+				a.actortype = 输入.actortype
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.deputeactorid <> ""
+				a.deputeactorid = 输入.deputeactorid
+			ENDOPTION
+			OPTION 输入.deputeactortype <> ""
+				a.deputeactortype = 输入.deputeactortype
+			ENDOPTION
+			OPTION 输入.deputedeptuuid <> ""
+				a.deputedeptuuid = 输入.deputedeptuuid
+			ENDOPTION
+			OPTION 输入.unitid <> ""
+				a.unitid = 输入.unitid
+			ENDOPTION
+			OPTION 输入.isdeputesign <> ""
+				a.isdeputesign = 输入.isdeputesign
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.remark <> ""
+				a.remark = 输入.remark
+			ENDOPTION
+			OPTION 输入.querydt	<> ""
+				输入.querydt > a.startdt  AND 输入.querydt < a.enddt
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY	
+			ENDSELECT
+		ENDQUERY
+	ENDIF

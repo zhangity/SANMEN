@@ -1,0 +1,213 @@
+[交易说明]
+	交易名：		根据登录名及密码，获取登录后全局信息
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、用户表		【UUM_UU_ACCOUNT】
+				2、组织信息表	【UUM_UU_ORGINFO】
+				3、管理单元表	【UUM_UU_MANAGEUNIT】
+				4、人员信息表	【UUM_UU_PERSONINFO】
+				5、系统参数信息【PF_PB_Parameter】
+				6、角色用户表【UUM_UA_ROLEACCOUNT】
+				7、角色信息表【UUM_UA_ROLE】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/6 13:43:35		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--登录名
+	输入.login_name					TYPEAS	s_mname
+
+	--登录口令
+	输入.login_pwd					TYPEAS	s_mname
+	
+	--用户登录令牌
+	输入.user_token					TYPEAS	s_mname
+	
+	--应用标识
+	输入.app_uuid						TYPEAS	s_uuid
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.USERCOUNT							TYPEAS	n_sn
+	临时.departex_uuid					TYPEAS	s_uuid
+	临时.departex_name					TYPEAS	s_mname
+	临时.departex_simplename		TYPEAS	s_mname
+	临时.departlevel						TYPEAS	s_diccode
+	临时.departtype							TYPEAS	s_diccode
+	临时.departcount						TYPEAS	n_sn
+	临时.isswchrole							TYPEAS	s_bool
+	临时.role_uuid							TYPEAS	s_uuid
+	临时.role_name							TYPEAS	s_mname
+	临时.rolecount							TYPEAS	n_sn
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.login_name = "" AND 输入.login_pwd = "" AND 输入.user_token = ""
+		ERROR "：登录名/登录口令/SN至少有一项不能为空"
+	ENDIF
+	
+	SELECT COUNT(1) AS usercount
+	FROM UUM_UU_ACCOUNT a
+	WHERE a.sysisdelete = '0'
+	OPTION 输入.login_name <> ""
+		a.login_name = 输入.login_name
+	ENDOPTION
+	OPTION 输入.login_pwd <> ""
+		a.login_pwd = 输入.login_pwd
+	ENDOPTION
+	OPTION 输入.user_token <> ""
+		a.user_token = 输入.user_token
+	ENDOPTION
+	ENDSELECT
+	临时.USERCOUNT = usercount
+	
+	IF 临时.USERCOUNT <> 1
+		ERROR "登录名或登录密码不正确!"
+	ELSE
+		SELECT b.depart_uuid AS deptuuid
+				, d.org_level_scode AS departlevel
+				, d.org_name AS deptname
+				, d.simple_name AS deptsimplename
+				, d.org_type_scode AS departtype
+		FROM UUM_UU_ACCOUNT a
+				LEFT JOIN UUM_UU_PERSONINFO b ON a.user_uuid = b.person_uuid
+				LEFT JOIN UUM_UU_ORGINFO d ON b.depart_uuid = d.org_uuid
+		WHERE a.sysisdelete = '0'
+		OPTION 输入.login_name <> ""
+			a.login_name = 输入.login_name
+		ENDOPTION
+		OPTION 输入.login_pwd <> ""
+			a.login_pwd = 输入.login_pwd
+		ENDOPTION
+		OPTION 输入.user_token <> ""
+			a.user_token = 输入.user_token
+		ENDOPTION
+		ENDSELECT
+		临时.departex_uuid = deptuuid
+		临时.departex_name = deptname
+		临时.departex_simplename = deptsimplename
+		临时.departlevel = departlevel
+		临时.departtype = departtype
+		
+		IF ( 临时.departlevel <> "U084" AND 临时.departtype = "U073" )
+			临时.departcount = 10
+			LOOP 临时.departcount
+			 IF 临时.departlevel <> "U084"
+				SELECT a.parent_uuid AS deptuuid
+					, b.org_level_scode AS departlevel
+					, b.org_name AS deptname
+					, b.simple_name AS deptsimplename
+				FROM UUM_UU_ORGINFO a
+					INNER JOIN UUM_UU_ORGINFO b ON a.parent_uuid = b.org_uuid
+				WHERE a.org_uuid = 临时.departex_uuid
+				ENDSELECT
+				临时.departex_uuid = deptuuid
+				临时.departex_name = deptname
+				临时.departex_simplename = deptsimplename
+				临时.departlevel = departlevel
+			 ENDIF
+			ENDLOOP
+		ENDIF
+		
+		SELECT ParaValue AS PVL
+		FROM PF_PB_Parameter
+		WHERE paracode = 'IsSwitchRole'
+		ENDSELECT
+		临时.isswchrole = PVL
+		
+		IF 临时.isswchrole = "1"
+			SELECT a.role_uuid AS ROLEUUID
+				, b.role_name AS ROLENAME
+			FROM UUM_UA_ROLEACCOUNT a
+				INNER JOIN UUM_UA_ROLE b ON a.role_uuid = b.role_uuid
+				INNER JOIN UUM_UU_ACCOUNT c ON a.account_uuid = c.account_uuid
+			WHERE a.is_default = '1'
+			OPTION 输入.login_name <> ""
+				c.login_name = 输入.login_name
+			ENDOPTION
+			OPTION 输入.login_pwd <> ""
+				c.login_pwd = 输入.login_pwd
+			ENDOPTION
+			OPTION 输入.user_token <> ""
+				c.user_token = 输入.user_token
+			ENDOPTION
+			ENDSELECT
+			临时.role_uuid = ROLEUUID
+			临时.role_name = ROLENAME
+		ENDIF
+		
+		QUERY
+			SELECT 输入.app_uuid AS appuuid
+				, a.login_name AS loginname
+				, a.login_pwd AS loginpwd
+				, a.account_uuid AS accountuuid
+				, a.user_scode AS accounttype
+				, a.user_uuid AS personuuid
+				, b.person_name AS personname
+				, 临时.role_uuid AS roleuuid
+				, 临时.role_name AS rolename
+				, b.org_uuid AS orguuid
+				, c.org_name AS orgname
+				, c.simple_name AS orgsimplename
+				, b.depart_uuid AS deptuuid
+				, d.org_name AS deptname
+				, d.simple_name AS deptsimplename
+				, e.manage_unit_uuid AS manageunituuid
+				, e.manage_unit_name AS manageunitname
+				, e.org_uuid AS manageunitorguuid
+				, 临时.departex_uuid AS deptuuidex
+				, 临时.departex_name AS deptnameex
+				, 临时.departex_simplename AS deptsimplenameex
+			FROM UUM_UU_ACCOUNT a
+				LEFT JOIN UUM_UU_PERSONINFO b ON a.user_uuid = b.person_uuid
+				LEFT JOIN UUM_UU_ORGINFO c ON b.org_uuid = c.org_uuid
+				LEFT JOIN UUM_UU_ORGINFO d ON b.depart_uuid = d.org_uuid
+				LEFT JOIN UUM_UU_MANAGEUNIT e ON c.manage_unit_uuid = e.manage_unit_uuid
+			WHERE a.sysisdelete = '0'
+			OPTION 输入.login_name <> ""
+				a.login_name = 输入.login_name
+			ENDOPTION
+			OPTION 输入.login_pwd <> ""
+				a.login_pwd = 输入.login_pwd
+			ENDOPTION
+			OPTION 输入.user_token <> ""
+				a.user_token = 输入.user_token
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

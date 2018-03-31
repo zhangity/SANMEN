@@ -1,0 +1,235 @@
+﻿[交易说明]
+	交易名：	应用信息维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、应用信息表【UUM_UA_APPLICATION】
+						2、角色信息表【UUM_UA_ROLE】
+						3、功能信息表【UUM_UA_FUNCTION】
+						
+	版本经历：	
+				1、v1.0		廖树平			2015/8/2 11:18:43		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--add/mdf/del
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.app_uuid								TYPEAS	s_uuid
+	输入.app_name								TYPEAS	s_mname
+	输入.short_name							TYPEAS	s_mname
+	输入.app_code								TYPEAS	s_code
+	输入.app_ver								TYPEAS	s_code
+	输入.app_type								TYPEAS	s_diccode
+	输入.deploy_type						TYPEAS	s_diccode
+	输入.data_right							TYPEAS	s_diccode
+	输入.deploy_date						TYPEAS	s_date
+	输入.manufacturer						TYPEAS	s_mname
+	输入.app_ip									TYPEAS	s_mname
+	输入.app_port								TYPEAS	s_mname
+	输入.app_deploy_name				TYPEAS	s_mname
+	输入.home_url								TYPEAS	s_mname
+	输入.login_url							TYPEAS	s_mname
+	输入.display_order					TYPEAS	n_sn
+	输入.ws_url									TYPEAS	s_mname
+	输入.ws_user								TYPEAS	s_mname
+	输入.ws_pwd									TYPEAS	s_mname
+	输入.remark									TYPEAS	s_comment
+	
+	输入.operator								TYPEAS	s_uuid
+	输入.odepart								TYPEAS	s_uuid
+	输入.oorg										TYPEAS	s_uuid
+	输入.odt										TYPEAS	s_datetime
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.reccount					TYPEAS		n_sn
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	IF 输入.actionflag = "add"
+		//判断应用的唯一性
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_APPLICATION a
+		WHERE a.app_code = 输入.app_code AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用代码已被使用，不能新增!"
+		ENDIF
+		
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_APPLICATION a
+		WHERE a.app_name = 输入.app_name AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用名称已被使用，不能新增!"
+		ENDIF
+		
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_APPLICATION a
+		WHERE a.short_name = 输入.short_name AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用简称已被使用，不能新增!"
+		ENDIF	
+	ENDIF
+	
+	IF 输入.actionflag = "mdf"
+		//应用代码不允许修改
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_APPLICATION a
+		WHERE a.app_uuid = 输入.app_uuid AND a.app_code <> 输入.app_code AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：应用代码不能修改!"
+		ENDIF
+		//应用名称不能重复
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_APPLICATION a
+		WHERE a.app_name = 输入.app_name AND a.app_uuid <> 输入.app_uuid AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用名称已被使用，不能修改!"
+		ENDIF
+		//应用简称不能重复
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_APPLICATION a
+		WHERE a.short_name = 输入.short_name AND a.app_uuid <> 输入.app_uuid AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用简称已被使用，不能修改!"
+		ENDIF
+	ENDIF
+
+	IF 输入.actionflag = "del"
+		//有功能的应用不能删除
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_FUNCTION a
+		WHERE a.app_uuid = 输入.app_uuid AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用有功能能使用，不能删除!"
+		ENDIF
+		//已创建角色的应用不能删除
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_ROLE a
+		WHERE a.app_uuid = 输入.app_uuid AND a.role_type = 'U132' AND a.sysisdelete = '0'
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的应用已创建角色，不能删除!"
+		ENDIF
+	ENDIF	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.display_order = ""
+		输入.display_order = 0
+	ENDIF
+	IF 输入.actionflag = "add"
+		INSERT INTO UUM_UA_APPLICATION(
+			app_uuid, app_code, app_name, short_name
+			, app_ver, display_order, app_type, app_ip
+			, app_port, app_deploy_name, home_url, login_url
+			, deploy_type, ws_url, ws_user, ws_pwd
+			, manufacturer, deploy_date, data_right, remark
+			, syscreatoruuid, syscreatedate, sysdeptuuid, syscompanyuuid)
+		VALUES(
+			输入.app_uuid , 输入.app_code , 输入.app_name , 输入.short_name
+			, 输入.app_ver , 输入.display_order , 输入.app_type , 输入.app_ip
+			, 输入.app_port , 输入.app_deploy_name , 输入.home_url , 输入.login_url
+			, 输入.deploy_type , 输入.ws_url , 输入.ws_user , 输入.ws_pwd
+			, 输入.manufacturer , 输入.deploy_date , 输入.data_right , 输入.remark
+			, 输入.operator , 输入.odt , 输入.odepart , 输入.oorg)
+		ENDINSERT
+		//自动创建应用管理员
+		INSERT INTO UUM_UA_ROLE(
+			role_uuid, role_code, role_name, short_name
+			, role_type, display_order, app_uuid, org_uuid
+			, remark, syscreatoruuid, syscreatedate, sysdeptuuid
+			, syscompanyuuid)
+		VALUES(
+			'WQL.APPUUID()' , CONCAT(输入.app_code , 'CMADMINROLE') , CONCAT(输入.app_name ,'应用管理员') , CONCAT(输入.short_name , '应用管理员')
+			, 'U133' , 0 , 输入.app_uuid , '-1'
+			, '' , 输入.operator , 输入.odt , 输入.odepart
+			, 输入.oorg)
+		ENDINSERT
+		//自动创建一般用户(是否分机构??)
+		INSERT INTO UUM_UA_ROLE(
+			role_uuid, role_code, role_name, short_name
+			, role_type, display_order, app_uuid, org_uuid
+			, remark, syscreatoruuid, syscreatedate, sysdeptuuid
+			, syscompanyuuid)
+		VALUES(
+			'WQL.APPUUID()' , CONCAT(输入.app_code , 'DFT') , CONCAT(输入.app_name , '一般用户') , CONCAT(输入.short_name , '一般用户')
+			, 'U134' , 0 , 输入.app_uuid , '-1'
+			, '' , 输入.operator , 输入.odt , 输入.odepart
+			, 输入.oorg)
+		ENDINSERT
+		
+	ENDIF
+	IF 输入.actionflag = "mdf"
+		UPDATE UUM_UA_APPLICATION
+		SET app_code = 输入.app_code
+				, app_name = 输入.app_name
+				, short_name = 输入.short_name
+				, app_ver = 输入.app_ver
+				, display_order = 输入.display_order
+				, app_type = 输入.app_type
+				, app_ip = 输入.app_ip
+				, app_port = 输入.app_port
+				, app_deploy_name = 输入.app_deploy_name
+				, home_url = 输入.home_url
+				, login_url = 输入.login_url
+				, deploy_type = 输入.deploy_type
+				, ws_url = 输入.ws_url
+				, ws_user = 输入.ws_user
+				, ws_pwd = 输入.ws_pwd
+				, manufacturer = 输入.manufacturer 
+				, deploy_date = 输入.deploy_date
+				, data_right = 输入.data_right
+				, remark = 输入.remark
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE app_uuid = 输入.app_uuid
+		ENDUPDATE
+	ENDIF
+	
+	IF 输入.actionflag = "del"
+		UPDATE UUM_UA_APPLICATION
+		SET sysisdelete = '1'
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE app_uuid = 输入.app_uuid
+		ENDUPDATE
+		//删除系统创建的应用管理员角色
+		UPDATE UUM_UA_ROLE
+		SET sysisdelete = '1'
+				, sysupdateuseruuid = 输入.operator
+				, sysupdatetime = 输入.odt
+		WHERE app_uuid = 输入.app_uuid AND ( role_type = 'U133' OR role_type = 'U134' )
+		ENDUPDATE
+	ENDIF

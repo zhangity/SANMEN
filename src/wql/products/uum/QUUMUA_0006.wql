@@ -1,0 +1,112 @@
+[交易说明]
+	交易名：		取用户角色树
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、应用信息表【UUM_UA_APPLICATION】
+				2、角色信息表【UUM_UA_ROLE】
+				3、角色用户表【UUM_UA_ROLEACCOUNT】
+
+	版本经历：	
+				1、v1.0		廖树平			2015/7/27 11:37:07		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.actionflag						TYPEAS	s_mname
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--角色标识
+	输入.account_uuid						TYPEAS	s_uuid
+	--机构标识
+	输入.org_uuid						TYPEAS	s_uuid
+	--部门标识
+	输入.depart_uuid						TYPEAS	s_uuid
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	IF 输入.actionflag = ""
+		ERROR ":未输入操作标识"
+	ENDIF
+	IF 输入.account_uuid = ""
+		ERROR ":未输入用户标识"
+	ENDIF
+
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF 输入.actionflag = "left"
+		QUERY
+			SELECT DISTINCT a.app_uuid AS node_uuid
+				, a.app_name AS node_name
+				, '-1' AS parent_uuid
+				, a.display_order
+				, 1 AS typeorder
+			FROM UUM_UA_APPLICATION a
+				INNER JOIN UUM_UA_ROLE b ON a.app_uuid = b.app_uuid
+			WHERE a.sysisdelete = '0' AND b.sysisdelete = '0'
+			UNION ALL
+			SELECT b.role_uuid AS node_uuid
+				, b.role_name AS node_name
+				, b.app_uuid AS parent_uuid
+				, b.display_order
+				, 2 AS typeorder
+			FROM UUM_UA_ROLE b
+				LEFT JOIN UUM_UA_ROLEACCOUNT c ON b.role_uuid = c.role_uuid AND c.account_uuid = 输入.account_uuid AND c.org_uuid = 输入.depart_uuid
+			WHERE b.sysisdelete = '0' AND b.role_type = 'U132' AND c.role_uuid IS NULL AND  b.org_uuid = 输入.org_uuid
+			ORDER BY typeorder, display_order
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	IF 输入.actionflag = "right"
+		QUERY
+			SELECT DISTINCT a.app_uuid AS node_uuid
+				, a.app_name AS node_name
+				, '-1' AS parent_uuid
+				, a.display_order
+				, 1 AS typeorder
+			FROM UUM_UA_APPLICATION a
+				INNER JOIN UUM_UA_ROLE b ON a.app_uuid = b.app_uuid
+			WHERE a.sysisdelete = '0' AND b.sysisdelete = '0'
+			UNION ALL
+			SELECT b.role_uuid AS node_uuid
+				, b.role_name AS node_name
+				, b.app_uuid AS parent_uuid
+				, b.display_order
+				, 2 AS typeorder
+			FROM UUM_UA_ROLE b
+				INNER JOIN UUM_UA_ROLEACCOUNT c ON b.role_uuid = c.role_uuid AND c.account_uuid = 输入.account_uuid AND c.org_uuid = 输入.depart_uuid
+			WHERE b.sysisdelete = '0' AND b.role_type = 'U132' AND  b.org_uuid = 输入.org_uuid
+			ORDER BY typeorder, display_order
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#对操作符进行判断，如果没有输入则提示错误

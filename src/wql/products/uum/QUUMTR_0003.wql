@@ -1,0 +1,93 @@
+[交易说明]
+	交易名： 甘肃统一用户同步
+	所属模块：	用户同步
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			人员组织关系表		【PUB_STRU】
+	版本经历：	
+				1、v1.0		于猛			2015/10/19 14:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库	GS
+	
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	输入.STRU_ID					TYPEAS		s_lname
+	输入.ORGAN_ID				TYPEAS		s_lname
+	输入.ORGAN_ALIAS				TYPEAS		s_lname
+	输入.STRU_TYPE				TYPEAS		s_lname
+	输入.PARENT_ID				TYPEAS		s_lname
+	输入.PRINCIPAL_ID			TYPEAS		s_lname
+	输入.CORPORATION_ID			TYPEAS		s_lname
+	输入.STRU_LEVEL				TYPEAS		n_sn
+	输入.STRU_PATH				TYPEAS		s_lname
+	输入.STRU_ORDER				TYPEAS		n_sn
+	输入.GLOBAL_ORDER			TYPEAS		n_sn
+	输入.BEGIN_DATE				TYPEAS		s_lname
+	输入.END_DATE				TYPEAS		s_lname
+	输入.SCN						TYPEAS		n_sn
+	输入.IS_LEAF					TYPEAS		s_bool
+	输入.IN_USE					TYPEAS		s_bool
+	输入.DEPARTMENT_ID			TYPEAS		s_lname
+	输入.PERMISSION_STRU_ID		TYPEAS		s_lname
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#普通不分页查询
+	IF 输入.flag = 1
+		QUERY
+			SELECT
+				STRU_ID
+				,ORGAN_ID
+				,ORGAN_ALIAS
+				,STRU_TYPE
+				,PARENT_ID
+				,PRINCIPAL_ID
+				,CORPORATION_ID
+				,STRU_LEVEL
+				,STRU_PATH
+				,STRU_ORDER
+				,GLOBAL_ORDER
+				,BEGIN_DATE
+				,END_DATE
+				,SCN
+				,IS_LEAF
+				,IN_USE
+				,DEPARTMENT_ID
+				,PERMISSION_STRU_ID
+			FROM PUB_STRU a
+			WHERE 1=1
+			ENDSELECT
+		ENDQUERY
+	ENDIF

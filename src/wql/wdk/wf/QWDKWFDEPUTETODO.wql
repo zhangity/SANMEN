@@ -1,0 +1,153 @@
+[交易说明]
+  交易名：    委托界面查询
+  所属模块：  流程管理
+  功能简述：  
+  版权所有：  杭州新世纪
+  表引用：    
+        1、任务待办表        【wdk_wf_todo】
+  版本经历：  
+        1、v1.0      江永特      2015-06-18 16:47:23    创建
+
+[数据库]
+  --指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+  #操作符   1-查询所有  2-分页查询
+  输入.flag            TYPEAS    s_string
+  
+  --流程模板ID
+  输入.pdid            TYPEAS  s_sstring
+  
+  --流程模板
+  输入.pdname            TYPEAS  s_sstring
+  
+  --原始办理者id
+  输入.originactorid        TYPEAS  s_sstring
+
+  --待办标题
+  输入.title            TYPEAS  s_string
+
+  --委托开始时间
+  输入.startdt            TYPEAS  s_string
+
+  --委托结束时间
+  输入.enddt            TYPEAS  s_string
+
+  #排序字段
+  输入.orderby          TYPEAS    f_string
+  
+[临时表]
+  --这边列出来的临时表就会在运行期动态创建
+
+  
+[临时变量]
+  --所有中间过程变量均可在此处定义
+  
+  
+[业务过程]
+
+  ##########################################
+  #      1、输入输出检查         #
+  ##########################################
+
+  
+  ##########################################
+  #      2、主过程前处理         #
+  ##########################################
+  
+  
+  ##########################################
+  #      3、业务主过程          #
+  ##########################################
+  IF  输入.flag = ""
+    ERROR "：未输入操作符"
+  ENDIF
+  
+  #根据条件查询符合要求的流水记录
+  IF  输入.flag = 1
+    PAGEQUERY
+      SELECT a.id 
+            ,a.title
+            ,a.actorid
+            ,b.person_name as actorname
+            ,a.originactorid
+            ,c.person_name as originactorname
+            ,a.createdt as createdt 
+            ,a.nodetitle as nodetitle 
+            ,a.operdt as operdt
+            ,a.status
+            ,case a.status 
+                when '0' then '待办'
+                when '1' then '完成'
+                when '2' then '关闭'
+             end as statusname
+            ,d.remark
+            ,e.cnname pdcnname
+        FROM wdk_wf_todo a 
+        LEFT JOIN UUM_UU_PERSONINFO b ON b.person_uuid = a.actorid
+        LEFT JOIN UUM_UU_PERSONINFO c ON c.person_uuid = a.originactorid
+        LEFT JOIN WDK_WF_DEPUTE d on d.id = a.depute_id 
+        LEFT JOIN WDK_WF_PD e ON e.pdid = a.pdid
+        WHERE a.AGENTTYPE = 'depute'
+          AND a.status IN ('0','1','2')
+        OPTION 输入.pdname <> ""
+          e.pdname = 输入.pdname
+        ENDOPTION
+        OPTION 输入.originactorid <> ""
+          a.originactorid = 输入.originactorid
+        ENDOPTION
+        OPTION 输入.title <> ""
+          a.title LIKE CONCAT("%" , 输入.title , "%" )
+        ENDOPTION
+        OPTION 输入.startdt <> ""
+          a.createdt >= 输入.startdt
+        ENDOPTION
+        OPTION 输入.enddt <> ""
+          a.createdt < 输入.enddt
+        ENDOPTION
+        
+        UNION ALL
+        
+        SELECT a.id 
+            ,a.title
+            ,a.actorid
+            ,b.person_name as actorname
+            ,a.originactorid
+            ,c.person_name as originactorname
+            ,a.createdt as createdt 
+            ,a.nodetitle as nodetitle 
+            ,a.operdt as operdt
+            ,a.status
+            ,case a.status 
+                when '0' then '待办'
+                when '1' then '完成'
+                when '2' then '关闭'
+             end as statusname
+            ,d.remark
+            ,e.cnname pdcnname
+        FROM wdk_wf_todo_his a 
+        LEFT JOIN UUM_UU_PERSONINFO b ON b.person_uuid = a.actorid
+        LEFT JOIN UUM_UU_PERSONINFO c ON c.person_uuid = a.originactorid
+        LEFT JOIN WDK_WF_DEPUTE d on d.id = a.depute_id 
+        LEFT JOIN WDK_WF_PD e ON e.pdid = a.pdid
+        WHERE a.AGENTTYPE = 'depute'
+          AND a.status IN ('0','1','2')
+        OPTION 输入.pdname <> ""
+          e.pdname = 输入.pdname
+        ENDOPTION
+        OPTION 输入.originactorid <> ""
+          a.originactorid = 输入.originactorid
+        ENDOPTION
+        OPTION 输入.title <> ""
+          a.title LIKE CONCAT("%" , 输入.title , "%" )
+        ENDOPTION
+        OPTION 输入.startdt <> ""
+          a.createdt >= 输入.startdt
+        ENDOPTION
+        OPTION 输入.enddt <> ""
+          a.createdt <= 输入.enddt
+        ENDOPTION
+        
+      ENDSELECT
+    ENDPAGEQUERY
+  ENDIF

@@ -1,0 +1,248 @@
+[交易说明]
+	交易名：		统一待办处理
+	所属模块：	统一待办
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、统一待办表			【PF_UN_TODO】
+				2、统一待办历史表		【PF_UN_TODO_Hist】
+	版本经历：	
+				1、v1.0			于猛			2014-11-17 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	--统一待办ID
+	输入.untodo_uuid			TYPEAS		s_uuid
+	
+	--来源应用系统标识
+	输入.appcode				TYPEAS		s_code
+	
+	--待办在来源系统中的待办ID
+	输入.todoid				TYPEAS		s_wfid
+	
+	---待办类型
+	输入.todotype			TYPEAS		s_type
+	
+	---流程名称
+	输入.flowname			TYPEAS		s_wfid
+	
+	--流程类型
+	输入.flowtype			TYPEAS		s_code
+	
+	---当前环节名称
+	输入.nodename			TYPEAS		s_wfid
+	
+	--前一环节名称
+	输入.prenodename			TYPEAS		s_wfid
+	
+	--待办任务标题
+	输入.title				TYPEAS		s_mname
+	
+	--任务摘要
+	输入.tasksummary			TYPEAS		s_lname
+	
+	--处理人ID
+	输入.userid				TYPEAS		s_uuid
+	
+	--处理人姓名
+	输入.username			TYPEAS		s_file
+	
+	--上一环节任务处理人ID
+	输入.preuserid			TYPEAS		s_uuid
+	
+	--上一环节任务处理人名称
+	输入.preusername			TYPEAS		s_file
+
+	--任务送达时间
+	输入.tasktime			TYPEAS		s_datetime
+	
+	--待办办理界面相对路径
+	输入.relativepath		TYPEAS		s_file
+	
+	--待办任务逾期时间
+	输入.expirestime			TYPEAS		s_datetime
+	
+	--待办任务预警时间
+	输入.warningtime			TYPEAS		s_datetime
+	
+	--紧急程度
+	输入.emergency			TYPEAS		s_code
+	
+	--备注
+	输入.remark				TYPEAS		s_file
+	
+	--自定义参数
+	输入.extraparam			TYPEAS		s_mstring
+	
+	--接收时间
+	输入.createdate			TYPEAS		s_datetime
+	
+	
+	
+	
+	--关闭方式
+	输入.closetype			TYPEAS		s_type
+	
+	--关闭时间
+	输入.closedate			TYPEAS		s_datetime
+	
+	--移动时间
+	输入.movedate			TYPEAS		s_datetime
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO PF_UN_TODO(
+    			untodo_uuid
+				,appcode
+				,todoid
+				,todotype
+				,flowname
+				,flowtype
+				,nodename
+				,prenodename
+				,title
+				,tasksummary
+				,userid
+				,username
+				,preuserid
+				,preusername
+				,tasktime
+				,relativepath
+				,expirestime
+				,warningtime
+				,emergency
+				,remark
+				,extraparam
+				,createdate
+    	) values (
+    			输入.untodo_uuid
+				,输入.appcode
+				,输入.todoid
+				,输入.todotype
+				,输入.flowname
+				,输入.flowtype
+				,输入.nodename
+				,输入.prenodename
+				,输入.title
+				,输入.tasksummary
+				,输入.userid
+				,输入.username
+				,输入.preuserid
+				,输入.preusername
+				,输入.tasktime
+				,输入.relativepath
+				,输入.expirestime
+				,输入.warningtime
+				,输入.emergency
+				,输入.remark
+				,输入.extraparam
+				,输入.createdate
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#2、关闭，从活动库移动到历史库
+	IF 输入.flag = 2
+	
+		#2.1、先向历史库插入待办信息
+		INSERT INTO PF_UN_TODO_Hist(
+    			untodo_uuid
+				,appcode
+				,todoid
+				,todotype
+				,flowname
+				,flowtype
+				,nodename
+				,prenodename
+				,title
+				,tasksummary
+				,userid
+				,username
+				,preuserid
+				,preusername
+				,tasktime
+				,relativepath
+				,expirestime
+				,warningtime
+				,emergency
+				,remark
+				,extraparam
+				,createdate
+				,closetype
+				,closedate
+				,movedate
+    	) SELECT
+    			untodo_uuid
+				,appcode
+				,todoid
+				,todotype
+				,flowname
+				,flowtype
+				,nodename
+				,prenodename
+				,title
+				,tasksummary
+				,userid
+				,username
+				,preuserid
+				,preusername
+				,tasktime
+				,relativepath
+				,expirestime
+				,warningtime
+				,emergency
+				,remark
+				,extraparam
+				,createdate
+				,输入.closetype		as	closetype
+				,输入.closedate		as	closedate
+				,输入.movedate		as	movedate
+			FROM PF_UN_TODO
+			WHERE 1=1
+				AND appcode		= 	输入.appcode
+				AND todoid		=	输入.todoid
+		ENDINSERT
+		
+		#2.2、从活动库删除原始待办记录
+		DELETE FROM PF_UN_TODO
+		WHERE 1=1
+				AND appcode		= 	输入.appcode
+				AND todoid		=	输入.todoid
+		ENDDELETE
+	ENDIF

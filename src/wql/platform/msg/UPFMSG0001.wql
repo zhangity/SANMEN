@@ -1,0 +1,247 @@
+[交易说明]
+	交易名：统一消息表
+	所属模块：	消息
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		统一消息表					【PF_UN_MSG】
+	版本经历：	
+				1、v1.0			于猛			2015-10-08 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	输入.unmsg_uuids				TYPEAS		f_uuid
+	
+		
+	--统一消息ID
+	输入.unmsg_uuid				TYPEAS		s_uuid
+	
+	--发送者类型
+	输入.sendertype				TYPEAS		s_code
+	
+	--发送者标识
+	输入.senderid				TYPEAS		s_uuid
+	
+	--发送者姓名
+	输入.sendername				TYPEAS		s_mname
+	
+	--消息在源系统中的ID
+	输入.msgid					TYPEAS		s_uuid
+	
+	--消息类型
+	输入.msgtype					TYPEAS		s_code
+	
+	--消息标题
+	输入.msgtitle				TYPEAS		s_mname
+	
+	--消息摘要
+	输入.msgsummary				TYPEAS		s_lname
+	
+	--消息内容
+	输入.msgcontent				TYPEAS		c_content
+	
+	--消息产生时间
+	输入.msgtime					TYPEAS		s_datetime
+	
+	--自定义发送参数
+	输入.msgparam				TYPEAS		s_mstring
+	
+	--接收者类型
+	输入.receivertype			TYPEAS		s_code
+	
+	--接收者标识
+	输入.receiverid				TYPEAS		s_uuid
+	
+	--路由方式
+	输入.routetype				TYPEAS		s_uuid
+	
+	--预定发送时间
+	输入.routetime				TYPEAS		s_datetime
+	
+	--发送状态
+	输入.status					TYPEAS		s_code
+	
+	--当前发送次数
+	输入.sendcount				TYPEAS		s_code
+	
+	--上一次处理时间
+	输入.updatetime				TYPEAS		s_datetime
+	
+	--创建时间
+	输入.createtime				TYPEAS		s_datetime
+	
+	--移动时间
+	输入.movetime				TYPEAS		s_datetime
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#1、新增
+	IF 输入.flag = 1
+		INSERT INTO PF_UN_MSG(
+    			unmsg_uuid
+				,sendertype
+				,senderid
+				,sendername
+				,msgid
+				,msgtype
+				,msgtitle
+				,msgsummary
+				,msgcontent
+				,msgtime
+				,msgparam
+				,receivertype
+				,receiverid
+				,routetype
+				,routetime
+				,status
+				,sendcount
+				,updatetime
+				,createtime
+    	) values (
+				输入.unmsg_uuid
+				,输入.sendertype
+				,输入.senderid
+				,输入.sendername
+				,输入.msgid
+				,输入.msgtype
+				,输入.msgtitle
+				,输入.msgsummary
+				,输入.msgcontent
+				,输入.msgtime
+				,输入.msgparam
+				,输入.receivertype
+				,输入.receiverid
+				,输入.routetype
+				,输入.routetime
+				,输入.status
+				,输入.sendcount
+				,输入.updatetime
+				,输入.createtime
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#2、关闭，从活动库移动到历史库
+	IF 输入.flag = 2
+	
+		#2.1、先向历史库插入消息信息
+		INSERT INTO PF_UN_MSG_Hist(
+    			unmsg_uuid
+				,sendertype
+				,senderid
+				,sendername
+				,msgid
+				,msgtype
+				,msgtitle
+				,msgsummary
+				,msgcontent
+				,msgtime
+				,msgparam
+				,receivertype
+				,receiverid
+				,routetype
+				,routetime
+				,status
+				,sendcount
+				,updatetime
+				,createtime
+				,movetime
+    	) SELECT
+    			unmsg_uuid
+				,sendertype
+				,senderid
+				,sendername
+				,msgid
+				,msgtype
+				,msgtitle
+				,msgsummary
+				,msgcontent
+				,msgtime
+				,msgparam
+				,receivertype
+				,receiverid
+				,routetype
+				,routetime
+				,输入.status			as	status
+				,输入.sendcount		as	sendcount
+				,updatetime
+				,createtime
+				,输入.movetime		as	movetime
+			FROM PF_UN_MSG a
+			WHERE 1=1
+				AND a.unmsg_uuid	= 	输入.unmsg_uuid
+		ENDINSERT
+		
+		#2.2、从活动库删除原始消息记录
+		DELETE FROM PF_UN_MSG
+		WHERE 1=1
+				AND unmsg_uuid		= 	输入.unmsg_uuid
+		ENDDELETE
+	ENDIF
+	
+	
+	#3.1、更新记录状态为已接收并开始处理
+	IF 输入.flag = 31
+		UPDATE PF_UN_MSG SET
+			status				=	'02'
+			,updatetime			=	输入.updatetime
+		WHERE 1=1
+			AND unmsg_uuid in ( 输入.unmsg_uuids )
+		ENDUPDATE
+	ENDIF
+	
+	
+	#3.2、更新处理后的状态
+	IF 输入.flag = 32
+		UPDATE PF_UN_MSG SET
+			status				=	输入.status
+			,sendcount			=	输入.sendcount
+			,updatetime			=	输入.updatetime
+		WHERE 1=1
+			AND unmsg_uuid		=	输入.unmsg_uuid
+		ENDUPDATE
+	ENDIF
+	
+	
+	
+	#3.3、初始化更新状态，将所有状态为02的改为状态01
+	IF 输入.flag = 33
+		UPDATE PF_UN_MSG SET
+			status				=	'01'
+		WHERE 1=1
+			AND status			=	'02'
+		ENDUPDATE
+	ENDIF
+	
+	#4、删除

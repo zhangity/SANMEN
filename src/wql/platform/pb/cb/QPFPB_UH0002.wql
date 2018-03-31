@@ -1,0 +1,134 @@
+[交易说明]
+	交易名：	平台服务接口交互报文留痕表
+	所属模块：平台	
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			1、用户登录信息表			【PF_PB_Login】
+	版本经历：	
+			1、v1.0			于猛			2015-11-14 20:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	--登录名
+	输入.loginname				TYPEAS		s_mname
+	
+	--登录状态
+	输入.loginstatus				TYPEAS		s_type
+	
+	--登录系统
+	输入.loginappuuid			TYPEAS		s_uuid
+	
+	--登录时间
+	输入.logindt					TYPEAS		s_datetime
+	
+	--登录ip
+	输入.loginip					TYPEAS		s_uuid
+	
+	--离线时间
+	输入.logoutdt				TYPEAS		s_datetime
+	
+	--登录sessionid
+	输入.loginsessionid			TYPEAS		s_mname
+	
+	--用户状态
+	输入.userstatus				TYPEAS		s_type
+	
+	--状态变更时间
+	输入.updatedt				TYPEAS		s_datetime
+
+
+
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	#1、普通查询
+	IF 输入.flag = 1
+		QUERY
+			SELECT
+				a.loginname
+				,a.loginstatus
+				,a.loginappuuid
+				,a.logindt
+				,a.loginip
+				,a.logoutdt
+				,a.loginsessionid
+				,a.userstatus
+				,a.updatedt
+			FROM PF_PB_Login a
+			WHERE 1=1
+			OPTION 输入.loginname <> ""
+				a.loginname = 输入.loginname
+			ENDOPTION
+			OPTION 输入.loginstatus <> ""
+				a.loginstatus = 输入.loginstatus
+			ENDOPTION
+			OPTION 输入.loginappuuid <> ""
+				a.loginappuuid = 输入.loginappuuid
+			ENDOPTION
+			OPTION 输入.logindt <> ""
+				a.logindt = 输入.logindt
+			ENDOPTION
+			OPTION 输入.logoutdt <> ""
+				a.logoutdt = 输入.logoutdt
+			ENDOPTION
+			OPTION 输入.loginsessionid <> ""
+				a.loginsessionid = 输入.loginsessionid
+			ENDOPTION
+			OPTION 输入.userstatus <> ""
+				a.userstatus = 输入.userstatus
+			ENDOPTION
+			OPTION 输入.updatedt <> ""
+				a.updatedt = 输入.updatedt
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#2、查询所有不等于指定状态的记录
+	IF 输入.flag = 2
+		QUERY
+			SELECT
+				a.loginname
+				,a.loginstatus
+				,a.loginappuuid
+				,a.logindt
+				,a.loginip
+				,a.logoutdt
+				,a.loginsessionid
+				,a.userstatus
+				,a.updatedt
+			FROM PF_PB_Login a
+			WHERE 1=1
+			OPTION 输入.a.loginstatus <> ""
+				a.a.loginstatus <> 输入.a.loginstatus
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

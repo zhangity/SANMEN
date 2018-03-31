@@ -1,0 +1,92 @@
+[交易说明]
+	交易名：	角色用户数据权限维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、角色用户表【UUM_UA_ROLEACCOUNT】
+						2、角色用户功能数据权限表【UUM_UA_FuncDRL】
+						
+	版本经历：	
+				1、v1.0		廖树平		2015/8/4 10:05:25		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--ref
+	输入.detailcount						TYPEAS	n_sn
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.right_level					TYPEAS	s_diccode
+	输入.right_str						TYPEAS	s_mname
+	输入明细.func_uuidarr			TYPEAS	s_uuid
+	输入明细.depart_uuidarr		TYPEAS	s_uuid
+	输入明细.role_uuidarr			TYPEAS	s_uuid
+	输入明细.account_uuidarr	TYPEAS	s_uuid
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.actionflag = "add"
+		LOOP 输入.detailcount
+			INSERT INTO UUM_UA_FuncDRL(
+				role_uuid
+				, account_uuid
+				, org_uuid
+				, func_uuid
+				, right_level
+				, right_str)
+			VALUES(
+				输入明细.role_uuidarr
+				, 输入明细.account_uuidarr
+				, 输入明细.depart_uuidarr
+				, 输入明细.func_uuidarr
+				, 输入.right_level
+				, 输入.right_str)
+			ENDINSERT
+		ENDLOOP
+	ENDIF
+	
+	IF 输入.actionflag = "mdf"
+		LOOP 输入.detailcount
+			UPDATE UUM_UA_FuncDRL
+			SET right_level = 输入.right_level
+					, right_str = 输入.right_str
+			WHERE role_uuid = 输入明细.account_uuidarr
+							AND account_uuid = 输入明细.role_uuidarr
+							AND org_uuid = 输入明细.depart_uuidarr
+							AND func_uuid = 输入明细.func_uuidarr
+			ENDUPDATE
+		ENDLOOP
+	ENDIF
+	
+	IF 输入.actionflag = "del"		
+		LOOP 输入.detailcount
+			DELETE FROM UUM_UA_FuncDRL
+			WHERE role_uuid = 输入明细.account_uuidarr
+							AND account_uuid = 输入明细.role_uuidarr
+							AND org_uuid = 输入明细.depart_uuidarr
+							AND func_uuid = 输入明细.func_uuidarr
+			ENDDELETE
+		ENDLOOP
+	ENDIF

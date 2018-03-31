@@ -1,0 +1,87 @@
+[交易说明]
+	交易名：		子功能数据权限设置
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、子功能信息表【UUM_UA_SUBFUNCTION】
+				2、角色子功能数据权限表【UUM_UA_SUBFUNCDRL】
+				3、角色信息表【UUM_UA_ROLE】
+	版本经历：	
+				1、v1.0		张会成			2016/02/02 10:16:59		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--功能标识
+	输入.role_uuid								TYPEAS	s_uuid
+	输入.subfunc_uuid								TYPEAS	s_uuid
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+		#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.role_uuid = ""
+		ERROR ":未输入角色ID"
+	ENDIF
+	IF 输入.subfunc_uuid = ""
+		ERROR ":未输入子功能信息ID"
+	ENDIF
+	
+	QUERY
+		SELECT o.ORG_UUID
+		    , o.ORG_CODE
+		    , o.ORG_NAME
+		    , o.ORG_LEVEL_SCODE
+		    , o.ORG_TYPE_SCODE
+		    , o.PARENT_UUID
+		    , p.ORG_NAME AS parent_org
+		    , t.DICNAME AS org_type_scodename
+		    , l.DICNAME AS org_level_scodename
+		    , t.REMARK AS operation
+		FROM UUM_UU_ORGINFO o INNER
+		    JOIN UUM_UA_SUBFUNCDRL s ON o.ORG_UUID = s.ORG_UUID
+		    LEFT JOIN UUM_UU_ORGINFO p ON p.ORG_UUID = o.PARENT_UUID
+		    LEFT JOIN PF_PB_SysDicInfo t ON t.DICSCODE = o.ORG_TYPE_SCODE
+		    LEFT JOIN PF_PB_SysDicInfo l ON l.DICSCODE = o.ORG_LEVEL_SCODE
+		WHERE o.sysisdelete = '0'
+		OPTION 输入.role_uuid <> ""
+			s.ROLE_UUID = 输入.role_uuid
+		ENDOPTION
+		OPTION 输入.subfunc_uuid <> ""
+			s.SUBFUNC_UUID = 输入.subfunc_uuid
+		ENDOPTION
+		ORDER BY o.DISPLAY_ORDER
+		ENDSELECT
+	ENDQUERY

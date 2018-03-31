@@ -1,0 +1,209 @@
+[交易说明]
+	交易名：		人员信息更新
+	所属模块：	系统功能
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、组织机构表				【wdk_org】
+	版本经历：	
+				1、v1.0		于猛			2015-03-30 14:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--组织机构主键
+	输入.id							TYPEAS		s_id
+	
+	--组织机构代码
+	输入.orgn_code					TYPEAS		s_id
+	
+	--组织机构名称
+	输入.orgn_name					TYPEAS		s_name
+	
+	--行政区划代码
+	输入.area_code					TYPEAS		s_code
+	
+	--组织机构类型代码
+	输入.orgn_type_code				TYPEAS		s_code
+	
+	--机构性质代码
+	输入.orgn_kind_code				TYPEAS		s_code
+	
+	--机构级别代码
+	输入.orgn_lvl_code				TYPEAS		s_code
+	
+	--行业类别代码
+	输入.prfn_type_code				TYPEAS		s_code
+	
+	--上级组织机构代码
+	输入.prnt_orgn_code				TYPEAS		s_code
+	
+	--组织机构排列顺序
+	输入.orgn_sort_no				TYPEAS		s_sstring
+	
+	--上级组织机构主键
+	输入.prnt_orgn_id				TYPEAS		s_id
+	
+	--管控级别代码
+	输入.ctrl_lvl_code				TYPEAS		s_code
+	
+	--组织单元大类代码
+	输入.orgn_unit_brd_hdng_code		TYPEAS		s_code
+	
+	--编制总数
+	输入.appd_sum_ttl				TYPEAS		s_code
+	
+	--邮编
+	输入.pstd						TYPEAS		s_sstring
+	
+	--职能
+	输入.fncn						TYPEAS		s_code
+	
+	--层次码
+	输入.grdn_code					TYPEAS		s_name
+	
+	--业务系统代码
+	输入.bsns_sysm_code				TYPEAS		s_id
+	
+	--业务系统主键
+	输入.bsns_sysm_id				TYPEAS		s_id
+	
+	--启用标识
+	输入.enbd_idny					TYPEAS		s_stype
+	
+	--更新时间
+	输入.updt_time					TYPEAS		s_sstring
+	
+	--状态
+	输入.status						TYPEAS		s_stype
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增  insert
+	IF 输入.flag = 1
+		INSERT INTO wdk_org(
+    		id
+			,orgn_code
+			,orgn_name
+			,area_code
+			,orgn_type_code
+			,orgn_kind_code
+			,orgn_lvl_code
+			,prfn_type_code
+			,prnt_orgn_code
+			,orgn_sort_no
+			,prnt_orgn_id
+			,ctrl_lvl_code
+			,orgn_unit_brd_hdng_code
+			,appd_sum_ttl
+			,pstd
+			,fncn
+			,grdn_code
+			,bsns_sysm_code
+			,bsns_sysm_id
+			,enbd_idny
+			,updt_time
+			,status
+    	) values (
+			输入.id
+			,输入.orgn_code
+			,输入.orgn_name
+			,输入.area_code
+			,输入.orgn_type_code
+			,输入.orgn_kind_code
+			,输入.orgn_lvl_code
+			,输入.prfn_type_code
+			,输入.prnt_orgn_code
+			,输入.orgn_sort_no
+			,输入.prnt_orgn_id
+			,输入.ctrl_lvl_code
+			,输入.orgn_unit_brd_hdng_code
+			,输入.appd_sum_ttl
+			,输入.pstd
+			,输入.fncn
+			,输入.grdn_code
+			,输入.bsns_sysm_code
+			,输入.bsns_sysm_id
+			,输入.enbd_idny
+			,输入.updt_time
+			,输入.status
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#修改  update
+	IF 输入.flag = 2
+		UPDATE wdk_org a SET
+			a.id							=	输入.id
+			,a.orgn_code					=	输入.orgn_code
+			,a.orgn_name					=	输入.orgn_name
+			,a.area_code					=	输入.area_code
+			,a.orgn_type_code				=	输入.orgn_type_code
+			,a.orgn_kind_code				=	输入.orgn_kind_code
+			,a.orgn_lvl_code				=	输入.orgn_lvl_code
+			,a.prfn_type_code				=	输入.prfn_type_code
+			,a.prnt_orgn_code				=	输入.prnt_orgn_code
+			,a.orgn_sort_no					=	输入.orgn_sort_no
+			,a.prnt_orgn_id					=	输入.prnt_orgn_id
+			,a.ctrl_lvl_code				=	输入.ctrl_lvl_code
+			,a.orgn_unit_brd_hdng_code		=	输入.orgn_unit_brd_hdng_code
+			,a.appd_sum_ttl					=	输入.appd_sum_ttl
+			,a.pstd							=	输入.pstd
+			,a.fncn							=	输入.fncn
+			,a.grdn_code					=	输入.grdn_code
+			,a.bsns_sysm_code				=	输入.bsns_sysm_code
+			,a.bsns_sysm_id					=	输入.bsns_sysm_id
+			,a.enbd_idny					=	输入.enbd_idny
+			,a.updt_time					=	输入.updt_time
+			,a.status						=	输入.status
+		WHERE
+			a.id = 输入.id
+		ENDUPDATE
+	
+	ENDIF
+	
+	
+	
+	#删除  delete
+	IF 输入.flag = 3
+		DELETE FROM wdk_org a
+		WHERE a.id = 输入.id
+		ENDDELETE
+	ENDIF

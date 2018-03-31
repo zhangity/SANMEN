@@ -1,0 +1,162 @@
+[交易说明]
+	交易名：		流程设计器查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程设计器				【wdk_wf_designer】
+	版本经历：	
+				1、v1.0			于猛			2015-04-08 14:03:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-查询所有  2-分页查询
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#当前查询的时间，用来判断时间段是否有效
+	输入.querydt					TYPEAS		s_string
+	
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--模板标识
+	输入.pdid					TYPEAS		s_id
+	
+	--模板名称
+	输入.pdname					TYPEAS		s_sstring
+	
+	--版本号
+	输入.pdversion				TYPEAS		s_stype
+	
+	--模板中文名称
+	输入.cnname					TYPEAS		s_sstring
+	
+	--JPDL内容
+	输入.jpdl					TYPEAS		c_content
+	
+	--WF内容XML格式
+	输入.wf						TYPEAS		c_content
+	
+	--WF内容JSON格式
+	输入.wfjson					TYPEAS		c_content
+	
+	--FX内容
+	输入.fx						TYPEAS		c_content
+	
+	--是否已部署
+	输入.isdeploy				TYPEAS		s_stype	
+	
+	--部署后的模板id
+	输入.engpdid					TYPEAS		s_id
+	
+	--当前状态
+	输入.status					TYPEAS		s_stype
+	
+	--所属分类
+	输入.parentcode				TYPEAS		s_sstring
+	
+	--排序序号
+	输入.ordercode				TYPEAS		s_sstring	
+	
+	--备注
+	输入.remark					TYPEAS		s_string
+	
+	--创建时间
+	输入.createdt				TYPEAS		s_sstring
+
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#根据条件查询符合要求的流水记录
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				pdid
+				,pdname
+				,pdversion
+				,cnname
+				,jpdl
+				,wf
+				,wfjson
+				,fx
+				,isdeploy
+				,case isdeploy when '1' then '已部署' else '未部署' end as isdeployname
+				,engpdid
+				,status
+				,case status when '1' then '启用' else '停用' end as statusname
+				,parentcode	
+				,ordercode	
+				,remark
+				,createdt
+				
+			FROM wdk_wf_designer  a
+			WHERE 1=1
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.pdname <> ""
+				a.pdname like CONCAT('%' , 输入.pdname , '%')
+			ENDOPTION
+			OPTION 输入.cnname <> ""
+				a.cnname like CONCAT('%' , 输入.cnname , '%')
+			ENDOPTION
+			OPTION 输入.pdversion <> ""
+				a.pdversion = 输入.pdversion
+			ENDOPTION
+			OPTION 输入.parentcode <> ""
+				a.parentcode = 输入.parentcode
+			ENDOPTION
+			OPTION 输入.ordercode <> ""
+				a.ordercode = 输入.ordercode
+			ENDOPTION
+			OPTION 输入.isdeploy <> ""
+				a.isdeploy = 输入.isdeploy
+			ENDOPTION
+			OPTION 输入.engpdid <> ""
+				a.engpdid = 输入.engpdid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

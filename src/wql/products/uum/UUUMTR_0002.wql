@@ -1,0 +1,94 @@
+[交易说明]
+	交易名： 甘肃统一用户同步
+	所属模块：	用户同步
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			组织表			【PUB_ORGAN】
+	版本经历：	
+				1、v1.0		于猛			2015/10/19 14:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+	
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag						TYPEAS		s_string
+	输入.count						TYPEAS		n_integer
+	
+	输入明细.organ_id				TYPEAS		s_lname
+	输入明细.organ_code				TYPEAS		s_lname
+	输入明细.organ_name				TYPEAS		s_lname
+	输入明细.short_name				TYPEAS		s_lname
+	输入明细.organ_type				TYPEAS		s_lname
+	输入明细.workplace_id			TYPEAS		s_lname
+	输入明细.begin_date				TYPEAS		s_lname
+	输入明细.end_date				TYPEAS		s_lname
+	输入明细.scn						TYPEAS		n_sn
+	输入明细.in_use					TYPEAS		s_bool
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#1、新增
+	IF 输入.flag = 1
+		LOOP 输入.count
+			INSERT INTO PUB_ORGAN(
+					ORGAN_ID
+					,ORGAN_CODE
+					,ORGAN_NAME
+					,SHORT_NAME
+					,ORGAN_TYPE
+					,WORKPLACE_ID
+					,BEGIN_DATE
+					,END_DATE
+					,SCN
+					,IN_USE
+				)  VALUES (
+					输入明细.organ_id
+					,输入明细.organ_code
+					,输入明细.organ_name
+					,输入明细.short_name
+					,输入明细.organ_type
+					,输入明细.workplace_id
+					,输入明细.begin_date
+					,输入明细.end_date
+					,输入明细.scn
+					,输入明细.in_use
+				)
+			ENDINSERT
+		ENDLOOP
+	ENDIF
+	
+	#2、删除所有
+	IF 输入.flag = 2
+		DELETE FROM PUB_ORGAN
+		ENDDELETE
+	ENDIF

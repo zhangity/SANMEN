@@ -1,0 +1,130 @@
+[交易说明]
+	交易名：		取按钮组按钮
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、按钮组主表【UUM_UA_BUTTONGROUPMST】
+				2、按钮组明细表【UUM_UA_BUTTONGROUPDTL】
+				3、角色按钮组权限表【UUM_UA_ROLEBTNGRG】
+				4、角色用户表【UUM_UA_ROLEACCOUNT】
+	版本经历：	
+				1、v1.0		廖树平			2015/8/19 10:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	--01:全部	02：有授权
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--应用标识
+	输入.app_uuid									TYPEAS	s_uuid
+	
+	--用户标识
+	输入.account_uuid							TYPEAS	s_uuid
+	
+	--角色标识
+	输入.role_uuid								TYPEAS	s_uuid
+
+	--按钮组编码
+	输入.btngrp_code							TYPEAS	s_code
+	
+	--按钮组名称
+	输入.btngrp_name							TYPEAS	s_mname
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	IF 输入.flag = ""
+		ERROR "：未输入查询类型"
+	ENDIF
+	IF 输入.app_uuid = ""
+		ERROR "：未输入应用标识"
+	ENDIF
+	IF 输入.account_uuid = ""
+		ERROR "：未输入用户标识"
+	ENDIF
+	IF 输入.btngrp_code = ""
+		ERROR "：未输入按钮组编码"
+	ENDIF
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.flag = "01"
+		QUERY
+			SELECT a.btngrp_code
+				, a.btngrp_name
+				, b.button_name
+				, b.display_name
+				, b.short_name
+				, b.display_order
+				, b.ico_index
+				, b.select_ico_index
+				, b.is_in_toolbar
+				, b.remark
+			FROM UUM_UA_BUTTONGROUPMST a
+				INNER JOIN UUM_UA_BUTTONGROUPDTL b ON a.btngrpmst_uuid = b.btngrpmst_uuid
+			WHERE a.sysisdelete = '0' AND a.app_uuid = 输入.app_uuid AND a.btngrp_code = 输入.btngrp_code
+			OPTION 输入.btngrp_name <> ""
+				a.btngrp_name LIKE CONCAT(输入.btngrp_name , "%")
+			ENDOPTION
+			ORDER BY b.display_order
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	IF 输入.flag = "02"
+		QUERY
+			SELECT a.btngrp_code
+				, a.btngrp_name
+				, b.button_name
+				, b.display_name
+				, b.short_name
+				, b.display_order
+				, b.ico_index
+				, b.select_ico_index
+				, b.is_in_toolbar
+				, b.remark
+			FROM UUM_UA_BUTTONGROUPMST a
+				INNER JOIN UUM_UA_BUTTONGROUPDTL b ON a.btngrpmst_uuid = b.btngrpmst_uuid
+				INNER JOIN UUM_UA_ROLEBTNGRG c ON a.btngrpmst_uuid = c.btngrpmst_uuid
+														AND b.btngrpdtl_uuid = c.btngrpdtl_uuid
+				INNER JOIN UUM_UA_ROLEACCOUNT d ON c.role_uuid = d.role_uuid
+			WHERE a.sysisdelete = '0' AND a.app_uuid = 输入.app_uuid
+							AND a.btngrp_code = 输入.btngrp_code AND d.account_uuid = 输入.account_uuid
+			OPTION 输入.role_uuid <> ""
+				c.role_uuid = 输入.role_uuid
+			ENDOPTION
+			OPTION 输入.btngrp_name <> ""
+				a.btngrp_name LIKE CONCAT(输入.btngrp_name , "%")
+			ENDOPTION
+			ORDER BY b.display_order
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+
+	#对操作符进行判断，如果没有输入则提示错误

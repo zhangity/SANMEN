@@ -1,0 +1,113 @@
+[交易说明]
+	交易名： 甘肃统一用户同步
+	所属模块：	用户同步
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			用户表					【PUB_USERS】
+	版本经历：	
+				1、v1.0		于猛			2015/10/19 14:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库	GS
+	
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	输入.USER_ID					TYPEAS		s_lname
+	输入.EXTERNAL_USER			TYPEAS		s_lname
+	输入.USER_NAME				TYPEAS		s_lname
+	输入.PASSWORD				TYPEAS		s_lname
+	输入.ACCOUNT_STATUS			TYPEAS		s_lname
+	输入.SECURITY_LEVEL			TYPEAS		n_hnumeric
+	输入.MAX_SESSIONS			TYPEAS		n_hnumeric
+	输入.IS_SYS					TYPEAS		s_bool
+	输入.IS_CPUBLIC				TYPEAS		s_bool
+	输入.CREATE_TIME				TYPEAS		s_lname
+	输入.LOCK_TIME				TYPEAS		s_lname
+	输入.EXPIRED_TIME			TYPEAS		s_lname
+	输入.PSWD_UPT_TIME			TYPEAS		s_lname
+	输入.PSWD_TIME				TYPEAS		s_lname
+	输入.CORPORATION_ID			TYPEAS		s_lname
+	输入.DEPARTMENT_ID			TYPEAS		s_lname
+	输入.EMPLOYEE_ID				TYPEAS		s_lname
+	输入.E_MAIL					TYPEAS		s_lname
+	输入.MSN						TYPEAS		s_lname
+	输入.QQ						TYPEAS		s_lname
+	输入.MOBILE					TYPEAS		s_lname
+	输入.CHAR_1					TYPEAS		s_lname
+	输入.CHAR_2					TYPEAS		s_lname
+	输入.NUM_1					TYPEAS		n_hnumeric
+	输入.NUM_2					TYPEAS		n_hnumeric
+	输入.PERMISSION_STRU_ID		TYPEAS		s_lname
+	输入.ISUSEIPPOLICY			TYPEAS		s_bool
+	输入.IPPOLICY				TYPEAS		s_lname
+		
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#普通不分页查询
+	IF 输入.flag = 1
+		QUERY
+			SELECT
+				USER_ID
+				,EXTERNAL_USER
+				,USER_NAME
+				,PASSWORD
+				,ACCOUNT_STATUS
+				,SECURITY_LEVEL
+				,MAX_SESSIONS
+				,IS_SYS
+				,IS_CPUBLIC
+				,CREATE_TIME
+				,LOCK_TIME
+				,EXPIRED_TIME
+				,PSWD_UPT_TIME
+				,PSWD_TIME
+				,CORPORATION_ID
+				,DEPARTMENT_ID
+				,EMPLOYEE_ID
+				,E_MAIL
+				,MSN
+				,QQ
+				,MOBILE
+				,CHAR_1
+				,CHAR_2
+				,NUM_1
+				,NUM_2
+				,PERMISSION_STRU_ID
+				,ISUSEIPPOLICY
+				,IPPOLICY
+			FROM PUB_USERS a
+			WHERE 1=1
+			ENDSELECT
+		ENDQUERY
+	ENDIF

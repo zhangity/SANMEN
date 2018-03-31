@@ -1,0 +1,128 @@
+[交易说明]
+	交易名：		文件业务关系查询
+	所属模块：	系统功能
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、文件业务关系表	【PF_PB_FileBusiness】
+	版本经历：	
+				1、v1.0		黄继华			2015-07-14 13:44:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-根据文件编号查业务编号  2-根据业务编号查文件编号
+	输入.flag				TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--文件ID
+	输入.fileid				TYPEAS	s_sstring
+	
+	--业务编号
+	输入.businessid			TYPEAS	s_string
+	
+	--业务类型
+	输入.businesstype			TYPEAS	s_sstring
+	
+	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#根据文件编号查业务编号
+	IF	输入.flag = 1
+		IF	输入.businessid = "" 
+			ERROR "：业务编号不能为空"
+		ENDIF
+	
+		QUERY
+			SELECT
+				fileid
+				,businessid
+				,businesstype
+			FROM PF_PB_FileBusiness  a
+			WHERE 1=1
+			OPTION 输入.businessid <> ""
+				a.businessid = 输入.businessid
+			ENDOPTION
+			OPTION 输入.businesstype <> ""
+				a.businesstype = 输入.businesstype
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#根据业务编号查文件编号
+	IF	输入.flag = 2
+		IF	输入.fileid = ""
+			ERROR "：文件编号不能为空"
+		ENDIF
+	
+		QUERY
+			SELECT
+				fileid
+				,businessid
+				,businesstype
+			FROM PF_PB_FileBusiness  a
+			WHERE 1=1
+			OPTION 输入.fileid <> ""
+				a.fileid = 输入.fileid
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#根据业务编号查文件编号
+	IF	输入.flag = 3
+		IF	输入.businesstype = ""
+			ERROR "：业务类型不能为空"
+		ENDIF
+	
+		QUERY
+			SELECT
+				a.fileid
+				,a.businessid
+				,a.businesstype
+				,b.filename
+				,b.filesize
+				,b.fileext
+				,b.catacode
+				,b.subcata
+				,b.personid
+				,b.status
+				,b.ordercode
+				,b.createdt
+			FROM PF_PB_FileBusiness  a
+			INNER JOIN WDK_ATTACHMENT b ON a.fileid=b.fileid
+			WHERE  a.businesstype like 输入.businesstype || '%'
+			ENDSELECT
+		ENDQUERY
+	ENDIF

@@ -1,0 +1,92 @@
+[交易说明]
+	交易名：		带直属部门名称组织信息代码模型
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+
+
+	版本经历：	
+				1、v1.0		彭晓赞			2015/9/11 10:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.whereclause							TYPEAS		f_string
+	输入.orderby									TYPEAS		f_string
+	输入.condition								TYPEAS		f_string
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	QUERY
+      SELECT a.org_uuid
+            ,a.org_code
+            ,a.sys_code
+            ,a.org_name
+            ,CASE when a.org_level_scode = 'U084' then a.org_name
+                  when b.org_level_scode = 'U084' then CONCAT(b.org_name , '-' , a.org_name)
+                  when c.org_level_scode = 'U084' then CONCAT(c.org_name , '-' , b.org_name , '-' , a.org_name)
+                  when d.org_level_scode = 'U084' then CONCAT(d.org_name , '-' , c.org_name , '-' , b.org_name , '-' , a.org_name)
+                  else a.org_name
+             end as org_fullname
+            ,a.simple_name
+            ,a.org_type_scode
+            ,a.org_level_scode
+            ,a.parent_uuid
+            ,a.manage_unit_uuid
+            ,a.display_order
+            ,a.remark
+            ,a.syscreatoruuid
+            ,a.syscreatedate
+            ,a.sysupdateuseruuid
+            ,a.sysupdatetime
+            ,a.sysdeptuuid
+            ,a.syscompanyuuid
+            ,a.sysisdelete
+	      FROM UUM_UU_ORGINFO a
+	      LEFT JOIN UUM_UU_ORGINFO b on b.org_uuid = a.parent_uuid
+	      LEFT JOIN UUM_UU_ORGINFO c on c.org_uuid = b.parent_uuid
+	      LEFT JOIN UUM_UU_ORGINFO d on d.org_uuid = c.parent_uuid
+	      WHERE 1 = 1
+	      OPTION 输入.whereclause <> ""
+	        输入.whereclause
+	      ENDOPTION
+		    OPTION 输入.condition <> ""
+		      a.输入.condition
+		    ENDOPTION
+		    ORDERBY 输入.orderby <> ""
+		      输入.orderby
+		    ENDORDERBY
+	  ENDSELECT
+	ENDQUERY

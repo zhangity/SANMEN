@@ -1,0 +1,262 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程定义表				【wdk_wf_pd】
+	版本经历：	
+				1、v1.0			于猛			2014-11-17 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag					TYPEAS		s_string
+	
+	
+	--标识
+	输入.pdid						TYPEAS		s_string
+	
+	--名称
+	输入.pdname						TYPEAS		s_string
+	
+	--名称,支持多个
+	输入.allpdname					TYPEAS		f_string
+	
+	--版本号
+	输入.pdversion					TYPEAS		s_string
+	
+	--中文名称
+	输入.cnname						TYPEAS		s_string
+	
+	--状态
+	输入.status						TYPEAS		s_string
+	
+	--数据库模板id
+	输入.deploymentid				TYPEAS		s_string
+	
+	--创建时间
+	输入.createdt					TYPEAS		s_string
+	
+	--wf内容
+	输入.wfcontent					TYPEAS		c_content
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				pdid
+				,pdname
+				,pdversion
+				,cnname
+				,status
+				,deploymentid
+				,createdt
+				,wfcontent
+			FROM wdk_wf_pd  a
+			WHERE 1=1
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.pdname <> ""
+				a.pdname = 输入.pdname
+			ENDOPTION
+			OPTION 输入.pdversion <> ""
+				a.pdversion = 输入.pdversion
+			ENDOPTION
+			OPTION 输入.cnname <> ""
+				a.cnname LIKE CONCAT("%" , 输入.cnname , "%" )
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.deploymentid <> ""
+				a.deploymentid = 输入.deploymentid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			order by pdname asc,pdversion asc
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查询所有，不带大字段
+	IF	输入.flag = 101
+		QUERY
+			SELECT
+				pdid
+				,pdname
+				,pdversion
+				,cnname
+				,status
+				,deploymentid
+				,createdt
+			FROM wdk_wf_pd  a
+			WHERE 1=1
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.pdname <> ""
+				a.pdname = 输入.pdname
+			ENDOPTION
+			OPTION 输入.pdversion <> ""
+				a.pdversion = 输入.pdversion
+			ENDOPTION
+			OPTION 输入.cnname <> ""
+				a.cnname LIKE CONCAT("%" , 输入.cnname , "%" )
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.deploymentid <> ""
+				a.deploymentid = 输入.deploymentid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			order by pdname asc,pdversion asc
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	#查询所有
+	IF	输入.flag = 2
+		QUERY
+			SELECT
+				pdid
+				,pdname
+				,pdversion
+				,cnname
+				,status
+				,deploymentid
+				,createdt
+				,wfcontent
+			FROM wdk_wf_pd  a
+			WHERE a.status <> '-1'
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.pdname <> ""
+				a.pdname LIKE CONCAT("%" , 输入.pdname , "%" )
+			ENDOPTION
+			OPTION 输入.cnname <> ""
+				a.cnname LIKE CONCAT("%" , 输入.cnname , "%" )
+			ENDOPTION
+			OPTION 输入.pdversion <> ""
+				a.pdversion = 输入.pdversion
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+
+	
+	#查询流程名称列表
+	IF	输入.flag = 3
+		QUERY
+			SELECT
+				distinct
+					a.pdid
+					,a.pdname
+					,a.pdversion
+					,a.cnname
+					,a.status
+					,a.deploymentid
+					,a.createdt
+			FROM wdk_wf_pd  a
+			WHERE 1=1
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.pdname <> ""
+				a.pdname = 输入.pdname
+			ENDOPTION
+			OPTION 输入.pdversion <> ""
+				a.pdversion = 输入.pdversion
+			ENDOPTION
+			OPTION 输入.cnname <> ""
+				a.cnname LIKE CONCAT("%" , 输入.cnname , "%" )
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.deploymentid <> ""
+				a.deploymentid = 输入.deploymentid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			order by pdname asc,pdversion asc
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查询最新版本流程列表
+	IF	输入.flag = 4
+		QUERY
+			SELECT
+				pdid
+				,pdname
+				,pdversion
+				,cnname
+				,status
+				,deploymentid
+				,createdt
+			FROM wdk_wf_pd  a
+			WHERE STATUS='1'
+			AND WQL.APPCAST(a.PDVERSION as int)=(SELECT max(WQL.APPCAST(PDVERSION as int))FROM wdk_wf_pd b WHERE b.pdname = a.pdname and b.STATUS='1')
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.pdname <> ""
+				a.pdname = 输入.pdname
+			ENDOPTION
+			OPTION 输入.allpdname <> ""
+				a.pdname IN( 输入.allpdname )
+			ENDOPTION
+			OPTION 输入.pdversion <> ""
+				a.pdversion = 输入.pdversion
+			ENDOPTION
+			OPTION 输入.cnname <> ""
+				a.cnname LIKE CONCAT("%" , 输入.cnname , "%" )
+			ENDOPTION
+			OPTION 输入.deploymentid <> ""
+				a.deploymentid = 输入.deploymentid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			
+			ENDSELECT
+		ENDQUERY
+	ENDIF

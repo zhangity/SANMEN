@@ -1,0 +1,80 @@
+[交易说明]
+	交易名：		取组织详细信息
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、组织信息表【UUM_UU_ORGINFO】
+				2、管理单元表【UUM_UU_MANAGEUNIT】
+				3、系统基础数据表【PF_PB_SysDicInfo】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/24 9:27:54		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--组织标识
+	输入.org_uuid									TYPEAS	s_uuid
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	IF 输入.org_uuid = ""
+		ERROR "：未输入组织标识!"
+	ENDIF
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	QUERY
+		SELECT a.org_uuid
+			, a.org_name
+			, a.org_code
+			, a.org_type_scode
+			, c.DicAliasName AS org_type
+			, a.org_level_scode
+			, d.DicAliasName AS org_level
+			, a.parent_uuid
+			, e.org_name AS parent_org
+			, a.display_order
+			, a.remark
+			, a.manage_unit_uuid
+			, b.manage_unit_name
+			, a.simple_name
+		FROM UUM_UU_ORGINFO a
+			INNER JOIN UUM_UU_MANAGEUNIT b ON a.manage_unit_uuid = b.manage_unit_uuid
+			INNER JOIN PF_PB_SysDicInfo c ON a.org_type_scode = c.DicSCode
+			INNER JOIN PF_PB_SysDicInfo d ON a.org_level_scode = d.DicSCode
+			LEFT JOIN UUM_UU_ORGINFO e ON a.parent_uuid = e.org_uuid
+		WHERE a.org_uuid = 输入.org_uuid
+		ENDSELECT
+	ENDQUERY
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误

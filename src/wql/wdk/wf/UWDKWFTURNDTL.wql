@@ -1,0 +1,181 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、转办交办任务明细表			【wdk_wf_turn_detail】
+	版本经历：	
+				1、v1.0			于猛			2015-07-03 16:47:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	
+	--流水ID
+	输入.id							TYPEAS		s_id
+	
+	--流程模板ID
+	输入.pdid						TYPEAS	s_sstring
+	
+	--流程实例ID
+	输入.piid						TYPEAS	s_string
+	
+	--原始待办ID
+	输入.origintodoid			TYPEAS	s_id
+	
+	--交办记录
+	输入.turnid						TYPEAS		s_id
+	
+	--对应待办id
+	输入.todoid						TYPEAS		s_id
+	
+	--办理人id
+	输入.actorid						TYPEAS		s_sstring
+	
+	--办理人类型
+	输入.actortype					TYPEAS		s_sstring
+	
+	--办理人部门
+	输入.deptuuid					TYPEAS		s_sstring
+	
+	--是否办理完成
+	输入.iscomplete					TYPEAS		s_stype
+	
+	--办理时间
+	输入.operdt						TYPEAS		s_sstring
+	
+	--办理意见
+	输入.opercomment				TYPEAS	s_string
+	
+	--排序序号
+	输入.ordercode					TYPEAS		s_sstring
+	
+	--创建时间
+	输入.createdt					TYPEAS		s_sstring
+	
+	--状态
+	输入.status						TYPEAS		s_stype
+
+
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+	
+		
+		#然后新增
+		INSERT INTO wdk_wf_turn_detail(
+			id
+			,pdid
+			,piid
+			,origintodoid
+			,turnid
+			,todoid
+			,actorid
+			,actortype
+			,deptuuid
+			,iscomplete
+			,operdt
+			,opercomment
+			,ordercode
+			,createdt
+			,status
+    	) values (
+			输入.id
+			,输入.pdid
+			,输入.piid
+			,输入.origintodoid
+			,输入.turnid
+			,输入.todoid
+			,输入.actorid
+			,输入.actortype
+			,输入.deptuuid
+			,输入.iscomplete
+			,输入.operdt
+			,输入.opercomment
+			,输入.ordercode
+			,输入.createdt
+			,输入.status
+		)
+		ENDINSERT
+	ENDIF
+	
+	
+	#开启待办
+	IF 输入.flag = 201
+		UPDATE wdk_wf_turn_detail a
+		SET a.todoid	= 输入.todoid
+		WHERE 1=1 
+			and a.id	= 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	
+	#完成转办明细
+	IF 输入.flag = 202
+		UPDATE wdk_wf_turn_detail a
+		SET a.iscomplete	= 输入.iscomplete
+			,a.operdt		= 输入.operdt
+			,a.opercomment	= 输入.opercomment
+		WHERE 1=1 
+			and a.id	= 输入.id
+		ENDUPDATE
+	ENDIF
+	
+	
+	
+	
+	#按照流程模板PDID删除所有转办明细
+	IF 输入.flag = 401
+		DELETE FROM wdk_wf_turn_detail a
+		WHERE a.pdid	= 输入.pdid
+		ENDDELETE
+	ENDIF
+	
+	#按照流程实例PIID删除所有转办明细
+	IF 输入.flag = 402
+		DELETE FROM wdk_wf_turn_detail a
+		WHERE a.piid	= 输入.piid
+		ENDDELETE
+	ENDIF
+	
+	#删除转办主记录下对应的所有转办明细
+	IF 输入.flag = 403
+		DELETE FROM wdk_wf_turn_detail a
+		WHERE a.origintodoid	= 输入.origintodoid
+		ENDDELETE
+	ENDIF

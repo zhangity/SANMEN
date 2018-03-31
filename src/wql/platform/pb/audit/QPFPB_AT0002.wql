@@ -1,0 +1,129 @@
+[交易说明]
+	交易名：	平台服务接口交互报文留痕表
+	所属模块：平台	
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			1、操作审计表				【PF_PB_Aduit_Oper】
+	版本经历：	
+			1、v1.0			于猛			2015-11-18 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag				TYPEAS		s_string
+	
+	--流水id
+	输入.flowid				TYPEAS		s_uuid
+	
+	--操作人
+	输入.loginname			TYPEAS		s_mname
+	
+	--所属部门
+	输入.operdept			TYPEAS		s_datetime
+	
+	--登录ip
+	输入.loginip				TYPEAS		s_uuid
+	
+	--操作时间
+	输入.operdt				TYPEAS		s_datetime
+	
+	--操作系统
+	输入.operappuuid			TYPEAS		s_uuid
+	
+	--操作模块
+	输入.opermodule			TYPEAS		s_mname
+	
+	--操作菜单
+	输入.opermenu			TYPEAS		s_mname
+	
+	--操作功能
+	输入.operbutton			TYPEAS		s_mname
+	
+	--业务标题
+	输入.busititle			TYPEAS		s_mname
+	
+	--业务记录
+	输入.busidata			TYPEAS		s_mstring
+
+	
+
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	#1、普通查询
+	IF 输入.flag = 1
+		QUERY
+			SELECT
+				flowid
+				,loginname
+				,operdept
+				,loginip
+				,operdt
+				,operappuuid
+				,opermodule
+				,opermenu
+				,operbutton
+				,busititle
+				,busidata
+			FROM PF_PB_Aduit_Oper a
+			WHERE 1=1
+			OPTION 输入.flowid <> ""
+				a.flowid = 输入.flowid
+			ENDOPTION
+			OPTION 输入.loginname <> ""
+				a.loginname = 输入.loginname
+			ENDOPTION
+			OPTION 输入.operdept <> ""
+				a.operdept = 输入.operdept
+			ENDOPTION
+			OPTION 输入.loginip <> ""
+				a.loginip = 输入.loginip
+			ENDOPTION
+			OPTION 输入.operdt <> ""
+				a.operdt = 输入.operdt
+			ENDOPTION
+			OPTION 输入.operappuuid <> ""
+				a.operappuuid = 输入.operappuuid
+			ENDOPTION
+			OPTION 输入.opermodule <> ""
+				a.opermodule = 输入.opermodule
+			ENDOPTION
+			OPTION 输入.opermenu <> ""
+				a.opermenu = 输入.opermenu
+			ENDOPTION
+			OPTION 输入.operbutton <> ""
+				a.operbutton = 输入.operbutton
+			ENDOPTION
+			OPTION 输入.busititle <> ""
+				a.busititle = 输入.busititle
+			ENDOPTION
+			OPTION 输入.busidata <> ""
+				a.busidata = 输入.busidata
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

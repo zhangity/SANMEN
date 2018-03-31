@@ -1,0 +1,204 @@
+[交易说明]
+	交易名： 检查分类查询
+	所属模块：	基础数据维护
+	功能简述：	
+	版权所有：	xxxx
+	表引用：		
+			检查类型表				【EA_BI_ExamType】
+			收费套餐收费项目关联表	【EA_BI_ChargePackageItem】
+			HIS收费项目表			【EA_BI_ChargeItem】
+			
+			
+			检查项目表【EA_BI_ExamItem】										
+			检查技术表【EA_BI_ExamTech】										
+			检查部位表【EA_BI_ExamPart】										
+			检查项目医生注意事项确认表【EA_BI_ExamItemConfirm】										
+			检查项目检查部位关联表【EA_BI_ExamItemBodyPart】										
+			检查项目检查技术关联表【EA_BI_ExamItemTech】										
+			
+	版本经历：	
+				1、v1.0		于猛			2016/12/1 15:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+[IO定义]
+	#操作符  101-根据套餐ID查询所有关联的收费明细
+	输入.flag					TYPEAS		s_string
+	
+	#单个收费套餐ID
+	输入.package_id				TYPEAS		s_id
+	
+	#多个收费套餐ID
+	输入.package_ids				TYPEAS		f_string
+	
+	#检查项目ID
+	输入.examitem_id				TYPEAS		s_id
+	
+	#多个设备的查询
+	输入.device_ids				TYPEAS		f_string
+	
+	#日期查询
+	输入.schedu_date				TYPEAS		s_string
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#根据套餐ID查询所有关联的收费明细
+	IF 输入.flag = 101
+		QUERY
+			SELECT
+				a.item_id
+				,a.item_name
+				,b.item_amount
+				,a.item_unit
+				,a.item_type
+				,a.item_price
+				,a.dept_id
+				,(select dept_name from EA_BI_DepartMent c where c.dept_id=a.dept_id) as dept_idname
+				,a.code_py
+				,a.code_wb
+				,a.code_sj
+				,a.code_qt
+				,a.mzsy
+				,case a.mzsy 
+		      			when '0' then '停用'
+		                when '1' then '启用'
+		             	end as mzsyname
+				,a.zysy
+				,case a.zysy
+		      			when '0' then '停用'
+		                when '1' then '启用'
+		             	end as zysyname
+				,a.yjsy
+				,case a.yjsy
+		      			when '0' then '停用'
+		                when '1' then '启用'
+		             	end as yjsyname
+				,a.zfpb
+				,case a.zfpb
+		      			when '0' then '停用'
+		                when '1' then '启用'
+		             	end as zfpbname
+				,a.ordercode
+				,a.createdt
+				,a.status
+				,a.remark
+				,b.package_id
+				,b.item_amount*item_price AS hjje
+			FROM EA_BI_ChargeItem a,EA_BI_ChargePackageItem b
+			WHERE a.item_id = b.item_id
+			OPTION 输入.package_id <> ""
+				b.package_id = 输入.package_id
+			ENDOPTION
+			OPTION 输入.package_ids <> ""
+				b.package_id IN (输入.package_ids)
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查询检查项目对应的收费套餐的总和
+	IF 输入.flag = 102
+		QUERY
+			SELECT PACKAGE_ID,
+		         PACKAGE_NAME,
+		         PACKAGE_ENNAME,
+		         CODE_PY,
+		         CODE_WB,
+		         CODE_SJ,
+		         CODE_QT,
+		         MZSY,
+		         ZYSY,
+		         YJSY,
+		         BQSY,
+		         EXAMTYPE_ID,
+		         PACKAGE_ITEMNUM,
+		         PACKAGE_MONEY,
+		         ORDERCODE,
+		         CREATEDT,
+		         STATUS,
+		         REMARK 
+		         FROM EA_BI_ChargePackage t 
+		         WHERE 1=1
+		         OPTION 输入.package_ids <> ""
+					 WQL.APPINSTR( t.package_id , 输入.package_ids)>0
+				 ENDOPTION
+				 OPTION 输入.examitem_id <> ""
+				 	 WQL.APPINSTR((select t9.package_id from EA_BI_ExamItem t9 where t9.item_id = 输入.examitem_id),t.package_id )>0
+				 ENDOPTION
+			 ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#获取收费 明细ID和收费数量
+	IF 输入.flag = 103
+		QUERY
+			 SELECT PACKAGE_ID,
+			        ITEM_ID,
+			        ITEM_AMOUNT,
+			        ORDERCODE,
+			        CREATEDT,
+			        STATUS,
+			        REMARK
+			     FROM EA_BI_CHARGEPACKAGEITEM t 
+		         WHERE 1=1
+		         OPTION 输入.package_ids <> ""
+					 WQL.APPINSTR( t.package_id , 输入.package_ids)>0
+				 ENDOPTION
+				 OPTION 输入.examitem_id <> ""
+				 	 WQL.APPINSTR((select t9.package_id from EA_BI_ExamItem t9 where t9.item_id = 输入.examitem_id),t.package_id )>0
+				 ENDOPTION
+			 ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查询所有的检查类型对应的适配器情况
+	IF 输入.flag = 201
+		QUERY
+			 SELECT t.examtype_id
+				 , t.adapter_clazz 
+				 from EA_BI_ExamType t
+			 ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#设备相关的查询,带上医生的名字
+	IF 输入.flag = 301
+		QUERY
+			SELECT a1.device_id,a1.device_name, a2.doctor_id,a3.person_name
+			  from ea_bi_device a1
+			 LEFT join ea_bi_deviceschedu a2 on a2.device_id = a1.device_id  and a2.schedu_date = 输入.schedu_date
+			 LEFT join Ea_Bi_Person a3 on a3.PERSON_ID = a2.doctor_id
+			 where a1.device_id in (输入.device_ids)
+			 AND a1.status='1'
+			 ORDER BY a1.ORDERCODE
+			ENDSELECT
+		ENDQUERY
+	ENDIF

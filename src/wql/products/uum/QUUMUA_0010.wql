@@ -1,0 +1,98 @@
+[交易说明]
+	交易名：		取系统角色列表
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、角色信息表【UUM_UA_ROLE】
+				2、应用信息表【UUM_UA_APPLICATION】
+				3、组织信息表【UUM_UU_ORGINFO】
+				4、系统基础数据表【PF_PB_SysDicInfo】
+				5、角色用户表【UUM_UA_ROLEACCOUNT】
+				6、用户表【UUM_UU_ACCOUNT】
+				7、人员信息表【UUM_UU_PERSONINFO】
+	版本经历：	
+				1、v1.0		廖树平			2015/9/9 13:26:26		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--角色标识
+	输入.role_uuid							TYPEAS	s_uuid
+	
+	--角色名称
+	输入.role_name							TYPEAS	s_mname
+	
+	--应用标识
+	输入.app_uuid								TYPEAS	s_uuid
+	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	QUERY
+		SELECT DISTINCT a.role_uuid
+			, a.role_name
+			, a.role_code
+			, a.app_uuid
+			, b.app_name AS app_uuidname
+			, a.org_uuid
+			, c.org_name AS org_uuidname
+			, a.role_type
+			, d.DicAliasName AS role_typename
+			, a.display_order
+			, a.syscreatedate
+			, e.account_uuid
+			, g.person_name AS account_name
+		FROM UUM_UA_ROLE a
+			LEFT JOIN UUM_UA_APPLICATION b ON a.app_uuid = b.app_uuid
+			LEFT JOIN UUM_UU_ORGINFO c ON a.org_uuid = c.org_uuid
+			INNER JOIN PF_PB_SysDicInfo d ON a.role_type = d.DicSCode
+			LEFT JOIN UUM_UA_ROLEACCOUNT e ON a.role_uuid = e.role_uuid
+			LEFT JOIN UUM_UU_ACCOUNT f ON e.account_uuid = f.account_uuid
+			LEFT JOIN UUM_UU_PERSONINFO g ON f.user_uuid = g.person_uuid
+		WHERE a.sysisdelete = '0' AND a.role_type IN ('U131', 'U133')
+		OPTION 输入.role_uuid <> ""
+			a.role_uuid = 输入.role_uuid
+		ENDOPTION
+		OPTION 输入.role_name <> ""
+			a.role_name LIKE CONCAT(输入.role_name , "%")
+		ENDOPTION
+		OPTION 输入.app_uuid <> ""
+			a.app_uuid = 输入.app_uuid
+		ENDOPTION
+		ENDSELECT
+	ENDQUERY
+	
+	#对操作符进行判断，如果没有输入则提示错误

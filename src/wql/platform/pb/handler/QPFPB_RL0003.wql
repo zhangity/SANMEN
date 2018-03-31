@@ -1,0 +1,255 @@
+[交易说明]
+	交易名：		获取有权限的功能菜单
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、角色信息表【UUM_UA_ROLE】
+				2、角色功能权限表【UUM_UA_ROLEFUNC】
+				3、角色用户表【UUM_UA_ROLEACCOUNT】
+				4、功能信息表【UUM_UA_FUNCTION】
+				5、系统参数信息【PF_PB_Parameter】
+	版本经历：	
+				1、v1.0		廖树平			2015/6/15 10:19:42		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type	
+	--01:全部 02:有授权
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--应用系统标识
+	输入.app_uuid						TYPEAS	s_uuid
+
+	--用户标识
+	输入.account_uuid				TYPEAS	s_uuid
+	
+	--角色标识
+	输入.role_uuid					TYPEAS	s_uuid
+	
+	--上级标识
+	输入.parent_uuid				TYPEAS	s_uuid
+	
+	--返回功能类型
+	输入.func_type					TYPEAS	s_diccode
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	UUM_UA_FUNCTREE_T
+	UUM_UA_FUNCTREE_T2
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.func_type			TYPEAS	s_diccode
+	临时.rightctrl			TYPEAS	s_type
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	DELETE FROM UUM_UA_FUNCTREE_T
+	WHERE node_uuid IS NULL OR node_uuid IS NOT NULL
+	ENDDELETE
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.app_uuid = ""
+		ERROR "：未输入应用标识"
+	ENDIF
+	
+	IF 输入.account_uuid = ""
+		ERROR "：未输入用户标识"
+	ENDIF
+	
+	DELETE FROM UUM_UA_FUNCTREE_T
+	ENDDELETE
+	
+	IF 输入.parent_uuid <> ""
+		//把传入上级标识的子级写入临时表
+		INSERT INTO UUM_UA_FUNCTREE_T(
+		 		node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type)
+		SELECT a.func_uuid AS node_uuid
+				, a.func_code AS node_code
+				, a.func_name AS node_name
+				, CASE a.func_type WHEN 'U121' THEN a.app_uuid ELSE a.parent_uuid END AS parent_uuid
+				, a.display_order
+				, 1 AS typeorder
+				, a.func_type
+		FROM UUM_UA_FUNCTION a
+		WHERE a.sysisdelete = '0' AND a.parent_uuid = 输入.parent_uuid
+		ENDINSERT
+		INSERT INTO UUM_UA_FUNCTREE_T2(
+		 		node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type)
+			select node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type	
+				UUM_UA_FUNCTREE_T
+		 ENDINSERT
+	
+	LOOP 10
+			SELECT max(d.node_type) AS NTYPE
+		 	FROM UUM_UA_FUNCTREE_T d
+		 	ENDSELECT
+		 	临时.func_type = NTYPE
+		 	
+		 	INSERT INTO UUM_UA_FUNCTREE_T(
+		 		node_uuid
+		 		, node_code
+		 		, node_name
+		 		, parent_uuid
+		 		, display_order
+		 		, node_level
+		 		, node_type)
+		 	SELECT DISTINCT a.func_uuid AS node_uuid
+				, a.func_code AS node_code
+				, a.func_name AS node_name
+				, CASE a.func_type WHEN 'U121' THEN a.app_uuid ELSE a.parent_uuid END AS parent_uuid
+				, a.display_order
+				, b.node_level + 1 AS typeorder
+				, a.func_type
+			FROM UUM_UA_FUNCTION a
+				INNER JOIN UUM_UA_FUNCTREE_T2 b ON a.parent_uuid = b.node_uuid
+			WHERE a.sysisdelete = '0' AND b.node_type = 临时.func_type
+		 	ENDINSERT
+		ENDLOOP
+	ENDIF
+	
+	临时.rightctrl = 输入.flag
+	
+	IF 输入.flag = ""
+		SELECT a.ParaValue AS ParaValue
+		FROM PF_PB_Parameter a
+		WHERE a.ParaCode = 'RightCtrlType'
+		ENDSELECT
+		临时.rightctrl = ParaValue
+	ENDIF
+	
+	IF 临时.rightctrl = "01"
+	 QUERY
+	 	SELECT c.func_uuid AS menucode
+						, c.func_name AS menuname
+						, c.func_type AS menutype
+						, c.func_url AS menuurl
+						, c.parent_uuid AS parentmenucode
+						, c.display_order AS ordercode
+						, c.ico_index AS menuicon
+						, c.select_ico_index as select_menuicon
+		FROM UUM_UA_FUNCTION c
+		WHERE c.sysisdelete = '0' AND c.app_uuid = 输入.app_uuid
+		OPTION 输入.parent_uuid <> ""
+			EXISTS (SELECT 1 FROM UUM_UA_FUNCTREE_T m WHERE m.node_uuid = c.func_uuid)
+		ENDOPTION
+		OPTION 输入.func_type <> ""
+			c.func_type <= 输入.func_type
+		ENDOPTION
+		ORDER BY ordercode
+		ENDSELECT
+	 ENDQUERY
+	ENDIF
+	
+	IF 临时.rightctrl = "02"
+	 QUERY
+		SELECT c.func_uuid AS menucode
+						, c.func_name AS menuname
+						, c.func_type AS menutype
+						, c.func_url AS menuurl
+						, c.parent_uuid AS parentmenucode
+						, c.display_order AS ordercode
+						, c.ico_index AS menuicon
+						, c.select_ico_index as select_menuicon
+		FROM UUM_UA_ROLEACCOUNT a
+			INNER JOIN UUM_UA_ROLEFUNC b ON a.role_uuid = b.role_uuid
+			INNER JOIN UUM_UA_FUNCTION c ON b.func_uuid = c.func_uuid
+		WHERE c.sysisdelete = '0' AND a.account_uuid = 输入.account_uuid AND c.app_uuid = 输入.app_uuid
+		OPTION 输入.role_uuid <> ""
+			a.role_uuid = 输入.role_uuid
+		ENDOPTION
+		OPTION 输入.parent_uuid <> ""
+			EXISTS (SELECT 1 FROM UUM_UA_FUNCTREE_T m WHERE m.node_uuid = c.func_uuid)
+		ENDOPTION
+		OPTION 输入.func_type <> ""
+			c.func_type <= 输入.func_type
+		ENDOPTION
+		UNION	
+		SELECT c.func_uuid AS menucode
+						, c.func_name AS menuname
+						, c.func_type AS menutype
+						, c.func_url AS menuurl
+						, c.parent_uuid AS parentmenucode
+						, c.display_order AS ordercode
+						, c.ico_index AS menuicon
+						, c.select_ico_index as select_menuicon
+		FROM UUM_UA_FUNCTION c
+		WHERE c.sysisdelete = '0' AND c.app_uuid = 输入.app_uuid
+					AND EXISTS (
+						SELECT 1
+						FROM UUM_UA_ROLEACCOUNT a
+							INNER JOIN UUM_UA_ROLE d ON a.role_uuid = d.role_uuid
+						WHERE a.account_uuid = 输入.account_uuid
+							AND ( d.role_code = 'SUPERADMIN' OR d.role_type = 'U133' )
+					)
+		OPTION 输入.parent_uuid <> ""
+			EXISTS (SELECT 1 FROM UUM_UA_FUNCTREE_T m WHERE m.node_uuid = c.func_uuid)
+		ENDOPTION
+		OPTION 输入.func_type <> ""
+			c.func_type <= 输入.func_type
+		ENDOPTION
+		UNION	
+		SELECT c.func_uuid AS menucode
+						, c.func_name AS menuname
+						, c.func_type AS menutype
+						, c.func_url AS menuurl
+						, c.parent_uuid AS parentmenucode
+						, c.display_order AS ordercode
+						, c.ico_index AS menuicon
+						, c.select_ico_index as select_menuicon
+		FROM UUM_UA_ROLEFUNC b
+			INNER JOIN UUM_UA_FUNCTION c ON b.func_uuid = c.func_uuid
+			INNER JOIN UUM_UA_ROLE d ON b.role_uuid = d.role_uuid
+		WHERE c.sysisdelete = '0' AND c.app_uuid = 输入.app_uuid AND d.role_type = 'U134'
+		OPTION 输入.parent_uuid <> ""
+			EXISTS (SELECT 1 FROM UUM_UA_FUNCTREE_T m WHERE m.node_uuid = c.func_uuid)
+		ENDOPTION
+		OPTION 输入.func_type <> ""
+			c.func_type <= 输入.func_type
+		ENDOPTION
+		ORDER BY ordercode
+		ENDSELECT
+	 ENDQUERY
+	ENDIF

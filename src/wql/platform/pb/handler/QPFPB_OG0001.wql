@@ -1,0 +1,187 @@
+[交易说明]
+	交易名：		取组织机构树
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、组织信息表【UUM_UU_ORGINFO】
+				2、管理单元表【UUM_UU_MANAGEUNIT】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/2 13:46:41		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--管理单元标识
+	输入.manage_unit_uuid					TYPEAS	s_uuid
+
+	--操作人员标识
+	输入.person_uuid							TYPEAS	s_uuid
+	
+	--角色标识
+	输入.role_uuid								TYPEAS	s_uuid
+	
+	--上级组织标识
+	输入.parent_uuid							TYPEAS	s_uuid
+	
+	--组织类型
+	输入.org_type_scode						TYPEAS	s_diccode
+
+	--组织级别
+	输入.org_level_scode					TYPEAS	s_diccode	
+
+	--是否控制权限
+	输入.isctrlperm								TYPEAS	s_diccode
+	
+	--是否同步
+	输入.issync										TYPEAS	s_bool		
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.sys_code									TYPEAS	s_mname
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF 输入.parent_uuid = "" OR 输入.parent_uuid = "-1"
+		IF 输入.issync = "1"
+		 QUERY
+			SELECT a.org_uuid
+				, a.org_code
+				, a.sys_code
+				, a.org_name
+				, a.simple_name
+				, a.mark_code
+				, a.manage_unit_uuid
+				, a.parent_uuid
+				, a.org_type_scode
+				, a.org_level_scode
+				, a.display_order
+			FROM UUM_UU_ORGINFO a
+			LEFT JOIN PF_PB_SysDicInfo z ON z.DicSCode = a.org_level_scode
+			WHERE a.sysisdelete = '0'
+			OPTION 输入.org_type_scode <> ""
+				a.org_type_scode <= 输入.org_type_scode
+			ENDOPTION
+			OPTION 输入.org_level_scode <> ""
+				a.org_level_scode <= 输入.org_level_scode
+			ENDOPTION
+			ORDER BY z.OrderIndex,a.display_order
+			ENDSELECT
+		 ENDQUERY
+		ELSE
+		 QUERY
+			SELECT a.org_uuid
+				, a.org_code
+				, a.sys_code
+				, a.org_name
+				, a.simple_name
+				, a.mark_code
+				, a.manage_unit_uuid
+				, a.parent_uuid
+				, a.org_type_scode
+				, a.org_level_scode
+				, a.display_order
+			FROM UUM_UU_ORGINFO a
+				INNER JOIN UUM_UU_MANAGEUNIT b ON a.org_uuid = b.org_uuid
+			WHERE a.sysisdelete = '0' AND b.parent_uuid = '-1'
+			OPTION 输入.org_type_scode <> ""
+				a.org_type_scode <= 输入.org_type_scode
+			ENDOPTION
+			OPTION 输入.org_level_scode <> ""
+				a.org_level_scode <= 输入.org_level_scode
+			ENDOPTION
+			ORDER BY a.display_order
+			ENDSELECT
+		 ENDQUERY
+		ENDIF
+	ELSE
+		IF 输入.issync = "1"
+		 SELECT a.sys_code AS sys_code
+		 FROM UUM_UU_ORGINFO a
+		 WHERE a.org_uuid = 输入.parent_uuid
+		 ENDSELECT
+		 临时.sys_code = sys_code
+		 
+		 QUERY
+			SELECT a.org_uuid
+				, a.org_code
+				, a.sys_code
+				, a.org_name
+				, a.simple_name
+				, a.mark_code
+				, a.manage_unit_uuid
+				, a.parent_uuid
+				, a.org_type_scode
+				, a.org_level_scode
+				, a.display_order
+			FROM UUM_UU_ORGINFO a
+			LEFT JOIN PF_PB_SysDicInfo z ON z.DicSCode = a.org_level_scode
+			WHERE a.sys_code LIKE CONCAT(临时.sys_code , "%") AND a.sysisdelete = '0'
+			OPTION 输入.org_type_scode <> ""
+				a.org_type_scode <= 输入.org_type_scode
+			ENDOPTION
+			OPTION 输入.org_level_scode <> ""
+				a.org_level_scode <= 输入.org_level_scode
+			ENDOPTION
+			ORDER BY z.OrderIndex,a.display_order
+			ENDSELECT
+		 ENDQUERY
+		 
+		ELSE
+		 QUERY
+			SELECT a.org_uuid
+				, a.org_code
+				, a.sys_code
+				, a.org_name
+				, a.simple_name
+				, a.mark_code
+				, a.manage_unit_uuid
+				, a.parent_uuid
+				, a.org_type_scode
+				, a.org_level_scode
+				, a.display_order
+			FROM UUM_UU_ORGINFO a
+			WHERE a.parent_uuid = 输入.parent_uuid AND a.sysisdelete = '0'
+			OPTION 输入.org_type_scode <> ""
+				a.org_type_scode <= 输入.org_type_scode
+			ENDOPTION
+			OPTION 输入.org_level_scode <> ""
+				a.org_level_scode <= 输入.org_level_scode
+			ENDOPTION
+			ORDER BY a.display_order
+			ENDSELECT
+		 ENDQUERY
+		ENDIF
+	ENDIF
+	
+	#对操作符进行判断，如果没有输入则提示错误

@@ -1,0 +1,79 @@
+[交易说明]
+	交易名：		根据角色ID取人员列表
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+
+
+	版本经历：	
+				1、v1.0		俞斌			2015/9/11 10:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.role_uuid								TYPEAS		f_string
+	#人员UUID
+	输入.person_uuid								TYPEAS		s_string
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+ 
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF 输入.role_uuid <> ""
+		IF 输入.person_uuid <> ""
+			QUERY
+		    SELECT a.ROLE_UUID,d.* 
+		    FROM UUM_UA_ROLE a
+		    INNER JOIN (SELECT DISTINCT role_uuid,account_uuid FROM UUM_UA_ROLEACCOUNT where role_uuid IN (输入.role_uuid) ) b on b.role_uuid = a.role_uuid
+		    INNER JOIN UUM_UU_ACCOUNT c on c.account_uuid = b.account_uuid and c.sysisdelete='0' and c.user_scode = 'U092'
+		    INNER JOIN UUM_UU_PERSONINFO d on d.person_uuid = c.user_uuid and d.sysisdelete='0' and d.person_uuid=输入.person_uuid
+		    WHERE a.role_uuid IN (输入.role_uuid)  and a.sysisdelete='0'
+		    ENDSELECT
+			ENDQUERY
+		ENDIF
+		IF 输入.person_uuid = ""
+			QUERY
+		    SELECT a.ROLE_UUID,d.* 
+		    FROM UUM_UA_ROLE a
+		    INNER JOIN (SELECT DISTINCT role_uuid,account_uuid FROM UUM_UA_ROLEACCOUNT where role_uuid IN (输入.role_uuid) ) b on b.role_uuid = a.role_uuid
+		    INNER JOIN UUM_UU_ACCOUNT c on c.account_uuid = b.account_uuid and c.sysisdelete='0' and c.user_scode = 'U092'
+		    INNER JOIN UUM_UU_PERSONINFO d on d.person_uuid = c.user_uuid and d.sysisdelete='0'
+		    WHERE a.role_uuid IN (输入.role_uuid)  and a.sysisdelete='0'
+		    ENDSELECT
+			ENDQUERY
+		ENDIF
+	ENDIF
+	
+
+	#对操作符进行判断，如果没有输入则提示错误

@@ -1,0 +1,160 @@
+[交易说明]
+	交易名：		取角色用户数据权限列表
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、应用信息表【UUM_UA_APPLICATION】
+				2、角色信息表【UUM_UA_ROLE】
+				3、组织信息表【UUM_UU_ORGINFO】
+				4、应用信息表【UUM_UA_APPLICATION】
+				5、角色用户功能数据权限表【UUM_UA_FuncDRL】
+				6、角色功能权限表【UUM_UA_ROLEFUNC】
+				7、角色用户表【UUM_UA_ROLEACCOUNT】
+				8、用户表【UUM_UU_ACCOUNT】
+				9、人员信息表【UUM_UU_PERSONINFO】
+				10、功能信息表【UUM_UA_FUNCTION】
+				11、系统基础数据表【PF_PB_SysDicInfo】
+
+	版本经历：	
+				1、v1.0		廖树平			2015/7/28 14:28:17		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.status							TYPEAS	s_mname
+	
+	--状态
+	输入.status							TYPEAS	s_mname
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--组织标识
+	输入.org_uuid						TYPEAS	s_uuid
+	
+	--角色标识
+	输入.role_uuid					TYPEAS	s_uuid
+	
+	--角色标识
+	输入.func_uuid					TYPEAS	s_uuid
+	
+	--登录名
+	输入.login_name					TYPEAS	s_uuid
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	IF 输入.status = ""
+		ERROR ":未输入状态标识"
+	ENDIF
+
+
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	IF 输入.status = '0'
+		QUERY
+			SELECT a.role_uuid
+				, d.role_name
+				, a.account_uuid
+				, e.login_name
+				, f.person_name
+				, a.org_uuid AS depart_uuid
+				, g.org_name AS depart_name
+				, b.func_uuid
+				, h.func_name
+				, c.right_level AS right_level_scode
+				, l.DicAliasName AS right_level
+				, c.right_str
+			FROM UUM_UA_ROLEACCOUNT a
+				INNER JOIN UUM_UA_ROLEFUNC b ON a.role_uuid = b.role_uuid AND a.account_uuid = b.account_uuid
+				LEFT JOIN UUM_UA_FuncDRL c ON a.role_uuid = c.role_uuid AND a.account_uuid = c.account_uuid
+																				a.org_uuid = c.org_uuid AND b.func_uuid = c.func_uuid
+				INNER JOIN UUM_UA_ROLE d ON a.role_uuid = d.role_uuid
+				INNER JOIN UUM_UU_ACCOUNT e ON a.account_uuid = e.account_uuid
+				INNER JOIN UUM_UU_PERSONINFO f ON e.user_uuid = f.person_uuid
+				INNER JOIN UUM_UU_ORGINFO g ON a.org_uuid = g.org_uuid
+				INNER JOIN UUM_UA_FUNCTION h ON b.func_uuid = h.func_uuid
+				INNER JOIN PF_PB_SysDicInfo l ON c.right_level = l.DicSCode
+			WHERE c.right_level IS NULL
+			OPTION 输入.org_uuid <> ""
+				a.org_uuid = 输入.org_uuid
+			ENDOPTION
+			OPTION 输入.role_uuid <> ""
+				a.role_uuid = 输入.role_uuid
+			ENDOPTION
+			OPTION 输入.func_uuid <> ""
+				b.func_uuid = 输入.func_uuid
+			ENDOPTION
+			OPTION 输入.login_name <> ""
+				e.login_name LIKE CONCAT(输入.login_name , "%")
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	IF 输入.status = '1'
+		QUERY
+			SELECT a.role_uuid
+				, d.role_name
+				, a.account_uuid
+				, e.login_name
+				, f.person_name
+				, a.org_uuid AS depart_uuid
+				, g.org_name AS depart_name
+				, b.func_uuid
+				, h.func_name
+				, c.right_level AS right_level_scode
+				, l.DicAliasName AS right_level
+				, c.right_str
+			FROM UUM_UA_ROLEACCOUNT a
+				INNER JOIN UUM_UA_ROLEFUNC b ON a.role_uuid = b.role_uuid AND a.account_uuid = b.account_uuid
+				INNER JOIN UUM_UA_FuncDRL c ON a.role_uuid = c.role_uuid AND a.account_uuid = c.account_uuid
+																				a.org_uuid = c.org_uuid AND b.func_uuid = c.func_uuid
+				INNER JOIN UUM_UA_ROLE d ON a.role_uuid = d.role_uuid
+				INNER JOIN UUM_UU_ACCOUNT e ON a.account_uuid = e.account_uuid
+				INNER JOIN UUM_UU_PERSONINFO f ON e.user_uuid = f.person_uuid
+				INNER JOIN UUM_UU_ORGINFO g ON a.org_uuid = g.org_uuid
+				INNER JOIN UUM_UA_FUNCTION h ON b.func_uuid = h.func_uuid
+				INNER JOIN PF_PB_SysDicInfo l ON c.right_level = l.DicSCode
+			WHERE 1 = 1
+			OPTION 输入.org_uuid <> ""
+				a.org_uuid = 输入.org_uuid
+			ENDOPTION
+			OPTION 输入.role_uuid <> ""
+				a.role_uuid = 输入.role_uuid
+			ENDOPTION
+			OPTION 输入.func_uuid <> ""
+				b.func_uuid = 输入.func_uuid
+			ENDOPTION
+			OPTION 输入.login_name <> ""
+				e.login_name LIKE CONCAT(输入.login_name , "%")
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#对操作符进行判断，如果没有输入则提示错误

@@ -1,0 +1,195 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程抄送阅办表			【wdk_wf_cc】
+	版本经历：	
+				1、v1.0			于猛			2014-12-23 15:33:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-查询所有  2-分页查询
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--抄送流水ID
+	输入.id						TYPEAS	s_sstring
+	
+	--关联办理记录ID
+	输入.taskrecordid			TYPEAS	s_sstring
+	
+	--流程模板ID
+	输入.pdid					TYPEAS	s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS	s_sstring
+	
+	--抄送环节
+	输入.nodename				TYPEAS	s_sstring
+	
+	--抄送人ID
+	输入.actorid					TYPEAS	s_sstring
+	
+	--抄送人姓名
+	输入.actortype				TYPEAS	s_sstring
+	
+	--阅办人ID
+	输入.ccactorid				TYPEAS	s_sstring
+	
+	--阅办人姓名
+	输入.ccactortype				TYPEAS	s_sstring
+	
+	--原始阅办人ID
+	输入.actualccactorid			TYPEAS	s_sstring
+	
+	--原始阅办人类型
+	输入.actualccactortype		TYPEAS	s_sstring
+	
+	--阅办代理方式
+	输入.agenttype				TYPEAS	s_sstring
+	
+	--抄送时间
+	输入.createdt				TYPEAS	s_sstring
+	
+	--抄送意见
+	输入.cccomment				TYPEAS	s_string
+	
+	--阅办时间
+	输入.readdt					TYPEAS	s_sstring
+	
+	--阅办意见
+	输入.readcomment				TYPEAS	s_string
+	
+	--当前抄送状态
+	输入.status					TYPEAS	s_stype
+
+
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#根据条件查询符合要求的流水记录
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				id
+				,taskrecordid
+				,pdid
+				,piid
+				,nodename
+				,actorid
+				,actortype
+				,ccactorid
+				,ccactortype
+				,actualccactorid
+				,actualccactortype
+				,agenttype
+				,createdt
+				,cccomment
+				,readdt
+				,readcomment
+				,status
+				,(select count(*) from wdk_wf_toget b where b.taskid = CONCAT(a.id,'_')) as isget
+			FROM wdk_wf_cc  a
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.taskrecordid <> ""
+				a.taskrecordid = 输入.taskrecordid
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			ENDOPTION
+			OPTION 输入.actortype <> ""
+				a.actortype = 输入.actortype
+			ENDOPTION
+			OPTION 输入.ccactorid <> ""
+				a.ccactorid = 输入.ccactorid
+			ENDOPTION
+			OPTION 输入.ccactortype <> ""
+				a.ccactortype = 输入.ccactortype
+			ENDOPTION
+			OPTION 输入.actualccactorid <> ""
+				a.actualccactorid = 输入.actualccactorid
+			ENDOPTION
+			OPTION 输入.actualccactortype <> ""
+				a.actualccactortype = 输入.actualccactortype
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.cccomment <> ""
+				a.cccomment = 输入.cccomment
+			ENDOPTION
+			OPTION 输入.readdt <> ""
+				a.readdt = 输入.readdt
+			ENDOPTION
+			OPTION 输入.readcomment <> ""
+				a.readcomment = 输入.readcomment
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY	
+			ENDSELECT
+		ENDQUERY
+	ENDIF

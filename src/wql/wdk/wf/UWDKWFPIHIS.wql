@@ -1,0 +1,162 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、历史流程表				【wdk_wf_pihistory】
+	版本经历：	
+				1、v1.0			于猛			2015-01-07 15:33:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS	s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--流水ID
+	输入.id						TYPEAS		s_sstring
+	
+	--流程模板ID
+	输入.pdid					TYPEAS		s_sstring
+	
+	--流程模板名称
+	输入.pdname					TYPEAS		s_sstring
+	
+	--流程模板版本
+	输入.pdversion				TYPEAS		s_sstring
+	
+	--流程模板中文名
+	输入.cnname					TYPEAS		s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS		s_sstring
+	
+	--所属父流程模板
+	输入.ppdid					TYPEAS		s_sstring
+	
+	--所属父流程模板名称
+	输入.ppdname					TYPEAS		s_sstring
+	
+	--所属父流程模板版本
+	输入.ppdversion				TYPEAS		s_sstring
+	
+	--所属父流程模板中文名
+	输入.pcnname					TYPEAS		s_sstring
+	
+	--所属父流程模板节点
+	输入.pnodename				TYPEAS		s_sstring
+	
+	--所属父流程ID
+	输入.ppiid					TYPEAS		s_sstring
+	
+	--发起者id
+	输入.createactorid			TYPEAS		s_sstring
+	
+	--发起者类型
+	输入.createactortype			TYPEAS		s_sstring
+	
+	--发起者部门
+	输入.createdeptuuid			TYPEAS		s_sstring
+	
+	--流程创建时间
+	输入.createdt				TYPEAS		s_sstring
+	
+	--流程完成时间
+	输入.completedt				TYPEAS		s_sstring
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_pihistory(
+				id
+				,pdid
+				,pdname
+				,pdversion
+				,cnname
+				,piid
+				,ppdid
+				,ppdname
+				,ppdversion
+				,pcnname
+				,pnodename
+				,ppiid
+				,createactorid
+				,createactortype
+				,createdeptuuid
+				,createdt
+				,completedt
+		) values (
+				输入.id
+				,输入.pdid
+				,输入.pdname
+				,输入.pdversion
+				,输入.cnname
+				,输入.piid
+				,输入.ppdid
+				,输入.ppdname
+				,输入.ppdversion
+				,输入.pcnname
+				,输入.pnodename
+				,输入.ppiid
+				,输入.createactorid
+				,输入.createactortype
+				,输入.createdeptuuid
+				,输入.createdt
+				,输入.completedt
+		)
+		ENDINSERT
+	ENDIF
+
+	
+	#修改意见和状态
+	IF 输入.flag = 2
+		UPDATE t_wdk_wf_frame_cc a SET
+			a.actualccactorid		=	输入.actualccactorid
+			,a.actualccactortype	=	输入.actualccactortype
+			,a.agenttype			=	输入.agenttype
+			,a.readdt				=	输入.readdt
+			,a.readcomment 			=	输入.readcomment
+			,a.status 				=	输入.status
+		WHERE 1=1
+			AND a.id		=	输入.id
+		ENDUPDATE
+	ENDIF

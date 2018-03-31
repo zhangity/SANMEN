@@ -1,0 +1,76 @@
+[交易说明]
+	交易名：		取应用功能详细信息
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、功能信息表【UUM_UA_FUNCTION】
+				2、系统基础数据表【PF_PB_SysDicInfo】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/25 15:07:57		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--功能标识
+	输入.func_uuid								TYPEAS	s_uuid
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	QUERY
+		SELECT a.func_uuid
+			, a.func_name
+			, a.func_code
+			, a.func_type
+			, b.DicAliasName AS func_typename
+			, a.func_url
+			, a.display_order
+			, sysisdelete
+			, CASE a.sysisdelete WHEN '0' THEN '可用' WHEN '1' THEN '不可用' ELSE '未知' END AS status
+			, a.is_ctrl_button
+			, a.remark
+			, a.ico_index
+			, a.select_ico_index
+			, a.parent_uuid
+		FROM UUM_UA_FUNCTION a
+			INNER JOIN PF_PB_SysDicInfo b ON a.func_type = b.DicSCode
+		WHERE 1 = 1
+		OPTION 输入.func_uuid <> ""
+			a.func_uuid = 输入.func_uuid
+		ENDOPTION
+		ENDSELECT
+	ENDQUERY
+	
+	#对操作符进行判断，如果没有输入则提示错误

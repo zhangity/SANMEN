@@ -1,0 +1,88 @@
+[交易说明]
+  交易名：    查询MQ服务
+  所属模块：  系统功能
+  功能简述：  
+  版权所有：  杭州新世纪
+  表引用：    
+  版本经历：  
+
+[数据库]
+  --指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+  输入.server_uuid      TYPEAS    s_string
+  输入.server_code      TYPEAS    s_string
+  输入.server_name      TYPEAS    s_string
+  输入.busiclass        TYPEAS    s_string
+  输入.isactive         TYPEAS    s_string
+  
+[临时表]
+  --这边列出来的临时表就会在运行期动态创建
+  
+[临时变量]
+  --所有中间过程变量均可在此处定义
+  
+[业务过程]
+
+  ##########################################
+  #      1、输入输出检查         #
+  ##########################################
+
+  
+  ##########################################
+  #      2、主过程前处理         #
+  ##########################################
+  
+  
+  ##########################################
+  #      3、业务主过程          #
+  ##########################################
+  
+  
+  PAGEQUERY
+    SELECT
+        a.server_uuid
+        ,a.server_code
+        ,a.server_name
+        ,a.hostname
+        ,a.channel
+        ,a.ccsid
+        ,case a.ccsid
+          when 1381 then 'GBK'
+          when 1208 then 'UTF'
+          else '未知'
+         end as ccsidname
+        ,a.port
+        ,a.qmname
+        ,a.qname_get
+        ,a.qname_put
+        ,a.userID
+        ,a.pwd
+        ,a.busiclass
+        ,WQL.APPISNULL(a.runmodel,'1') as runmodel
+        ,case WQL.APPISNULL(a.runmodel,'1')
+          when '1' then '自动轮询'
+          when '2' then '手工触发'
+          else WQL.APPISNULL(a.runmodel,'1')
+         end as runmodelname
+        ,a.remark
+        ,a.isactive
+      FROM WDK_MQ_Server  a
+      WHERE 1=1
+      OPTION 输入.server_uuid <> ""
+        a.server_uuid = 输入.server_uuid
+      ENDOPTION
+      OPTION 输入.server_code <> ""
+        a.server_code like CONCAT("%" , 输入.server_code , "%")
+      ENDOPTION
+      OPTION 输入.server_name <> ""
+        a.server_name like CONCAT("%" , 输入.server_name , "%")
+      ENDOPTION
+      OPTION 输入.busiclass <> ""
+        a.busiclass like CONCAT("%" , 输入.busiclass , "%")
+      ENDOPTION
+      OPTION 输入.isactive <> ""
+        a.isactive = 输入.isactive
+      ENDOPTION
+    ENDSELECT
+  ENDPAGEQUERY

@@ -1,0 +1,75 @@
+[交易说明]
+	交易名：		取快捷方式
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、功能快捷设置表【PF_PB_ShortCut】
+	版本经历：	
+
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.shortcut_uuid				TYPEAS		s_uuid
+	输入.account_uuid				TYPEAS		s_uuid
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+
+	
+	QUERY
+		SELECT 
+			  a.shortcut_uuid
+			, a.account_uuid
+			, a.menucode
+			, a.menualias
+			, a.menuicon
+			, b.func_url
+			, b.func_name
+			, c.func_uuid		as submenu
+			, c.func_name		as submunename
+			, d.func_uuid		as topmenu
+			, d.func_name		as topmenuname
+		FROM PF_PB_ShortCut a
+		inner join UUM_UA_FUNCTION b on b.func_uuid = a.menucode
+		inner join UUM_UA_FUNCTION c on c.func_uuid = b.parent_uuid
+		inner join UUM_UA_FUNCTION d on d.func_uuid = c.parent_uuid
+		WHERE a.sysisdelete = '0' and a.account_uuid = 输入.account_uuid
+		ORDER BY b.display_order
+		ENDSELECT
+	ENDQUERY

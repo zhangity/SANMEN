@@ -1,0 +1,601 @@
+[交易说明]
+	交易名：		流程模板查询
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、任务处理流水表			【wdk_wf_record】
+	版本经历：	
+				1、v1.0			于猛			2014-11-21 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为wql.properties中default所指定的数据库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#查询监控记录所用
+	输入.opertypes				TYPEAS 		f_string
+	
+	
+	
+	--流水UUID
+	输入.id						TYPEAS		s_id
+	
+	--流程模板ID
+	输入.pdid					TYPEAS		s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS		s_string
+	
+	--当前处理节点名称
+	输入.nodename				TYPEAS		s_sstring
+	
+	--节点对应页面
+	输入.nodepage				TYPEAS		s_string
+	
+	--节点标题
+	输入.nodetitle				TYPEAS		s_sstring
+	
+	--当前节点类型
+	输入.nodetype				TYPEAS		s_sstring
+	
+	--会签类型
+	输入.signtype				TYPEAS		s_stype
+	
+	--当前处理任务ID
+	输入.taskid					TYPEAS		s_string
+	
+	--子任务ID
+	输入.subtaskid				TYPEAS		s_string
+	
+	--流程创建者id
+	输入.createactorid			TYPEAS		s_sstring
+	
+	--流程创建者类型
+	输入.createactortype			TYPEAS		s_sstring
+	
+	--流程创建者部门
+	输入.createdeptuuid			TYPEAS		s_sstring
+	
+	--流程创建时间
+	输入.createdt				TYPEAS		s_sstring
+	
+	--任务送达时间
+	输入.taskcreatedt			TYPEAS		s_sstring
+	
+	--办理者id
+	输入.actorid					TYPEAS		s_sstring
+	
+	--办理者类型
+	输入.actortype				TYPEAS		s_sstring
+	
+	--办理者部门
+	输入.deptuuid				TYPEAS		s_sstring
+	
+	--原始办理者id
+	输入.originactorid			TYPEAS		s_sstring
+	
+	--原始办理者类型
+	输入.originactortype			TYPEAS		s_sstring
+	
+	--原始办理者部门
+	输入.origindeptuuid			TYPEAS		s_sstring
+	
+	--关联待办流水
+	输入.todoid					TYPEAS		s_id
+	
+	--代理类型
+	输入.agenttype				TYPEAS		s_sstring
+	
+	--操作类型
+	输入.opertype				TYPEAS		s_stype
+	
+	--办理意见
+	输入.opercomment				TYPEAS		s_string
+	
+	--办理时间
+	输入.operdt					TYPEAS		s_sstring
+	
+	--目标环节
+	输入.target					TYPEAS		s_sstring
+	
+	--目标环节办理人
+	输入.targetactors			TYPEAS		s_lstring
+	
+	--前一任务流水记录
+	输入.preid					TYPEAS		s_sstring
+	
+	--当前任务状态
+	输入.status					TYPEAS		s_stype
+
+	--流程办结时间
+	输入.completedt				TYPEAS		s_sstring
+
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.orderby					TYPEAS		f_orderby
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	临时.orderby = "pdid asc,piid asc,operdt desc"
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#根据条件查询符合要求的流水记录
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetitle
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,createactorid
+				,createactortype
+				,createdeptuuid
+				,createdt
+				,taskcreatedt
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,todoid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,target
+				,targetactors
+				,preid
+				,status
+			FROM wdk_wf_record  a
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.createactorid <> ""
+				a.createactorid = 输入.createactorid
+			ENDOPTION
+			OPTION 输入.createactortype <> ""
+				a.createactortype = 输入.createactortype
+			ENDOPTION
+			OPTION 输入.createdeptuuid <> ""
+				a.createdeptuuid = 输入.createdeptuuid
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.taskcreatedt <> ""
+				a.taskcreatedt = 输入.taskcreatedt
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.signtype <> ""
+				a.signtype = 输入.signtype
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.nodetype <> ""
+				a.nodetype = 输入.nodetype
+			ENDOPTION
+			OPTION 输入.nodepage <> ""
+				a.nodepage = 输入.nodepage
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.actortype <> ""
+				a.actortype = 输入.actortype
+			ENDOPTION
+			OPTION 输入.deptuuid <> ""
+				a.deptuuid = 输入.deptuuid
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			OPTION 输入.originactortype <> ""
+				a.originactortype = 输入.originactortype
+			ENDOPTION
+			OPTION 输入.origindeptuuid <> ""
+				a.origindeptuuid = 输入.origindeptuuid
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.operdt <> ""
+				a.operdt = 输入.operdt
+			ENDOPTION
+			OPTION 输入.opercomment <> ""
+				a.opercomment = 输入.opercomment
+			ENDOPTION
+			OPTION 输入.target <> ""
+				a.target = 输入.target
+			ENDOPTION
+			OPTION 输入.targetactors <> ""
+				a.targetactors = 输入.targetactors
+			ENDOPTION
+			OPTION 输入.todoid <> ""
+				a.todoid = 输入.todoid
+			ENDOPTION
+			OPTION 输入.preid <> ""
+				a.preid = 输入.preid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY	
+			
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	
+	#根据流程实例查询该流程所有的已办环节
+	IF	输入.flag = 21
+		QUERY
+			SELECT
+				distinct
+					nodename
+			FROM wdk_wf_record  a
+			WHERE 1=1
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	#根据人员标识获取该人员参与的所有流程实例
+	IF	输入.flag = 31
+		QUERY
+			SELECT
+				distinct
+					piid
+			FROM wdk_wf_record  a
+			WHERE 1=1
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#查找当前人员已办、下一环节未办的任务
+	IF	输入.flag = 4
+		QUERY
+			SELECT
+				distinct
+					piid
+			FROM wdk_wf_record  a
+			WHERE 1=1
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	
+	
+	#查询不重复的前序节点和操作者
+	IF	输入.flag = 5
+		QUERY
+			SELECT
+				distinct
+					nodename
+					,actorname
+			FROM wdk_wf_record  a
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.createactorid <> ""
+				a.createactorid = 输入.createactorid
+			ENDOPTION
+			OPTION 输入.createactortype <> ""
+				a.createactortype = 输入.createactortype
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.taskcreatedt <> ""
+				a.taskcreatedt = 输入.taskcreatedt
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.signtype <> ""
+				a.signtype = 输入.signtype
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.nodetype <> ""
+				a.nodetype = 输入.nodetype
+			ENDOPTION
+			OPTION 输入.nodepage <> ""
+				a.nodepage = 输入.nodepage
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.actortype <> ""
+				a.actortype = 输入.actortype
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			OPTION 输入.originactortype <> ""
+				a.originactortype = 输入.originactortype
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.tasktype <> ""
+				a.tasktype = 输入.tasktype
+			ENDOPTION
+			OPTION 输入.operdt <> ""
+				a.operdt = 输入.operdt
+			ENDOPTION
+			OPTION 输入.opercomment <> ""
+				a.opercomment = 输入.opercomment
+			ENDOPTION
+			OPTION 输入.target <> ""
+				a.target = 输入.target
+			ENDOPTION
+			OPTION 输入.targetactors <> ""
+				a.targetactors = 输入.targetactors
+			ENDOPTION
+			OPTION 输入.forwardtype <> ""
+				a.forwardtype = 输入.forwardtype
+			ENDOPTION
+			OPTION 输入.preid <> ""
+				a.preid = 输入.preid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY	
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	
+	#从历史表中查询办理记录
+	IF	输入.flag = 6
+		QUERY
+			SELECT
+				id
+				,pdid
+				,piid
+				,nodename
+				,nodepage
+				,nodetitle
+				,nodetype
+				,signtype
+				,taskid
+				,subtaskid
+				,createactorid
+				,createactortype
+				,createdeptuuid
+				,createdt
+				,taskcreatedt
+				,actorid
+				,actortype
+				,deptuuid
+				,originactorid
+				,originactortype
+				,origindeptuuid
+				,todoid
+				,agenttype
+				,opertype
+				,opercomment
+				,operdt
+				,target
+				,targetactors
+				,preid
+				,status
+				,completedt
+			FROM wdk_wf_record_his  a
+			WHERE 1=1
+			OPTION 输入.id <> ""
+				a.id = 输入.id
+			ENDOPTION
+			OPTION 输入.pdid <> ""
+				a.pdid = 输入.pdid
+			ENDOPTION
+			OPTION 输入.piid <> ""
+				a.piid = 输入.piid
+			ENDOPTION
+			OPTION 输入.createactorid <> ""
+				a.createactorid = 输入.createactorid
+			ENDOPTION
+			OPTION 输入.createactortype <> ""
+				a.createactortype = 输入.createactortype
+			ENDOPTION
+			OPTION 输入.createdt <> ""
+				a.createdt = 输入.createdt
+			ENDOPTION
+			OPTION 输入.taskcreatedt <> ""
+				a.taskcreatedt = 输入.taskcreatedt
+			ENDOPTION
+			OPTION 输入.taskid <> ""
+				a.taskid = 输入.taskid
+			ENDOPTION
+			OPTION 输入.subtaskid <> ""
+				a.subtaskid = 输入.subtaskid
+			ENDOPTION
+			OPTION 输入.signtype <> ""
+				a.signtype = 输入.signtype
+			ENDOPTION
+			OPTION 输入.nodename <> ""
+				a.nodename = 输入.nodename
+			ENDOPTION
+			OPTION 输入.nodetype <> ""
+				a.nodetype = 输入.nodetype
+			ENDOPTION
+			OPTION 输入.nodepage <> ""
+				a.nodepage = 输入.nodepage
+			ENDOPTION
+			OPTION 输入.actorid <> ""
+				a.actorid = 输入.actorid
+			ENDOPTION
+			OPTION 输入.actortype <> ""
+				a.actortype = 输入.actortype
+			ENDOPTION
+			OPTION 输入.originactorid <> ""
+				a.originactorid = 输入.originactorid
+			ENDOPTION
+			OPTION 输入.originactortype <> ""
+				a.originactortype = 输入.originactortype
+			ENDOPTION
+			OPTION 输入.agenttype <> ""
+				a.agenttype = 输入.agenttype
+			ENDOPTION
+			OPTION 输入.opertype <> ""
+				a.opertype = 输入.opertype
+			ENDOPTION
+			OPTION 输入.operdt <> ""
+				a.operdt = 输入.operdt
+			ENDOPTION
+			OPTION 输入.opercomment <> ""
+				a.opercomment = 输入.opercomment
+			ENDOPTION
+			OPTION 输入.target <> ""
+				a.target = 输入.target
+			ENDOPTION
+			OPTION 输入.targetactors <> ""
+				a.targetactors = 输入.targetactors
+			ENDOPTION
+			OPTION 输入.preid <> ""
+				a.preid = 输入.preid
+			ENDOPTION
+			OPTION 输入.status <> ""
+				a.status = 输入.status
+			ENDOPTION
+			OPTION 输入.sql <> ""
+				输入.sql	
+			ENDOPTION
+			ORDERBY 输入.orderby <> ""
+				输入.orderby
+			ENDORDERBY	
+			
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#为流程监控查询指定流程的流转过程
+	IF	输入.flag = 801
+		QUERY
+			SELECT
+				PIID
+				,NODENAME
+				,TARGET
+				,OPERTYPE
+			FROM wdk_wf_record a
+			WHERE 1=1
+				OPTION 输入.piid <> ""
+					a.piid = 输入.piid
+				ENDOPTION
+				OPTION 输入.opertypes <> ""
+					a.opertype in ( 输入.opertypes )
+				ENDOPTION
+			order by piid desc,createdt asc
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	#为流程监控查询指定流程的流转过程
+	IF	输入.flag = 802
+		QUERY
+			SELECT
+				PIID
+				,NODENAME
+				,TARGET
+				,OPERTYPE
+			FROM wdk_wf_record_his a
+			WHERE 1=1
+				OPTION 输入.piid <> ""
+					a.piid = 输入.piid
+				ENDOPTION
+				OPTION 输入.opertypes <> ""
+					a.opertype in ( 输入.opertypes )
+				ENDOPTION
+			order by piid desc,createdt asc
+			ENDSELECT
+		ENDQUERY
+	ENDIF

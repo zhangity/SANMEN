@@ -1,0 +1,114 @@
+[交易说明]
+	交易名：	平台服务接口交互报文留痕表
+	所属模块：平台	
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			1、登录审计表				【PF_PB_Aduit_Login】
+	版本经历：	
+			1、v1.0			于猛			2015-11-18 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag				TYPEAS		s_string
+	
+	--流水id
+	输入.flowid				TYPEAS		s_uuid
+	
+	--登录用户
+	输入.loginname			TYPEAS		s_mname
+	
+	--登录系统
+	输入.loginappuuid		TYPEAS		s_uuid
+	
+	--登录时间
+	输入.logindt				TYPEAS		s_datetime
+	
+	--登录ip
+	输入.loginip				TYPEAS		s_uuid
+	
+	--登录sessionid
+	输入.loginsessionid		TYPEAS		s_mname
+
+	--登录结果
+	输入.loginstatus			TYPEAS		s_type
+	
+	--失败编码
+	输入.errcode				TYPEAS		s_type
+	
+	--失败描述
+	输入.errdesc				TYPEAS		s_mname
+	
+
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	#1、普通查询
+	IF 输入.flag = 1
+		QUERY
+			SELECT
+				a.flowid
+				,a.loginname
+				,a.loginappuuid
+				,a.logindt
+				,a.loginip
+				,a.loginsessionid
+				,a.loginstatus
+				,a.errcode
+				,a.errdesc
+			FROM PF_PB_Login a
+			WHERE 1=1
+			OPTION 输入.flowid <> ""
+				a.flowid = 输入.flowid
+			ENDOPTION
+			OPTION 输入.loginname <> ""
+				a.loginname = 输入.loginname
+			ENDOPTION
+			OPTION 输入.loginappuuid <> ""
+				a.loginappuuid = 输入.loginappuuid
+			ENDOPTION
+			OPTION 输入.logindt <> ""
+				a.logindt = 输入.logindt
+			ENDOPTION
+			OPTION 输入.loginip <> ""
+				a.loginip = 输入.loginip
+			ENDOPTION
+			OPTION 输入.loginsessionid <> ""
+				a.loginsessionid = 输入.loginsessionid
+			ENDOPTION
+			OPTION 输入.loginstatus <> ""
+				a.loginstatus = 输入.loginstatus
+			ENDOPTION
+			OPTION 输入.errcode <> ""
+				a.errcode = 输入.errcode
+			ENDOPTION
+			OPTION 输入.errdesc <> ""
+				a.errdesc = 输入.errdesc
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF

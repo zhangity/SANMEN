@@ -1,0 +1,76 @@
+[交易说明]
+	交易名：	角色用户维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、角色用户表【UUM_UA_ROLEACCOUNT】
+						
+	版本经历：	
+				1、v1.0		廖树平		2015/8/3 17:09:25		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--ref
+	输入.detailcount						TYPEAS	n_sn
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.role_uuid							TYPEAS	s_uuid
+	输入明细.depart_uuidarr			TYPEAS	s_uuid
+	输入明细.account_uuidarr		TYPEAS	s_uuid
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.isdefault							TYPEAS	s_bool
+	临时.rlecount								TYPEAS	n_sn
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.actionflag = "ref"
+		DELETE FROM UUM_UA_ROLEACCOUNT
+		WHERE role_uuid = 输入.role_uuid
+		ENDDELETE
+		
+		LOOP 输入.detailcount
+			SELECT COUNT(1) AS RLECNT
+			FROM UUM_UA_ROLEACCOUNT
+			WHERE account_uuid = 输入明细.account_uuidarr AND is_default = '1'
+			ENDSELECT
+			临时.rlecount = RLECNT
+			IF 临时.rlecount = 0
+				临时.isdefault = 1
+			ELSE
+				临时.isdefault = 0
+			ENDIF
+			
+			INSERT INTO UUM_UA_ROLEACCOUNT(
+				role_uuid
+				, account_uuid
+				, org_uuid
+				, is_default)
+			VALUES(
+				输入.role_uuid
+				, 输入明细.account_uuidarr
+				, 输入明细.depart_uuidarr
+				, 临时.isdefault)
+			ENDINSERT
+		ENDLOOP
+	ENDIF

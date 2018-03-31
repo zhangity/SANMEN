@@ -1,0 +1,191 @@
+[交易说明]
+	交易名：		根据角色ID取人员列表
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+
+
+	版本经历：	
+				1、v1.0		彭晓赞			2015/9/11 10:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.role_uuid								TYPEAS		f_string
+	输入.org_uuid									TYPEAS		s_uuid
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+  临时.sys_code									TYPEAS	s_mname
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.org_uuid <> ""
+	  SELECT a.sys_code
+	  FROM UUM_UU_ORGINFO a
+	  WHERE a.org_uuid = 输入.org_uuid
+	  ENDSELECT
+	  临时.sys_code = sys_code
+	ENDIF
+	
+	IF 输入.role_uuid <> ""
+	QUERY
+      SELECT DISTINCT 
+	             d.person_uuid
+		          ,d.person_code
+		          ,d.person_name
+		          ,d.old_name
+		          ,d.by_name
+		          ,d.nick_name
+		          ,d.gender_scode
+		          ,d.english_name
+		          ,d.org_uuid
+		          ,a.org_uuid depart_uuid
+		          ,d.emp_no
+		          ,d.politics_scode
+		          ,d.birth_date
+		          ,d.entry_date
+		          ,d.diploma_scode
+		          ,d.cer_type_scode
+		          ,d.id_no
+		          ,d.id_address
+		          ,d.attach_uuid
+		          ,d.nation
+		          ,d.family_back_group
+		          ,d.nation_place
+		          ,d.tech_title
+		          ,d.job_title
+		          ,d.country
+		          ,d.is_saler
+		          ,d.is_purcher
+		          ,d.is_warehouse_keeper
+		          ,d.master_email
+		          ,d.backup_email
+		          ,d.phone_no
+		          ,d.office_phone_no
+		          ,d.room_no
+		          ,d.master_mobile
+		          ,d.backup_mobile
+		          ,d.address
+		          ,d.post_code
+		          ,d.drive_no
+		          ,d.status_scode
+		          ,d.sign_pic
+		          ,d.sign_picname
+		          ,d.display_order
+		          ,d.remark
+		          ,d.syscreatoruuid
+		          ,d.syscreatedate
+		          ,d.sysupdateuseruuid
+		          ,d.sysupdatetime
+		          ,d.sysdeptuuid
+		          ,d.syscompanyuuid
+		          ,d.sysisdelete
+		          ,d.externalid
+	      FROM UUM_UA_ROLEACCOUNT a
+	      INNER JOIN UUM_UA_ROLE b on b.role_uuid = a.role_uuid and b.sysisdelete='0'
+	      INNER JOIN UUM_UU_ACCOUNT c on c.account_uuid = a.account_uuid and c.sysisdelete='0' and c.user_scode = 'U092'
+	      INNER JOIN UUM_UU_PERSONINFO d on d.person_uuid = c.user_uuid and d.sysisdelete='0'
+	      INNER JOIN UUM_UU_ORGINFO e on e.org_uuid = a.org_uuid
+	      where a.role_uuid in ( 输入.role_uuid )
+		    OPTION 输入.org_uuid <> ""
+		      e.sys_code LIKE CONCAT(临时.sys_code , "%")
+		    ENDOPTION
+		    ORDER BY d.DISPLAY_ORDER
+	  ENDSELECT
+	ENDQUERY
+	ENDIF
+	
+	IF 输入.role_uuid = ""
+		QUERY
+	    SELECT a.person_uuid
+		          ,a.person_code
+		          ,a.person_name
+		          ,a.old_name
+		          ,a.by_name
+		          ,a.nick_name
+		          ,a.gender_scode
+		          ,a.english_name
+		          ,a.org_uuid
+		          ,a.depart_uuid
+		          ,a.emp_no
+		          ,a.politics_scode
+		          ,a.birth_date
+		          ,a.entry_date
+		          ,a.diploma_scode
+		          ,a.cer_type_scode
+		          ,a.id_no
+		          ,a.id_address
+		          ,a.attach_uuid
+		          ,a.nation
+		          ,a.family_back_group
+		          ,a.nation_place
+		          ,a.tech_title
+		          ,a.job_title
+		          ,a.country
+		          ,a.is_saler
+		          ,a.is_purcher
+		          ,a.is_warehouse_keeper
+		          ,a.master_email
+		          ,a.backup_email
+		          ,a.phone_no
+		          ,a.office_phone_no
+		          ,a.room_no
+		          ,a.master_mobile
+		          ,a.backup_mobile
+		          ,a.address
+		          ,a.post_code
+		          ,a.drive_no
+		          ,a.status_scode
+		          ,a.sign_pic
+		          ,a.sign_picname
+		          ,a.display_order
+		          ,a.remark
+		          ,a.syscreatoruuid
+		          ,a.syscreatedate
+		          ,a.sysupdateuseruuid
+		          ,a.sysupdatetime
+		          ,a.sysdeptuuid
+		          ,a.syscompanyuuid
+		          ,a.sysisdelete
+		          ,a.externalid
+		    FROM UUM_UU_PERSONINFO a
+		    INNER JOIN UUM_UU_ORGINFO e on e.org_uuid = a.depart_uuid
+		    WHERE  a.sysisdelete='0'
+		    OPTION 输入.org_uuid <> ""
+		      e.sys_code LIKE CONCAT(临时.sys_code , "%")
+		    ENDOPTION
+		    ORDER BY a.DISPLAY_ORDER
+	    ENDSELECT
+		ENDQUERY
+	ENDIF
+
+	#对操作符进行判断，如果没有输入则提示错误

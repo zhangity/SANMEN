@@ -1,0 +1,249 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、流程设计器				【wdk_wf_designer】
+	版本经历：	
+				1、v1.0			于猛			2015-04-08 14:03:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--模板标识
+	输入.pdid					TYPEAS		s_id
+	
+	--模板名称
+	输入.pdname					TYPEAS		s_sstring
+	
+	--版本号
+	输入.pdversion				TYPEAS		s_stype
+	
+	--模板中文名称
+	输入.cnname					TYPEAS		s_sstring
+	
+	--FX内容
+	输入.fx						TYPEAS		c_content
+	
+	--WF内容XML格式
+	输入.wf						TYPEAS		c_content
+	
+	--WF内容JSON格式
+	输入.wfjson					TYPEAS		c_content
+	
+	--JPDL内容
+	输入.jpdl					TYPEAS		c_content
+	
+	--是否已部署
+	输入.isdeploy				TYPEAS		s_stype
+	
+	--部署后的模板id
+	输入.engpdid					TYPEAS		s_id
+	
+	--当前状态
+	输入.status					TYPEAS		s_stype
+	
+	--所属分类
+	输入.parentcode				TYPEAS		s_sstring
+	
+	--排序序号
+	输入.ordercode				TYPEAS		s_sstring	
+	
+	--备注
+	输入.remark					TYPEAS		s_string
+	
+	--创建时间
+	输入.createdt				TYPEAS		s_sstring
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增流程设计
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_designer(
+			pdid
+			,pdname
+			,pdversion
+			,cnname
+			,fx
+			,wf
+			,wfjson
+			,jpdl
+			,isdeploy
+			,engpdid
+			,status
+			,parentcode
+			,ordercode
+			,remark
+			,createdt
+		) values (
+			输入.pdid
+			,输入.pdname
+			,输入.pdversion
+			,输入.cnname
+			,输入.fx
+			,输入.wf
+			,输入.wfjson
+			,输入.jpdl
+			,输入.isdeploy
+			,输入.engpdid
+			,输入.status
+			,输入.parentcode
+			,输入.ordercode
+			,输入.remark
+			,输入.createdt
+		)
+		ENDINSERT
+	ENDIF
+	
+	#修改流程设计
+	IF 输入.flag = 2
+		UPDATE wdk_wf_designer a set
+			a.pdname 		= 	输入.pdname
+			,a.pdversion 	= 	输入.pdversion
+			,a.cnname		=	输入.cnname
+			,a.fx 			= 	输入.fx
+			,a.wf 			= 	输入.wf
+			,a.wfjson		=	输入.wfjson
+			,a.jpdl 		= 	输入.jpdl
+			,a.isdeploy		=	输入.isdeploy
+			,a.engpdid		=	输入.engpdid
+			,a.status 		= 	输入.status
+			,a.parentcode	= 	输入.parentcode
+			,a.ordercode	= 	输入.ordercode
+			,a.remark 		= 	输入.remark
+			,a.createdt 	= 	输入.createdt
+		WHERE a.pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF
+	
+	
+	#删除流程设计
+	IF 输入.flag = 3
+		DELETE FROM wdk_wf_designer a
+		WHERE a.pdid = 输入.pdid
+		ENDDELETE
+	ENDIF
+	
+	
+	#修改流程状态
+	IF 输入.flag = 4
+		UPDATE wdk_wf_designer a set
+			a.isdeploy		=	输入.isdeploy
+		WHERE a.pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	#5、分步骤增加流程设计器的内容
+	
+	#5.1、新增基础记录
+	IF 输入.flag = 51
+		INSERT INTO wdk_wf_designer(
+			pdid
+			,pdname
+			,pdversion
+			,cnname
+			,isdeploy
+			,engpdid
+			,status
+			,parentcode
+			,ordercode
+			,remark
+			,createdt
+		) values (
+			输入.pdid
+			,输入.pdname
+			,输入.pdversion
+			,输入.cnname
+			,输入.isdeploy
+			,输入.engpdid
+			,输入.status
+			,输入.parentcode
+			,输入.ordercode
+			,输入.remark
+			,输入.createdt
+		)
+		ENDINSERT
+	ENDIF
+	
+	#5.2、插入fx
+	IF 输入.flag = 52
+		UPDATE wdk_wf_designer a set
+			a.fx		=	输入.fx
+		WHERE a.pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF
+	
+	#5.3、插入wf
+	IF 输入.flag = 53
+		UPDATE wdk_wf_designer a set
+			a.wf		=	输入.wf
+		WHERE a.pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF
+	
+	#5.4、插入wfjson
+	IF 输入.flag = 54
+		UPDATE wdk_wf_designer a set
+			a.wfjson	=	输入.wfjson
+		WHERE a.pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF
+	
+	#5.5、插入jpdl
+	IF 输入.flag = 55
+		UPDATE wdk_wf_designer a set
+			a.jpdl		=	输入.jpdl
+		WHERE a.pdid = 输入.pdid
+		ENDUPDATE
+	ENDIF

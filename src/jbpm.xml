@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+          "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+          "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+  <session-factory>
+  	
+
+		<!-- 	数据源方式	weblogic/was  +  oracle 
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.OracleDialect</property>
+		<property name="hibernate.connection.driver_class">oracle.jdbc.OracleDriver</property>
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="hibernate.connection.datasource">TIEG</property>  
+		<property name="jta.UserTransaction">javax.transaction.UserTransaction</property> 
+		<property name="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JOTMTransactionManagerLookup</property>
+		<property name="hibernate.default_schema">TIEG</property>	
+	 	-->
+		
+		<!-- 	数据源方式	weblogic/was  +  db2
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
+		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="hibernate.connection.datasource">TIEG</property>  
+		<property name="jta.UserTransaction">javax.transaction.UserTransaction</property> 
+		<property name="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JOTMTransactionManagerLookup</property>
+		<property name="hibernate.default_schema">TIEG</property>
+		 -->
+		 
+		 <!-- 	数据源方式	tomcat  +  mssql 	
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
+		<property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="hibernate.connection.datasource">java:comp/env/WDK</property>  
+		<property name="jta.UserTransaction">java:comp/env/UWDK</property> 
+		<property name="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JOTMTransactionManagerLookup</property>
+		<property name="hibernate.default_schema">WDK</property>
+
+-->
+		<!-- 	数据源方式	tomcat  +  oracle -->	
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.OracleDialect</property>
+		<property name="hibernate.connection.driver_class">oracle.jdbc.OracleDriver</property>
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="hibernate.connection.datasource">java:comp/env/WDK</property>  
+		<property name="jta.UserTransaction">java:comp/env/UWDK</property> 
+		<property name="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JOTMTransactionManagerLookup</property>
+		<property name="hibernate.default_schema">WDK</property>
+		
+		
+	
+
+		<!-- 	数据源方式	tomcat  +  db2 
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
+		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="hibernate.connection.datasource">java:comp/env/OA</property>  
+		<property name="jta.UserTransaction">java:comp/env/UOA</property> 
+		<property name="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JOTMTransactionManagerLookup</property>
+		<property name="hibernate.default_schema">OA</property>
+		-->
+
+
+		<!-- 	数据源方式	tomcat  +  mysql
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="hibernate.connection.datasource">java:comp/env/WDK</property>  
+		<property name="jta.UserTransaction">java:comp/env/UWDK</property> 
+		<property name="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JOTMTransactionManagerLookup</property>
+		<property name="hibernate.default_schema">smresv</property>
+		 -->
+
+
+
+
+		<!-- 	JDBC方式	 db2	
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
+		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
+		<property name="hibernate.connection.url">jdbc:db2://192.168.0.244:50000/TIEG</property>
+		<property name="hibernate.connection.username">TIEG</property>
+		<property name="hibernate.connection.password">TIEG</property>
+		-->
+
+
+		<!-- 	JDBC方式	  oracle	
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.OracleDialect</property>
+		<property name="hibernate.connection.driver_class">oracle.jdbc.OracleDriver</property>
+		<property name="hibernate.connection.url">jdbc:oracle:thin:@192.168.0.131:1521:TIEG</property>
+		<property name="hibernate.connection.username">TIEG</property>
+		<property name="hibernate.connection.password">TIEG</property>
+		-->
+		
+
+		<!-- 	JDBC方式	 mysql	
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:db2://192.168.0.244:50000/TIEG</property>
+		<property name="hibernate.connection.username">TIEG</property>
+		<property name="hibernate.connection.password">TIEG</property>
+		-->
+
+		
+	     <mapping resource="jbpm.repository.hbm.xml" />
+	     <mapping resource="jbpm.execution.hbm.xml" />
+	     <mapping resource="jbpm.history.hbm.xml" />
+	     <mapping resource="jbpm.task.hbm.xml" />
+	     <mapping resource="jbpm.identity.hbm.xml" />
+     
+  </session-factory>
+</hibernate-configuration>

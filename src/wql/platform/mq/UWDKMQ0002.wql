@@ -1,0 +1,79 @@
+[交易说明]
+  交易名：    MQ消息保存
+  所属模块：  系统功能
+  功能简述：  
+  版权所有：  杭州新世纪
+  表引用：    
+  版本经历：  
+
+[数据库]
+  --指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+  #操作符   1-新增  2-修改  3-删除
+  输入.flag                   TYPEAS    s_string
+  --消息标识
+  输入.msg_uuid               TYPEAS    s_string
+  --服务标识
+  输入.server_uuid            TYPEAS    s_string
+  --接收时间
+  输入.receivetime            TYPEAS    s_string
+  --明细数
+  输入.dtlcount               TYPEAS    n_sn
+
+  --序号
+  输入明细.seqno_arr          TYPEAS    n_sn
+  --消息键值
+  输入明细.msgkey_arr         TYPEAS    s_string
+  --消息内容
+  输入明细.msgvalue_arr       TYPEAS    c_content
+
+[临时表]
+  --这边列出来的临时表就会在运行期动态创建
+  
+[临时变量]
+  --所有中间过程变量均可在此处定义
+     
+[业务过程]
+
+  ##########################################
+  #      1、输入输出检查         #
+  ##########################################
+
+  
+  ##########################################
+  #      2、主过程前处理         #
+  ##########################################
+  
+  
+  ##########################################
+  #      3、业务主过程          #
+  ##########################################
+  
+  INSERT INTO WDK_MQ_MSG (
+      msg_uuid
+      ,server_uuid
+      ,receivetime
+      ,dtlcount
+    ) values (
+      输入.msg_uuid
+      ,输入.server_uuid
+      ,输入.receivetime
+      ,输入.dtlcount
+    )
+  ENDINSERT
+  
+  LOOP 输入.dtlcount
+    INSERT INTO WDK_MQ_MSGDTL (
+      msg_uuid
+      ,seqno
+      ,msgkey
+      ,msgvalue
+    ) values (
+      输入.msg_uuid
+      ,输入明细.seqno_arr
+      ,输入明细.msgkey_arr
+      ,输入明细.msgvalue_arr
+    )
+    ENDINSERT
+  ENDLOOP

@@ -1,0 +1,84 @@
+[交易说明]
+	交易名：		组织机构表查询
+	所属模块：	系统功能
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、组织机构表				【EA_BI_DepartMent】
+	版本经历：	
+				1、v1.0		于猛			2015-01-23 14:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-查询所有  2-分页查询
+	输入.flag						TYPEAS		s_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--上级组织机构代码
+	输入.prnt_orgn_code				TYPEAS		s_code
+	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询所有人员
+	IF	输入.flag = 1
+		QUERY
+			SELECT DEPT_ID as id,
+			       DEPT_ID as orgn_code,
+			       DEPT_NAME as orgn_name,
+			       PARENT_DEPT as prnt_orgn_id,
+			       ,(select DEPT_NAME from EA_BI_DEPARTMENT d where d.DEPT_ID = a.PARENT_DEPT) as prnt_orgn_name
+			       CODE_PY,
+			       CODE_WB,
+			       CODE_SJ,
+			       MZSY,
+			       ZYSY,
+			       YJSY,
+			       BQSY,
+			       CODE_QT,
+			       ACTUAL_ID,
+			       IS_ZYY,
+			       AREA_ID,
+			       ORDERCODE,
+			       CREATEDT,
+			       STATUS,
+			       REMARK
+			       ,(select count(*) from EA_BI_DEPARTMENT b where b.parent_dept = a.dept_id) as childs
+				   ,(select count(*) from EA_BI_Person c where c.dept_id = a.dept_id) as childs2
+				   ,'org' as nodetype
+		    FROM EA_BI_DEPARTMENT a
+			WHERE 1=1
+			OPTION 输入.prnt_orgn_code <> ""
+				a.PARENT_DEPT = 输入.prnt_orgn_code
+			ENDOPTION
+			order by ORDERCODE
+			ENDSELECT
+		ENDQUERY
+	ENDIF

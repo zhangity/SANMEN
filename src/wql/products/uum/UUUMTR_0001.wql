@@ -1,0 +1,150 @@
+[交易说明]
+	交易名： 甘肃统一用户同步
+	所属模块：	用户同步
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			用户表					【PUB_USERS】
+	版本经历：	
+				1、v1.0		于猛			2015/10/19 14:32:08		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+	
+	
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag						TYPEAS		s_string
+	输入.count						TYPEAS		n_integer
+	
+	输入明细.user_id					TYPEAS		s_lname
+	输入明细.external_user			TYPEAS		s_lname
+	输入明细.user_name				TYPEAS		s_lname
+	输入明细.password				TYPEAS		s_lname
+	输入明细.account_status			TYPEAS		s_lname
+	输入明细.security_level			TYPEAS		n_hnumeric
+	输入明细.max_sessions			TYPEAS		n_hnumeric
+	输入明细.is_sys					TYPEAS		s_bool
+	输入明细.is_cpublic				TYPEAS		s_bool
+	输入明细.create_time				TYPEAS		s_lname
+	输入明细.lock_time				TYPEAS		s_lname
+	输入明细.expired_time			TYPEAS		s_lname
+	输入明细.pswd_upt_time			TYPEAS		s_lname
+	输入明细.pswd_time				TYPEAS		s_lname
+	输入明细.corporation_id			TYPEAS		s_lname
+	输入明细.department_id			TYPEAS		s_lname
+	输入明细.employee_id				TYPEAS		s_lname
+	输入明细.e_mail					TYPEAS		s_lname
+	输入明细.msn						TYPEAS		s_lname
+	输入明细.qq						TYPEAS		s_lname
+	输入明细.mobile					TYPEAS		s_lname
+	输入明细.char_1					TYPEAS		s_lname
+	输入明细.char_2					TYPEAS		s_lname
+	输入明细.num_1					TYPEAS		n_hnumeric
+	输入明细.num_2					TYPEAS		n_hnumeric
+	输入明细.permission_stru_id		TYPEAS		s_lname
+	输入明细.isuseippolicy			TYPEAS		s_bool
+	输入明细.ippolicy				TYPEAS		s_lname
+		
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#1、新增
+	IF 输入.flag = 1
+		LOOP 输入.count
+			INSERT INTO PUB_USERS(
+					USER_ID
+					,EXTERNAL_USER
+					,USER_NAME
+					,PASSWORD
+					,ACCOUNT_STATUS
+					,SECURITY_LEVEL
+					,MAX_SESSIONS
+					,IS_SYS
+					,IS_CPUBLIC
+					,CREATE_TIME
+					,LOCK_TIME
+					,EXPIRED_TIME
+					,PSWD_UPT_TIME
+					,PSWD_TIME
+					,CORPORATION_ID
+					,DEPARTMENT_ID
+					,EMPLOYEE_ID
+					,E_MAIL
+					,MSN
+					,QQ
+					,MOBILE
+					,CHAR_1
+					,CHAR_2
+					,NUM_1
+					,NUM_2
+					,PERMISSION_STRU_ID
+					,ISUSEIPPOLICY
+					,IPPOLICY
+				)  VALUES (
+					输入明细.user_id
+					,输入明细.external_user
+					,输入明细.user_name
+					,输入明细.password
+					,输入明细.account_status
+					,输入明细.security_level
+					,输入明细.max_sessions
+					,输入明细.is_sys
+					,输入明细.is_cpublic
+					,输入明细.create_time
+					,输入明细.lock_time
+					,输入明细.expired_time
+					,输入明细.pswd_upt_time
+					,输入明细.pswd_time
+					,输入明细.corporation_id
+					,输入明细.department_id
+					,输入明细.employee_id
+					,输入明细.e_mail
+					,输入明细.msn
+					,输入明细.qq
+					,输入明细.mobile
+					,输入明细.char_1
+					,输入明细.char_2
+					,输入明细.num_1
+					,输入明细.num_2
+					,输入明细.permission_stru_id
+					,输入明细.isuseippolicy
+					,输入明细.ippolicy
+				)
+			ENDINSERT
+		ENDLOOP
+	ENDIF
+	
+	
+	#2、删除所有
+	IF 输入.flag = 2
+		DELETE FROM PUB_USERS
+		ENDDELETE
+	ENDIF

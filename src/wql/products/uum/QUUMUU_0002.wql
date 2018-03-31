@@ -1,0 +1,87 @@
+[交易说明]
+	交易名：		取用户详细信息
+	所属模块：	平台公共
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、用户表【UUM_UU_ACCOUNT】
+				2、人员信息表【UUM_UU_PERSONINFO】
+	版本经历：	
+				1、v1.0		廖树平			2015/7/24 9:27:54		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag								TYPEAS		s_type
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--用户标识
+	输入.account_uuid						TYPEAS	s_uuid
+	
+	--人员标识
+	输入.person_uuid						TYPEAS	s_uuid
+	
+	--登录名
+	输入.login_name							TYPEAS	s_lname
+
+	--姓名
+	输入.person_name						TYPEAS	s_lname
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	QUERY
+		SELECT a.account_uuid
+			, a.user_uuid
+			, b.person_name
+			, a.login_name
+			, CASE a.sysisdelete WHEN '0' THEN '是' WHEN '1' THEN '否' ELSE '未知' END AS user_status
+			, a.sysisdelete
+			, a.active_time
+		FROM UUM_UU_ACCOUNT a
+			INNER JOIN UUM_UU_PERSONINFO b ON a.user_uuid = b.person_uuid
+		WHERE 1 = 1
+		OPTION 输入.account_uuid <> ""
+			a.account_uuid = 输入.account_uuid
+		ENDOPTION
+		OPTION 输入.person_uuid <> ""
+			b.person_uuid = 输入.person_uuid
+		ENDOPTION
+		OPTION 输入.login_name <> ""
+			a.login_name = 输入.login_name
+		ENDOPTION
+		OPTION 输入.person_name <> ""
+			b.person_name = 输入.person_name
+		ENDOPTION
+		ENDSELECT
+	ENDQUERY
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误

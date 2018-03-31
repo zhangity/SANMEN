@@ -1,0 +1,141 @@
+[交易说明]
+	交易名：	应用功能信息维护
+	所属模块：	4A
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：	1、功能信息表【UUM_UA_FUNCTION】
+						2、角色功能权限表【UUM_UA_ROLEFUNC】
+						
+	版本经历：	
+				1、v1.0		廖树平			2015/8/2 15:19:32		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	输入.actionflag							TYPEAS	s_code	--add/mdf/del
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	输入.func_uuid							TYPEAS	s_uuid
+	输入.parent_uuid						TYPEAS	s_uuid
+	输入.app_uuid						TYPEAS	s_uuid
+	输入.func_name							TYPEAS	s_mname
+	输入.func_code							TYPEAS	s_code
+	输入.func_type							TYPEAS	s_diccode
+	输入.func_url								TYPEAS	s_mname
+	输入.display_order					TYPEAS	n_sn
+	输入.is_ctrl_button					TYPEAS	s_bool
+	输入.sysisdelete						TYPEAS	s_bool
+	输入.remark									TYPEAS	s_comment
+		
+	输入.operator								TYPEAS	s_uuid
+	输入.odepart								TYPEAS	s_uuid
+	输入.oorg										TYPEAS	s_uuid
+	输入.odt										TYPEAS	s_datetime
+	
+	输入.ico_index								TYPEAS	s_string
+
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	临时.reccount					TYPEAS		n_sn
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	IF 输入.actionflag = "add"
+		//判断功能编码的唯一性
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_FUNCTION a
+		WHERE a.func_code = 输入.func_code
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的功能代码已被使用，不能新增!"
+		ENDIF
+	ENDIF
+	
+	IF 输入.actionflag = "mdf"
+		//功能代码不允许修改
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_FUNCTION a
+		WHERE a.func_uuid = 输入.func_uuid AND a.func_code <> 输入.func_code
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：功能代码不能修改!"
+		ENDIF
+	ENDIF
+
+	IF 输入.actionflag = "del"
+		//已被授权的功能不能删除
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_ROLEFUNC a
+		WHERE (a.func_uuid = 输入.func_uuid OR a.button_uuid = 输入.func_uuid )
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的功能已被授权，不能删除!"
+		ENDIF
+		//有下级功能的功能不能删除
+		SELECT COUNT(1) AS RECCNT
+		FROM UUM_UA_FUNCTION a
+		WHERE a.parent_uuid = 输入.func_uuid
+		ENDSELECT
+		临时.reccount = RECCNT
+		IF 临时.reccount > 0
+			ERROR "：输入的功能有下级功能，不能删除!"
+		ENDIF
+	ENDIF	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF 输入.display_order = ""
+		输入.display_order = 0
+	ENDIF
+	IF 输入.actionflag = "add"
+		INSERT INTO UUM_UA_FUNCTION(
+			func_uuid, func_code, func_name, display_order
+			, func_type, func_url, parent_uuid, app_uuid
+			, is_ctrl_button, remark, sysisdelete, ico_index)
+		VALUES(
+			输入.func_uuid , 输入.func_code , 输入.func_name , 输入.display_order
+			, 输入.func_type , 输入.func_url , 输入.parent_uuid , 输入.app_uuid
+			, 输入.is_ctrl_button , 输入.remark , 输入.sysisdelete, 输入.ico_index)
+		ENDINSERT
+	ENDIF
+	
+	IF 输入.actionflag = "mdf"
+		UPDATE UUM_UA_FUNCTION
+		SET func_name = 输入.func_name
+				, display_order = 输入.display_order
+				, func_type = 输入.func_type
+				, func_url = 输入.func_url
+				, parent_uuid = 输入.parent_uuid
+				, app_uuid = 输入.app_uuid
+				, is_ctrl_button = 输入.is_ctrl_button
+				, remark = 输入.remark
+				, sysisdelete = 输入.sysisdelete
+				, ico_index =  输入.ico_index
+		WHERE func_uuid = 输入.func_uuid
+		ENDUPDATE
+	ENDIF
+	
+	IF 输入.actionflag = "del"
+		//sysisdelete用于控制可用不可用，删除时物理删除
+		DELETE FROM UUM_UA_FUNCTION
+		WHERE func_uuid = 输入.func_uuid
+		ENDDELETE
+	ENDIF

@@ -1,0 +1,84 @@
+[交易说明]
+	交易名：	平台服务接口交互报文留痕表
+	所属模块：平台	
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+			1、对外交互报文留痕表			【PF_PB_Mark】
+	版本经历：	
+				1、v1.0			于猛			2015-09-30 10:17:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	--痕迹ID
+	输入.markuuid				TYPEAS		s_uuid
+	
+	--痕迹分类
+	输入.marktype				TYPEAS		s_code
+	
+	--流水序号
+	输入.serialuuid				TYPEAS		s_uuid
+	
+	--报文交互方向
+	输入.direction				TYPEAS		s_type
+	
+	--创建时间
+	输入.createdt				TYPEAS		s_datetime
+	
+	--报文内容
+	输入.markcontent				TYPEAS		c_content
+	
+
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+		 
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增
+	IF 输入.flag = 1
+		INSERT INTO PF_PB_Mark(
+    			markuuid
+				,marktype
+				,serialuuid
+				,direction
+				,createdt
+				,markcontent
+    	) values (
+				输入.markuuid
+				,输入.marktype
+				,输入.serialuuid
+				,输入.direction
+				,输入.createdt
+				,输入.markcontent
+		)
+		ENDINSERT
+	ENDIF

@@ -1,0 +1,231 @@
+[交易说明]
+	交易名：	统一待办查询
+	所属模块：	事项
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		统一待办表			【PF_UN_TODO】
+	版本经历：	
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+		
+	--统一待办ID
+	输入.untodo_uuid			TYPEAS		s_uuid
+	
+	--来源应用系统标识
+	输入.appcode				TYPEAS		s_code
+	
+	--待办在来源系统中的待办ID
+	输入.todoid				TYPEAS		s_wfid
+	
+	---待办类型
+	输入.todotype			TYPEAS		s_type
+	
+	---流程名称
+	输入.flowname			TYPEAS		s_wfid
+	
+	--流程类型
+	输入.flowtype			TYPEAS		s_code
+	
+	---当前环节名称
+	输入.nodename			TYPEAS		s_wfid
+	
+	--前一环节名称
+	输入.prenodename			TYPEAS		s_wfid
+	
+	--待办任务标题
+	输入.title				TYPEAS		s_mname
+	
+	--任务摘要
+	输入.tasksummary			TYPEAS		s_lname
+	
+	--处理人ID
+	输入.userid				TYPEAS		s_uuid
+	
+	--处理人姓名
+	输入.username			TYPEAS		s_file
+	
+	--上一环节任务处理人ID
+	输入.preuserid			TYPEAS		s_uuid
+	
+	--上一环节任务处理人名称
+	输入.preusername			TYPEAS		s_file
+
+	--任务送达时间
+	输入.tasktime			TYPEAS		s_datetime
+	
+	--待办办理界面相对路径
+	输入.relativepath		TYPEAS		s_file
+	
+	--待办任务逾期时间
+	输入.expirestime			TYPEAS		s_datetime
+	
+	--待办任务预警时间
+	输入.warningtime			TYPEAS		s_datetime
+	
+	--紧急程度
+	输入.emergency			TYPEAS		s_code
+	
+	--备注
+	输入.remark				TYPEAS		s_file
+	
+	--自定义参数
+	输入.extraparam			TYPEAS		s_mstring
+	
+	--接收时间
+	输入.createdate			TYPEAS		s_datetime
+
+
+
+
+	--开始时间
+	输入.starttime			TYPEAS		s_datetime
+	
+	--结束时间
+	输入.endtime				TYPEAS		s_datetime
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#普通不分页查询
+	IF 输入.flag = 1
+		QUERY
+			SELECT
+				untodo_uuid
+				,appcode
+				,todoid
+				,todotype
+				,flowname
+				,flowtype
+				,nodename
+				,prenodename
+				,title
+				,tasksummary
+				,userid
+				,username
+				,preuserid
+				,preusername
+				,tasktime
+				,relativepath
+				,expirestime
+				,warningtime
+				,emergency
+				,remark
+				,extraparam
+				,createdate
+			FROM PF_UN_TODO a
+			WHERE 1=1
+			OPTION 输入.appcode <> ""
+				a.appcode = 输入.appcode
+			ENDOPTION
+			OPTION 输入.todoid <> ""
+				a.todoid = 输入.todoid
+			ENDOPTION
+			OPTION 输入.todotype <> ""
+				a.todotype = 输入.todotype
+			ENDOPTION
+			OPTION 输入.flowtype <> ""
+				a.flowtype = 输入.flowtype
+			ENDOPTION
+			OPTION 输入.title <> ""
+				a.title like CONCAT("%" , 输入.title , "%")
+			ENDOPTION
+			OPTION 输入.userid <> ""
+				a.userid = 输入.userid
+			ENDOPTION
+			OPTION 输入.starttime <> ""
+				a.tasktime > 输入.starttime
+			ENDOPTION
+			OPTION 输入.endtime <> ""
+				a.tasktime < 输入.endtime
+			ENDOPTION
+			ENDSELECT
+		ENDQUERY
+	ENDIF
+	
+	#分页查询
+	IF 输入.flag = 2
+		PAGEQUERY
+			SELECT
+				untodo_uuid
+				,appcode
+				,todoid
+				,todotype
+				,flowname
+				,flowtype
+				,nodename
+				,prenodename
+				,title
+				,tasksummary
+				,userid
+				,username
+				,preuserid
+				,preusername
+				,tasktime
+				,relativepath
+				,expirestime
+				,warningtime
+				,emergency
+				,remark
+				,extraparam
+				,createdate
+			FROM PF_UN_TODO a
+			WHERE 1=1
+			OPTION 输入.appcode <> ""
+				a.appcode = 输入.appcode
+			ENDOPTION
+			OPTION 输入.todoid <> ""
+				a.todoid = 输入.todoid
+			ENDOPTION
+			OPTION 输入.todotype <> ""
+				a.todotype = 输入.todotype
+			ENDOPTION
+			OPTION 输入.flowtype <> ""
+				a.flowtype = 输入.flowtype
+			ENDOPTION
+			OPTION 输入.title <> ""
+				a.title like CONCAT("%" , 输入.title , "%")
+			ENDOPTION
+			OPTION 输入.userid <> ""
+				a.userid = 输入.userid
+			ENDOPTION
+			OPTION 输入.starttime <> ""
+				a.tasktime > 输入.starttime
+			ENDOPTION
+			OPTION 输入.endtime <> ""
+				a.tasktime < 输入.endtime
+			ENDOPTION
+			ENDSELECT
+		ENDPAGEQUERY
+	ENDIF

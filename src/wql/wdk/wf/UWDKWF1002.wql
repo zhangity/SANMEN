@@ -1,0 +1,179 @@
+[交易说明]
+	交易名：		流程模板更新
+	所属模块：	流程管理
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、办理期限监控表			【wdk_wf_overdue】
+	版本经历：	
+				1、v1.0			于猛			2014-10-20 14:03:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+
+	#################################################
+	##			常用输入参数
+	#################################################
+	#操作符   1-新增  2-修改  3-删除
+	输入.flag					TYPEAS		s_string
+	
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	--流水ID
+	输入.id						TYPEAS			s_sstring
+	
+	--流程模板ID
+	输入.pdid					TYPEAS			s_sstring
+	
+	--流程实例ID
+	输入.piid					TYPEAS			s_sstring
+	
+	--任务ID
+	输入.taskid					TYPEAS			s_sstring
+	
+	--监控类型
+	输入.type					TYPEAS			s_stype
+	
+	--工作日历
+	输入.calendar				TYPEAS			s_sstring
+	
+	--超期后处理方式
+	输入.deadprocess				TYPEAS			s_stype
+	
+	--创建时间
+	输入.createdt				TYPEAS			s_sstring
+	
+	--办理期限
+	输入.deadline				TYPEAS			s_stype
+	
+	--黄牌警告天数
+	输入.warnyellow				TYPEAS			s_stype
+	
+	--红牌警告天数
+	输入.warnred					TYPEAS			s_stype
+	
+	--周期性提醒次数
+	输入.warnamount				TYPEAS			s_stype
+	
+	--周期性提醒间隔周期
+	输入.warnperiod				TYPEAS			s_stype
+	
+	--当前提醒次数
+	输入.warncount				TYPEAS			s_stype
+	
+	--周期性提醒间隔计时步数
+	输入.periodcount				TYPEAS			s_stype
+	
+	--黄色警告统计次数
+	输入.yellowcount				TYPEAS			s_type
+	
+	--红色警告统计次数
+	输入.redcount				TYPEAS			s_type
+	
+	--当前监控的状态
+	输入.status					TYPEAS			s_stype	
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	
+	
+	#对操作符进行判断，如果没有输入则提示错误
+	IF 输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	
+	#新增监控项
+	IF 输入.flag = 1
+		INSERT INTO wdk_wf_overdue(
+				id
+				,pdid
+				,piid
+				,taskid
+				,type
+				,calendar
+				,deadprocess
+				,createdt
+				,deadline
+				,warnyellow
+				,warnred
+				,warnamount
+				,warnperiod
+				,warncount
+				,periodcount
+				,yellowcount
+				,redcount
+				,status
+		) values (
+				输入.id
+				,输入.pdid
+				,输入.piid
+				,输入.taskid
+				,输入.type
+				,输入.calendar
+				,输入.deadprocess
+				,输入.createdt
+				,输入.deadline
+				,输入.warnyellow
+				,输入.warnred
+				,输入.warnamount
+				,输入.warnperiod
+				,输入.warncount
+				,输入.periodcount
+				,输入.yellowcount
+				,输入.redcount
+				,输入.status
+		)
+		ENDINSERT
+	ENDIF
+	
+	#根据ID删除监控项
+	IF 输入.flag = 2
+		DELETE FROM wdk_wf_overdue a
+		WHERE a.id = 输入.id
+		ENDDELETE
+	ENDIF
+	
+	
+	#根据流程ID删除相关流程和任务的监控项
+	IF 输入.flag = 3
+		DELETE FROM wdk_wf_overdue a
+		WHERE a.pdid = 输入.pdid
+		ENDDELETE
+	ENDIF
+	
+	
+	
+	#更新各类统计变量
+	IF 输入.flag = 4
+		UPDATE wdk_wf_overdue a set
+			a.warncount 	= 	输入.warncount
+			,a.periodcount	=	输入.periodcount
+			,a.yellowcount 	= 	输入.yellowcount
+			,a.redcount 	= 	输入.redcount
+		WHERE a.id = 输入.id
+		ENDUPDATE
+	ENDIF

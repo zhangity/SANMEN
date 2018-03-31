@@ -1,0 +1,99 @@
+[交易说明]
+	交易名：		公用角色表
+	所属模块：	系统公用
+	功能简述：	
+	版权所有：	杭州新世纪
+	表引用：		
+				1、角色表				【wdk_role】
+	版本经历：	
+				1、v1.0		于猛			2015-01-26 10:11:23		创建
+
+[数据库]
+	--指定数据库，为空采用默认值，默认为db.properties中列出的第一个库
+
+[IO定义]
+	#################################################
+	##			常用输入参数
+	#################################################
+	
+	#操作符
+	输入.flag					TYPEAS		s_string
+	
+	#排序字段
+	输入.orderby					TYPEAS		f_string
+	
+	#自定义sql段
+	输入.sql						TYPEAS		f_string
+	
+	#################################################
+	##			表字段对应输入参数
+	#################################################
+	
+	--角色ID
+	输入.roleid					TYPEAS		s_id
+	
+	--角色名称
+	输入.rolename				TYPEAS		s_name
+	
+	--角色编码
+	输入.rolecode				TYPEAS		s_code
+	
+	--排序序号
+	输入.ordercode				TYPEAS		s_code
+
+
+	
+[临时表]
+	--这边列出来的临时表就会在运行期动态创建
+	
+[临时变量]
+	--所有中间过程变量均可在此处定义
+	
+[业务过程]
+
+	##########################################
+	#			1、输入输出检查				 #
+	##########################################
+
+	
+	##########################################
+	#			2、主过程前处理				 #
+	##########################################
+	
+	
+	##########################################
+	#			3、业务主过程			 	 #
+	##########################################
+	IF	输入.flag = ""
+		ERROR "：未输入操作符"
+	ENDIF
+	
+	#查询字典表
+	IF	输入.flag = 1
+		QUERY
+			SELECT
+				roleid
+				,rolename
+				,rolecode
+				,ordercode
+				FROM wdk_role  a
+				WHERE 1=1
+				OPTION 输入.roleid <> ""
+					a.roleid = 输入.roleid
+				ENDOPTION
+				OPTION 输入.rolename <> ""
+					a.rolename like CONCAT("%" , 输入.rolename , "%")
+				ENDOPTION
+				OPTION 输入.rolecode <> ""
+					a.rolecode = 输入.rolecode
+				ENDOPTION
+				OPTION 输入.ordercode <> ""
+					a.ordercode = 输入.ordercode
+				ENDOPTION
+				OPTION 输入.sql <> ""
+					输入.sql	
+				ENDOPTION
+				order by ordercode asc
+			ENDSELECT
+		ENDQUERY
+	ENDIF
